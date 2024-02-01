@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
+import { inter } from '@/app/ui/fonts';
 
 export const metadata: Metadata = {
   title: {
@@ -19,7 +17,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.className} flex flex-col min-h-100`}>
+        <div className="flex h-full flex-col">
+          <div className="flex-1">{children}</div>
+          {/*  Copyright */}
+          <footer className="flex h-16 items-center justify-center text-white">
+            <p className="text-sm">
+              &copy; {new Date().getFullYear()}{' '}
+              <a
+                href="https://wp0.vanderbilt.edu/oele/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Vanderbilt University, Open Ended Learning Environments Lab
+              </a>
+            </p>
+          </footer>
+        </div>
+      </body>
     </html>
   );
 }
