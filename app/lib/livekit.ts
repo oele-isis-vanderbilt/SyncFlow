@@ -1,4 +1,10 @@
-import { Room, RoomServiceClient } from 'livekit-server-sdk';
+import {
+  CreateOptions,
+  Room,
+  RoomServiceClient,
+  AccessToken,
+} from 'livekit-server-sdk';
+import type { AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
 
 class LiveKitService {
   roomService: RoomServiceClient;
@@ -11,8 +17,28 @@ class LiveKitService {
     );
   }
 
-  async createRoom(name: string): Promise<Room> {
-    return await this.roomService.createRoom({ name });
+  async createRoom(options: CreateOptions): Promise<Room> {
+    return await this.roomService.createRoom(options);
+  }
+
+  async deleteRoom(room: string): Promise<void> {
+    return await this.roomService.deleteRoom(room);
+  }
+
+  async generateToken(
+    identity: string,
+    name: string,
+    grant: VideoGrant,
+  ): Promise<string> {
+    const token = new AccessToken(
+      process.env.LIVEKIT_API_KEY,
+      process.env.LIVEKIT_API_SECRET,
+      {
+        identity,
+      },
+    );
+    token.addGrant(grant);
+    return token.toJwt();
   }
 
   async listRooms(): Promise<Room[]> {

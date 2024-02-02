@@ -1,9 +1,9 @@
 'use client';
 
 import {
-  UserGroupIcon,
   HomeIcon,
-  DocumentDuplicateIcon,
+  GlobeAltIcon as NetworkIcon,
+  Cog8ToothIcon as SettingsIcon,
 } from '@heroicons/react/24/outline';
 
 import Link from 'next/link';
@@ -20,7 +20,12 @@ const links = [
   {
     name: 'Streams',
     href: '/dashboard/streams',
-    icon: DocumentDuplicateIcon,
+    icon: NetworkIcon,
+  },
+  {
+    name: 'LiveKit Settings',
+    href: '/dashboard/settings',
+    icon: SettingsIcon,
   },
 ];
 
