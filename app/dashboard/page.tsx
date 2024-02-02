@@ -9,7 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const rooms = await liveKitService.listRooms();
+  const rooms = (await liveKitService.listRooms()).sort(
+    (r1, r2) => r1.creationTime - r2.creationTime,
+  );
   const isRoomActive = rooms.length > 0;
   const roomName = isRoomActive ? rooms[0].name : '';
   if (isRoomActive) {

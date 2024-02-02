@@ -42,13 +42,20 @@ export async function deleteRoom(roomName: string) {
   redirect('/dashboard');
 }
 
-export async function generateToken(roomName: string) {
-  const token = await liveKitService.generateToken(USER_NAME, USER_NAME, {
-    canPublish: true,
-    canSubscribe: false,
-    canUpdateOwnMetadata: true,
-    roomJoin: true,
-    roomCreate: false,
-  } as VideoGrant);
+// ToDo: Add a function to get all rooms
+export async function generateToken(tokenOptions: VideoGrant = {}) {
+  const grant = {
+    ...{
+      canPublish: true,
+      canSubscribe: true,
+      canUpdateOwnMetadata: true,
+      roomJoin: true,
+      roomCreate: false,
+    },
+    ...tokenOptions,
+  };
+
+  // ToDo: Add a function to get the user's identity after DB integration
+  const token = await liveKitService.generateToken(USER_NAME, USER_NAME, grant);
   return token;
 }
