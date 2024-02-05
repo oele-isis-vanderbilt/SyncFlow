@@ -1,28 +1,20 @@
 'use client';
 
 import { createRoom } from '@/app/lib/actions';
-import { EyeSlashIcon } from '@heroicons/react/24/outline';
+
+import { PlusIcon } from '@heroicons/react/24/outline';
+import { Button } from '@/app/ui/button';
+
 export default function Page() {
   return (
-    <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-      <div
-        className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        rel="noopener noreferrer"
-        role="button"
-        onClick={async () => {
-          await createRoom();
-        }}
-      >
-        <h2 className={`mb-3 text-2xl font-semibold opacity-70`}>
-          Offline{' '}
-          <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-            <EyeSlashIcon className="w-6" />
-          </span>
-        </h2>
-        <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-          Click to create a room in LiveKit
-        </p>
-      </div>
-    </div>
+    <Button
+      className="ml-10 rounded-md bg-teal-900 p-2 text-white"
+      onClick={async () => {
+        await createRoom();
+      }}
+    >
+      Create a new Room
+      <PlusIcon className="ml-2 h-5 w-5 text-gray-50" />
+    </Button>
   );
 }

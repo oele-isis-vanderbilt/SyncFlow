@@ -18,11 +18,6 @@ const links = [
     icon: HomeIcon,
   },
   {
-    name: 'Streams',
-    href: '/dashboard/streams',
-    icon: NetworkIcon,
-  },
-  {
     name: 'LiveKit Settings',
     href: '/dashboard/settings',
     icon: SettingsIcon,

@@ -28,6 +28,7 @@ export default function RootLayout({
                 href="https://wp0.vanderbilt.edu/oele/"
                 target="_blank"
                 rel="noopener noreferrer"
+                className={'hover:text-blue-400 hover:underline'}
               >
                 Vanderbilt University, Open Ended Learning Environments Lab
               </a>

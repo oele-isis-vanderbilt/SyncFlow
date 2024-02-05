@@ -3,6 +3,7 @@ import '@livekit/components-styles';
 
 import {
   LiveKitRoom,
+  RoomName,
   VideoConference,
   GridLayout,
   ParticipantTile,
@@ -12,29 +13,22 @@ import {
 } from '@livekit/components-react';
 
 import { Track, Room as RoomType } from 'livekit-client';
+import { lusitana } from '@/app/ui/fonts';
 
-export default function Room({
-  user,
-  token,
-  room,
-}: {
-  user: string;
-  token: string;
-}) {
-  console.log(user, token, room);
-
+export default function Room({ name, token }: { user: string; token: string }) {
   return (
     <LiveKitRoom
-      video={true}
-      audio={true}
-      name={user}
+      video={false}
+      audio={false}
+      name={name}
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL}
       token={token}
       data-lk-theme="default"
-      style={{ height: '100dvh' }}
+      className="h-full w-full"
+      // style={{ height: '100dvh' }}
     >
+      <RoomName className={`${lusitana.className} text-2xl`} />
       <MyVideoConference />
-      <RoomAudioRenderer />
       <ControlBar />
     </LiveKitRoom>
   );
@@ -43,12 +37,12 @@ export default function Room({
 function MyVideoConference() {
   const tracks = useTracks(
     [
-      { source: Track.Source.Camera, withPlaceholder: true },
-      { source: Track.Source.ScreenShare, withPlaceholder: true },
+      { source: Track.Source.Camera, withPlaceholder: false },
+      { source: Track.Source.ScreenShare, withPlaceholder: false },
     ],
-    { onlySubscribed: false },
+    { onlySubscribed: true },
   );
-  console.log(tracks);
+
   return (
     <GridLayout
       tracks={tracks}

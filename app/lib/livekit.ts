@@ -42,7 +42,9 @@ class LiveKitService {
   }
 
   async listRooms(): Promise<Room[]> {
-    return await this.roomService.listRooms();
+    return (await this.roomService.listRooms()).sort(
+      (r1, r2) => r1.creationTime - r2.creationTime,
+    );
   }
 }
 
