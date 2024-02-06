@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { liveKitService } from './livekit';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 import type { CreateOptions, VideoGrant } from 'livekit-server-sdk';
 
@@ -34,11 +35,13 @@ export async function createRoom() {
     metadata: 'LiveKit ELP Room',
   };
   const room = await liveKitService.createRoom(options);
+  revalidatePath('/dashboard');
   redirect('/dashboard');
 }
 
 export async function deleteRoom(roomName: string) {
   await liveKitService.deleteRoom(roomName);
+  revalidatePath('/dashboard');
   redirect('/dashboard');
 }
 

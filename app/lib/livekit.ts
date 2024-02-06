@@ -5,6 +5,7 @@ import {
   AccessToken,
 } from 'livekit-server-sdk';
 import type { AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
+import { unstable_noStore as noStore } from 'next/cache';
 
 class LiveKitService {
   roomService: RoomServiceClient;
@@ -18,10 +19,12 @@ class LiveKitService {
   }
 
   async createRoom(options: CreateOptions): Promise<Room> {
+    noStore();
     return await this.roomService.createRoom(options);
   }
 
   async deleteRoom(room: string): Promise<void> {
+    noStore();
     return await this.roomService.deleteRoom(room);
   }
 
@@ -42,6 +45,7 @@ class LiveKitService {
   }
 
   async listRooms(): Promise<Room[]> {
+    noStore();
     return (await this.roomService.listRooms()).sort(
       (r1, r2) => r1.creationTime - r2.creationTime,
     );
