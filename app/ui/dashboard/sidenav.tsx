@@ -3,8 +3,10 @@ import NavLinks from '@/app/ui/dashboard/nav-links';
 import ElpLogo from '@/app/ui/elp-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { signOut } from '@/auth';
+import { auth } from '@/auth';
 
-export default function SideNav() {
+export default async function SideNav() {
+  const session = await auth();
   return (
     <div className="flex h-full grow flex-col px-3 py-4 md:px-2">
       <Link
@@ -16,6 +18,10 @@ export default function SideNav() {
         </div>
       </Link>
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
+        <div className="hidden p-2 md:block">
+          {session?.user?.name ? `Welcome! ${session.user.name!}` : 'Welcome'}{' '}
+        </div>
+
         <NavLinks />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-900 md:block"></div>
         <form

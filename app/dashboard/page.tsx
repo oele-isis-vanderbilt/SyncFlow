@@ -9,6 +9,7 @@ import RoomsTable from '@/app/ui/dashboard/rooms-table';
 import { auth } from '@/auth';
 
 import { Suspense } from 'react';
+import { Role } from '@prisma/client';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const session = await auth();
-  console.log(session);
+
   return (
     <main>
       <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
@@ -33,7 +34,7 @@ export default async function Page() {
             Rooms
           </h1>
         </div>
-        <CreateRoom />
+        {session?.user?.role === Role.ADMIN ? <CreateRoom /> : null}
       </div>
       <div className="mt-8 flex items-center">
         <RoomsTable />

@@ -23,7 +23,20 @@ async function getUser(email: string): Promise<User> {
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: {strategy: 'jwt'},
+  session: { strategy: 'jwt' },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.role = token.role;
+      return session;
+    },
+  },
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -41,8 +54,11 @@ export const { auth, signIn, signOut } = NextAuth({
             const passwordMatch = await bcrypt.compare(password, user.password);
 
             if (passwordMatch) {
-              console.log(user);
-              return user;
+              return {
+                name: user.username,
+                email: user.email,
+                role: user.role,
+              };
             }
           }
         }
