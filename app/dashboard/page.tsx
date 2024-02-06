@@ -6,6 +6,7 @@ import { Button } from '@/app/ui/button';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import CreateRoom from '@/app/ui/dashboard/create-room';
 import RoomsTable from '@/app/ui/dashboard/rooms-table';
+import { auth } from '@/auth';
 
 import { Suspense } from 'react';
 
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
+  const session = await auth();
+  console.log(session);
   return (
     <main>
       <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>

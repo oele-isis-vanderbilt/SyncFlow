@@ -12,9 +12,9 @@ class LiveKitService {
 
   constructor() {
     this.roomService = new RoomServiceClient(
-      process.env.LIVEKIT_SERVER_URL,
-      process.env.LIVEKIT_API_KEY,
-      process.env.LIVEKIT_API_SECRET,
+      process.env.LIVEKIT_SERVER_URL!,
+      process.env.LIVEKIT_API_KEY!,
+      process.env.LIVEKIT_API_SECRET!,
     );
   }
 

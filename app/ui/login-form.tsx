@@ -10,10 +10,10 @@ import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
 
 import { useFormState, useFormStatus } from 'react-dom';
-// import { authenticate } from '@/app/lib/actions';
+import { authenticate } from '@/app/lib/actions';
 
 export default function LoginForm() {
-  const [errorMessage, dispatch] = useFormState(() => {}, undefined);
+  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
   return (
     <form action={dispatch} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-900 px-6 pb-4 pt-8">
@@ -55,7 +55,7 @@ export default function LoginForm() {
                 name="password"
                 placeholder="Enter password"
                 required
-                minLength={6}
+                minLength={3}
               />
               <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>

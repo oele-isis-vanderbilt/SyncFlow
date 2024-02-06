@@ -17,6 +17,7 @@ export default function RoomActions({ room }) {
           await deleteRoom(room.name);
         }}
         className="cursor-pointer hover:text-red-700"
+        help={'Delete room'}
       />
     </div>
   );

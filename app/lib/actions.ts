@@ -4,8 +4,10 @@ import { z } from 'zod';
 import { liveKitService } from './livekit';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { signIn } from '@/auth';
 
 import type { CreateOptions, VideoGrant } from 'livekit-server-sdk';
+import { AuthError } from 'next-auth';
 
 const APP_NAME = 'LiveKitELP';
 const USER_NAME = 'admin';
@@ -61,4 +63,23 @@ export async function generateToken(tokenOptions: VideoGrant = {}) {
   // ToDo: Add a function to get the user's identity after DB integration
   const token = await liveKitService.generateToken(USER_NAME, USER_NAME, grant);
   return token;
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials';
+        default:
+          return 'An error occurred';
+      }
+    }
+    throw error;
+  }
 }
