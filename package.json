@@ -6,11 +6,11 @@
     "build": "next build",
     "create-user": "node ./scripts/create-user.js",
     "dev": "next dev",
+    "postinstall": "prisma generate",
     "lint": "next lint",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
-    "start": "next start",
-    "postinstall": "prisma generate"
+    "start": "next start"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.3.2",

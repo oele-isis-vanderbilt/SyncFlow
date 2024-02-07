@@ -83,3 +83,8 @@ export async function authenticate(
     throw error;
   }
 }
+
+export async function redirectToDashboard() {
+  revalidatePath('/dashboard');
+  redirect('/dashboard');
+}

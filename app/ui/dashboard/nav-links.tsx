@@ -2,7 +2,6 @@
 
 import {
   HomeIcon,
-  GlobeAltIcon as NetworkIcon,
   Cog8ToothIcon as SettingsIcon,
 } from '@heroicons/react/24/outline';
 

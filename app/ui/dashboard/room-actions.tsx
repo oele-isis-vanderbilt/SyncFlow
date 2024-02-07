@@ -2,10 +2,11 @@
 import { deleteRoom } from '@/app/lib/actions';
 import clsx from 'clsx';
 
-import { TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, CameraIcon } from '@heroicons/react/24/outline';
 
 const iconsMap = {
   delete: TrashIcon,
+  camera: CameraIcon,
 };
 
 export default function RoomActions({ room }) {

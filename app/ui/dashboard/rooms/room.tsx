@@ -4,32 +4,33 @@ import '@livekit/components-styles';
 import {
   LiveKitRoom,
   RoomName,
-  VideoConference,
   GridLayout,
   ParticipantTile,
   useTracks,
-  RoomAudioRenderer,
   ControlBar,
 } from '@livekit/components-react';
 
 import { Track, Room as RoomType } from 'livekit-client';
 import { lusitana } from '@/app/ui/fonts';
+import { redirectToDashboard } from '@/app/lib/actions';
 
 export default function Room({ name, token }: { user: string; token: string }) {
   return (
     <LiveKitRoom
       video={false}
       audio={false}
-      name={name}
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL}
       token={token}
-      data-lk-theme="default"
-      className="h-full w-full"
+      // data-lk-theme="default"
+      onDisconnected={() => {
+        redirectToDashboard();
+      }}
+      className="h-full w-full grow"
       // style={{ height: '100dvh' }}
     >
       <RoomName className={`${lusitana.className} text-2xl`} />
       <MyVideoConference />
-      <ControlBar />
+      <ControlBar variation="verbose" />
     </LiveKitRoom>
   );
 }

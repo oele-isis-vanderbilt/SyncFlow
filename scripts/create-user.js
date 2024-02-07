@@ -27,9 +27,9 @@ async function getUserByEmail(email) {
   //   2 Second delay
   await new Promise((resolve) => setTimeout(resolve, 2000));
   return prisma.user.findUnique({
-      where: {
-          email: email,
-      },
+    where: {
+      email: email,
+    },
   });
 }
 
@@ -50,5 +50,5 @@ function main() {
 }
 
 if (require.main === module) {
-    main();
+  main();
 }
