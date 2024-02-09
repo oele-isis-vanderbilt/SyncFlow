@@ -21,8 +21,8 @@ export default async function Page({ params }: { params: { name: string } }) {
   });
 
   return (
-    <main>
+    <>
       <Room token={token} />
-    </main>
+    </>
   );
 }
