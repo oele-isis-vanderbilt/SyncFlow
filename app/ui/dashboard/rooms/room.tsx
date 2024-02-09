@@ -1,5 +1,6 @@
 'use client';
 import '@livekit/components-styles';
+import clsx from 'clsx';
 
 import {
   LiveKitRoom,
@@ -10,11 +11,11 @@ import {
   ControlBar,
 } from '@livekit/components-react';
 
-import { Track, Room as RoomType } from 'livekit-client';
+import { Track } from 'livekit-client';
 import { lusitana } from '@/app/ui/fonts';
 import { redirectToDashboard } from '@/app/lib/actions';
 
-export default function Room({ name, token }: { user: string; token: string }) {
+export default function Room({ token }: { token: string }) {
   return (
     <LiveKitRoom
       video={false}
@@ -25,12 +26,11 @@ export default function Room({ name, token }: { user: string; token: string }) {
       onDisconnected={() => {
         redirectToDashboard();
       }}
-      className="h-full w-full grow"
-      // style={{ height: '100dvh' }}
+      style={{ height: 'ca' }}
     >
-      <RoomName className={`${lusitana.className} text-2xl`} />
+      <TopBar />
       <MyVideoConference />
-      <ControlBar variation="verbose" />
+      {/*<ControlBar variation="verbose" />*/}
     </LiveKitRoom>
   );
 }
@@ -45,11 +45,31 @@ function MyVideoConference() {
   );
 
   return (
-    <GridLayout
-      tracks={tracks}
-      style={{ height: 'calc(100vh - var(--lk-control-bar-height))' }}
-    >
+    <GridLayout tracks={tracks} className="h-full">
       <ParticipantTile />
     </GridLayout>
+  );
+}
+
+function TopBar() {
+  return (
+    <div className="flex h-20 w-full items-center justify-between bg-black py-2 md:py-5">
+      <div className="w-1/2">
+        <RoomName className={`${lusitana.className} p-2 text-xl md:text-2xl`} />
+      </div>
+      <div className="flex w-1/2 items-center justify-end gap-4">
+        <ControlBar
+          controls={{
+            microphone: false,
+            camera: true,
+            chat: false,
+            screenShare: true,
+            leave: true,
+          }}
+          className={`flex text-xl`}
+          variation={'verbose'}
+        />
+      </div>
+    </div>
   );
 }
