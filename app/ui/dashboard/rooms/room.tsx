@@ -1,13 +1,16 @@
 'use client';
 import '@livekit/components-styles';
+import VideoGallery from '@/app/ui/dashboard/rooms/video-gallery';
 
 import {
-    LiveKitRoom,
-    RoomName,
-    GridLayout,
-    ParticipantTile,
-    useTracks,
-    ControlBar, FocusLayout, CarouselLayout,
+  LiveKitRoom,
+  RoomName,
+  GridLayout,
+  ParticipantTile,
+  useTracks,
+  ControlBar,
+  FocusLayout,
+  CarouselLayout,
 } from '@livekit/components-react';
 
 import { Track } from 'livekit-client';
@@ -29,37 +32,20 @@ export default function Room({ token }: { token: string }) {
       <TopBar />
       <div className="flex flex-row bg-black">
         <div className="h-full w-1/2 flex-1">
-            <VideoGallery/>
+          <VideoGallery title={'Videos'} />
         </div>
-        <div className="h-full bg-gray-100 flex-1 border-red-900 border-l-4">
-            <div className="h-full w-full flex flex-col justify-center items-center">
-                <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl text-black`}>
-                ToDo: Audio Components
-                </h2>
-                <p className="text-lg md:text-xl text-black">Coming soon...</p>
-            </div>
+        <div className="h-full flex-1 border-l-4 border-red-900 bg-gray-100">
+          <div className="flex h-full w-full flex-col items-center justify-center">
+            <h2
+              className={`${lusitana.className} p-2 text-xl text-black md:text-2xl`}
+            >
+              ToDo: Audio Components
+            </h2>
+            <p className="text-lg text-black md:text-xl">Coming soon...</p>
+          </div>
         </div>
       </div>
     </LiveKitRoom>
-  );
-}
-
-function VideoGallery() {
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: false },
-      { source: Track.Source.ScreenShare, withPlaceholder: false },
-    ],
-    { onlySubscribed: true },
-  );
-
-  return (
-    <>
-      <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
-        Video Streams
-      </h2>
-
-    </>
   );
 }
 
