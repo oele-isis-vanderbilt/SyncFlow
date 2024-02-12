@@ -1,7 +1,5 @@
-import { lusitana } from '@/app/ui/fonts';
 import Room from '@/app/ui/dashboard/rooms/room';
 import { liveKitService } from '@/app/lib/livekit';
-import { useMemo } from 'react';
 import { auth } from '@/auth';
 import { Role } from '@prisma/client';
 
@@ -9,6 +7,7 @@ export default async function Page({ params }: { params: { name: string } }) {
   const roomName = params.name;
   const session = await auth();
   const userName = session?.user?.name || 'Anonymous';
+  // @ts-ignore
   const isAdmin = session?.user?.role === Role.ADMIN;
 
   let token = await liveKitService.generateToken(userName, userName, {
@@ -20,9 +19,5 @@ export default async function Page({ params }: { params: { name: string } }) {
     room: roomName,
   });
 
-  return (
-    <>
-      <Room token={token} />
-    </>
-  );
+  return <Room token={token} />;
 }

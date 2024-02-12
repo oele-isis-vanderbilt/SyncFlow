@@ -1,25 +1,17 @@
 import {
-  TrackRefContext,
-  ParticipantTile,
+  TrackReference,
   TrackReferenceOrPlaceholder,
   useTracks,
   VideoTrack,
-  ParticipantContextIfNeeded,
-  TrackLoop,
-  useRoomContext,
-  ParticipantName,
 } from '@livekit/components-react';
-import type { TrackPublication } from 'livekit-client';
 import { Track } from 'livekit-client';
 import { lusitana } from '@/app/ui/fonts';
 import { PlayCircleIcon } from '@heroicons/react/16/solid';
 import { Pagination, Tooltip } from 'flowbite-react';
 import { useMediaQuery } from '@uidotdev/usehooks';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { Button } from '@/app/ui/button';
 import { RxEnterFullScreen } from 'react-icons/rx';
-import { ParticipantInfo } from 'livekit-server-sdk';
 
 function getHelpText(track: TrackReferenceOrPlaceholder) {
   if (track.publication?.source === Track.Source.Camera) {
@@ -92,15 +84,21 @@ export default function VideoGallery(
         </Tooltip>
       </div>
 
-      {/* A div here that divides the available vertical space into 70-30 */}
       <div className="flex h-full flex-col">
         <div
-          className="items-center justify-center bg-white"
+          className="items-center justify-center bg-gray-300"
           style={{ height: '800px' }}
         >
           {toRenderTrack ? (
             <>
-              <VideoTrack trackRef={toRenderTrack} controls={true} />
+              {toRenderTrack.publication?.isMuted ? (
+                <VideoMutedIndicator trackRef={toRenderTrack} />
+              ) : (
+                <VideoTrack
+                  trackRef={toRenderTrack as TrackReference}
+                  controls={true}
+                />
+              )}
               <span className={'text-xl'}>{getHelpText(toRenderTrack)}</span>
             </>
           ) : (
@@ -115,7 +113,7 @@ export default function VideoGallery(
             tracks={tracks}
             activeTrackSid={toRenderTrack?.publication?.trackSid}
             onTrackClick={(track) => {
-              handleTrackSelection(track.publication?.trackSid);
+              handleTrackSelection(track.publication?.trackSid!);
             }}
           />
         </div>
@@ -227,6 +225,21 @@ function NoTrackMessage() {
       <p className={'text-lg text-black md:text-2xl'}>
         No Video Streams Available
       </p>
+    </div>
+  );
+}
+
+function VideoMutedIndicator({
+  trackRef,
+}: {
+  trackRef: TrackReferenceOrPlaceholder;
+}) {
+  return (
+    <div className={'flex h-full flex-col items-center justify-center'}>
+      <p className={'text-lg text-black md:text-2xl'}>
+        {getHelpText(trackRef)}
+      </p>
+      <p className={'text-lg text-black md:text-2xl'}>Video Muted</p>
     </div>
   );
 }
