@@ -3,15 +3,19 @@ import {
   TrackReferenceOrPlaceholder,
   useTracks,
   VideoTrack,
+  GridLayout,
+  ParticipantTile,
+  ControlBar,
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { lusitana } from '@/app/ui/fonts';
 import { PlayCircleIcon } from '@heroicons/react/16/solid';
 import { Pagination, Tooltip } from 'flowbite-react';
 import { useMediaQuery } from '@uidotdev/usehooks';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
-import { RxEnterFullScreen } from 'react-icons/rx';
+import { RxEnterFullScreen, RxExitFullScreen } from 'react-icons/rx';
+import { FullScreen, useFullScreenHandle } from 'react-full-screen';
 
 function getHelpText(track: TrackReferenceOrPlaceholder) {
   if (track.publication?.source === Track.Source.Camera) {
@@ -36,6 +40,16 @@ export default function VideoGallery(
       // { source: Track.Source.Microphone, withPlaceholder: false },
     ],
     { onlySubscribed: true },
+  );
+
+  const fsHandle = useFullScreenHandle();
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  const toggleFullScreen = useCallback(
+    (state: boolean) => {
+      setIsFullScreen(state);
+    },
+    [fsHandle],
   );
 
   function handleTrackSelection(trackSid: string) {
@@ -67,54 +81,61 @@ export default function VideoGallery(
   }, [tracks]);
 
   return (
-    <div className={'flex h-full w-full flex-col'}>
-      <div className={'flex items-center justify-between bg-black'}>
-        <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
-          {title}
-        </h2>
-        <Tooltip content={'Enter Full Screen(Grid View)'}>
-          <div
-            role={'button'}
-            onClick={() => {
-              //     ToDo: Implement Full Screen(Grid View)
-            }}
-          >
-            <RxEnterFullScreen className={'mr-2 h-6 w-6'} />
-          </div>
-        </Tooltip>
-      </div>
-      <div className="flex-1 gap-2">
-        <div className="h-3/5 items-center justify-center bg-gray-300">
-          {toRenderTrack ? (
-            <>
-              {toRenderTrack.publication?.isMuted ? (
-                <VideoMutedIndicator trackRef={toRenderTrack} />
-              ) : (
-                <VideoTrack
-                  trackRef={toRenderTrack as TrackReference}
-                  controls={true}
-                />
-              )}
-              <span className={'text-xl'}>{getHelpText(toRenderTrack)}</span>
-            </>
-          ) : (
-            <NoTrackMessage />
-          )}
-        </div>
-        <div className="h-2/5 pt-10">
-          <h2 className={`${lusitana.className} py-2 text-xl md:text-2xl`}>
-            Participants
+    <>
+      <div className={'flex h-full w-full flex-col'}>
+        <div className={'flex items-center justify-between bg-black'}>
+          <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
+            {title}
           </h2>
-          <PagedTrackView
-            tracks={tracks}
-            activeTrackSid={toRenderTrack?.publication?.trackSid}
-            onTrackClick={(track) => {
-              handleTrackSelection(track.publication?.trackSid!);
-            }}
-          />
+          <Tooltip content={'Enter Full Screen(Grid View)'}>
+            <div role={'button'} onClick={fsHandle.enter}>
+              <RxEnterFullScreen className={'mr-2 h-6 w-6'} />
+            </div>
+          </Tooltip>
+        </div>
+        <div className="flex-1 gap-2">
+          <div className="h-3/5 items-center justify-center bg-gray-300">
+            {toRenderTrack ? (
+              <>
+                {toRenderTrack.publication?.isMuted ? (
+                  <VideoMutedIndicator trackRef={toRenderTrack} />
+                ) : (
+                  <VideoTrack
+                    trackRef={toRenderTrack as TrackReference}
+                    controls={true}
+                  />
+                )}
+                <span className={'text-xl'}>{getHelpText(toRenderTrack)}</span>
+              </>
+            ) : (
+              <NoTrackMessage />
+            )}
+          </div>
+          <div className="h-2/5 pt-10">
+            <h2 className={`${lusitana.className} py-2 text-xl md:text-2xl`}>
+              Participants
+            </h2>
+            <PagedTrackView
+              tracks={tracks}
+              activeTrackSid={toRenderTrack?.publication?.trackSid}
+              onTrackClick={(track) => {
+                handleTrackSelection(track.publication?.trackSid!);
+              }}
+            />
+          </div>
         </div>
       </div>
-    </div>
+      <FullScreen handle={fsHandle} onChange={toggleFullScreen}>
+        <div
+          className={clsx(isFullScreen ? 'block' : 'hidden')}
+          onDoubleClick={() => fsHandle.exit()}
+        >
+          <GridLayout tracks={tracks} className={'h-full w-full'}>
+            <ParticipantTile />
+          </GridLayout>
+        </div>
+      </FullScreen>
+    </>
   );
 }
 
