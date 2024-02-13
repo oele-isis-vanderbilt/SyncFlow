@@ -177,7 +177,7 @@ function PagedTrackView({
           );
         })}
       </div>
-      <div className={'pt-5 self-center'}>
+      <div className={'self-center pt-5'}>
         {pages.length > 1 ? (
           <Pagination
             totalPages={pages.length}
