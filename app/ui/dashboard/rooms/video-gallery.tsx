@@ -177,7 +177,7 @@ function PagedTrackView({
           );
         })}
       </div>
-      <div className={'mt-5 self-center'}>
+      <div className={'pt-5 self-center'}>
         {pages.length > 1 ? (
           <Pagination
             totalPages={pages.length}
@@ -208,7 +208,7 @@ function VideoTile({
   return (
     <div className={'flex flex-col items-center'} {...props}>
       <PlayCircleIcon className={clsx('h-12 w-12', active)} />
-      <p className={'text-sm text-white hover:underline md:text-lg'}>
+      <p className={'text-sm text-white hover:underline'}>
         {track ? getHelpText(track) : 'Unknown Track'}
       </p>
     </div>
