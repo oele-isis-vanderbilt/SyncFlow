@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import prisma from '@/app/lib/prisma';
-import type { User } from '@prisma/client';
+import type { User, Role } from '@prisma/client';
 import { authConfig } from './auth.config';
 import { z } from 'zod';
 import { PrismaAdapter } from '@auth/prisma-adapter';
@@ -28,12 +28,13 @@ export const { auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        // @ts-ignore
         token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.role = token.role;
+      session.user.role = token.role as Role;
       return session;
     },
   },
