@@ -84,7 +84,7 @@ export default function VideoGallery(
         </Tooltip>
       </div>
       <div className="flex-1 gap-2">
-        <div className="items-center justify-center bg-gray-300 md:h-1/2 lg:h-3/4">
+        <div className="h-3/5 items-center justify-center bg-gray-300">
           {toRenderTrack ? (
             <>
               {toRenderTrack.publication?.isMuted ? (
@@ -101,8 +101,8 @@ export default function VideoGallery(
             <NoTrackMessage />
           )}
         </div>
-        <div className="pt-10 md:h-1/2 lg:h-1/4">
-          <h2 className={`${lusitana.className} text-xl md:text-2xl`}>
+        <div className="h-2/5 pt-10">
+          <h2 className={`${lusitana.className} py-2 text-xl md:text-2xl`}>
             Participants
           </h2>
           <PagedTrackView
