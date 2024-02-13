@@ -3,13 +3,14 @@ import { deleteRoom } from '@/app/lib/actions';
 import clsx from 'clsx';
 
 import { TrashIcon, CameraIcon } from '@heroicons/react/24/outline';
+import type { Room } from 'livekit-server-sdk';
 
 const iconsMap = {
   delete: TrashIcon,
   camera: CameraIcon,
 };
 
-export default function RoomActions({ room }) {
+export default function RoomActions({ room }: { room: Room }) {
   return (
     <div className="flex items-center">
       <RoomAction
@@ -18,14 +19,21 @@ export default function RoomActions({ room }) {
           await deleteRoom(room.name);
         }}
         className="cursor-pointer hover:text-red-700"
-        help={'Delete room'}
       />
     </div>
   );
 }
 
-export function RoomAction({ type, onClick, help, className }) {
-  const Icon = iconsMap[type];
+export function RoomAction({
+  type,
+  onClick,
+  className,
+}: {
+  type: string;
+  onClick: () => void;
+  className: string;
+}) {
+  const Icon = iconsMap[type as keyof typeof iconsMap];
   return (
     <>
       <Icon

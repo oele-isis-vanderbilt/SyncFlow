@@ -1,6 +1,6 @@
 'use client';
 import '@livekit/components-styles';
-import clsx from 'clsx';
+import VideoGallery from '@/app/ui/dashboard/rooms/video-gallery';
 
 import {
   LiveKitRoom,
@@ -9,6 +9,8 @@ import {
   ParticipantTile,
   useTracks,
   ControlBar,
+  FocusLayout,
+  CarouselLayout,
 } from '@livekit/components-react';
 
 import { Track } from 'livekit-client';
@@ -22,32 +24,30 @@ export default function Room({ token }: { token: string }) {
       audio={false}
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL}
       token={token}
-      // data-lk-theme="default"
+      className={`h-full w-full`}
       onDisconnected={() => {
         redirectToDashboard();
       }}
-      style={{ height: 'ca' }}
     >
-      <TopBar />
-      <MyVideoConference />
-      {/*<ControlBar variation="verbose" />*/}
+      <div className="flex h-full w-full flex-col bg-black">
+        <TopBar />
+        <div className="flex h-full w-full flex-row bg-black">
+          <div className="h-full w-1/2 flex-1">
+            <VideoGallery title={'Videos'} />
+          </div>
+          <div className="h-full flex-1 border-l-4 border-red-900 bg-gray-100">
+            <div className="flex h-full w-full flex-col items-center justify-center">
+              <h2
+                className={`${lusitana.className} p-2 text-xl text-black md:text-2xl`}
+              >
+                ToDo: Audio Components
+              </h2>
+              <p className="text-lg text-black md:text-xl">Coming soon...</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </LiveKitRoom>
-  );
-}
-
-function MyVideoConference() {
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: false },
-      { source: Track.Source.ScreenShare, withPlaceholder: false },
-    ],
-    { onlySubscribed: true },
-  );
-
-  return (
-    <GridLayout tracks={tracks} className="h-full">
-      <ParticipantTile />
-    </GridLayout>
   );
 }
 

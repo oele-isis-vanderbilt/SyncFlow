@@ -2,8 +2,6 @@ import { lusitana } from '@/app/ui/fonts';
 import type { Metadata } from 'next';
 import { CardsSkeleton } from '@/app/ui/skeletons';
 import { SummaryCards } from '@/app/ui/dashboard/summary-cards';
-import { Button } from '@/app/ui/button';
-import { PlusIcon } from '@heroicons/react/24/outline';
 import CreateRoom from '@/app/ui/dashboard/create-room';
 import RoomsTable from '@/app/ui/dashboard/rooms-table';
 import { auth } from '@/auth';
@@ -34,6 +32,7 @@ export default async function Page() {
             Rooms
           </h1>
         </div>
+        {/*@ts-ignore*/}
         {session?.user?.role === Role.ADMIN ? <CreateRoom /> : null}
       </div>
       <div className="mt-8 flex items-center">
