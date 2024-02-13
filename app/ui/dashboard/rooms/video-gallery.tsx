@@ -67,7 +67,7 @@ export default function VideoGallery(
   }, [tracks]);
 
   return (
-    <>
+    <div className={'flex h-full w-full flex-col'}>
       <div className={'flex items-center justify-between bg-black'}>
         <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
           {title}
@@ -83,12 +83,8 @@ export default function VideoGallery(
           </div>
         </Tooltip>
       </div>
-
-      <div className="flex h-full flex-col">
-        <div
-          className="items-center justify-center bg-gray-300"
-          style={{ height: '800px' }}
-        >
+      <div className="flex-1 gap-2">
+        <div className="items-center justify-center bg-gray-300 md:h-1/2 lg:h-3/4">
           {toRenderTrack ? (
             <>
               {toRenderTrack.publication?.isMuted ? (
@@ -105,8 +101,8 @@ export default function VideoGallery(
             <NoTrackMessage />
           )}
         </div>
-        <div className="h-2/5">
-          <h2 className={`${lusitana.className} mt-10 p-2 text-xl md:text-2xl`}>
+        <div className="pt-10 md:h-1/2 lg:h-1/4">
+          <h2 className={`${lusitana.className} text-xl md:text-2xl`}>
             Participants
           </h2>
           <PagedTrackView
@@ -118,7 +114,7 @@ export default function VideoGallery(
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
