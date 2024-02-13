@@ -7,7 +7,6 @@ export default async function Page({ params }: { params: { name: string } }) {
   const roomName = params.name;
   const session = await auth();
   const userName = session?.user?.name || 'Anonymous';
-  // @ts-ignore
   const isAdmin = session?.user?.role === Role.ADMIN;
 
   let token = await liveKitService.generateToken(userName, userName, {

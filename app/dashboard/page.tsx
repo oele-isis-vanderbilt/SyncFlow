@@ -32,7 +32,6 @@ export default async function Page() {
             Rooms
           </h1>
         </div>
-        {/*@ts-ignore*/}
         {session?.user?.role === Role.ADMIN ? <CreateRoom /> : null}
       </div>
       <div className="mt-8 flex items-center">
