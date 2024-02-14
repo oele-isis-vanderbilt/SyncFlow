@@ -14,15 +14,7 @@ import {
 import AudioStreams from '@/app/ui/dashboard/rooms/audio-streams';
 
 import { lusitana } from '@/app/ui/fonts';
-import {
-  beginRoomCompositeEgress,
-  redirectToDashboard,
-  stopRoomCompositeEgress,
-} from '@/app/lib/actions';
-import { BsRecordBtn } from 'react-icons/bs';
-import clsx from 'clsx';
-import { Tooltip } from 'flowbite-react';
-import { useState } from 'react';
+import { redirectToDashboard } from '@/app/lib/actions';
 
 export default function Room({ token }: { token: string }) {
   return (
@@ -74,50 +66,7 @@ function TopBar() {
           className={`flex text-xl`}
           variation={'verbose'}
         />
-        <RoomRecorder />
       </div>
-    </div>
-  );
-}
-
-export function RoomRecorder() {
-  const roomInfo = useRoomContext();
-  const tracks = useTracks();
-
-  const [activeEgressId, setActiveEgressId] = useState<string | null>(null);
-  const [isProcessingEgress, setIsProcessingEgress] = useState(false);
-
-  return (
-    <div
-      role={'button'}
-      aria-disabled={tracks.length > 0 ? 'true' : 'false'}
-      onClick={async () => {
-        setIsProcessingEgress(true);
-        if (!roomInfo.isRecording) {
-          const egressInfo = await beginRoomCompositeEgress(roomInfo.name);
-          setActiveEgressId(egressInfo?.egressId || null);
-        } else {
-          if (activeEgressId) await stopRoomCompositeEgress(activeEgressId!);
-        }
-        setIsProcessingEgress(false);
-      }}
-      className={
-        tracks.length > 0 || isProcessingEgress
-          ? 'cursor-pointer'
-          : 'cursor-not-allowed'
-      }
-    >
-      <Tooltip
-        content={roomInfo.isRecording ? 'Stop Recording' : 'Start Recording'}
-        className={tracks.length > 0 ? 'block' : 'hidden'}
-      >
-        <BsRecordBtn
-          className={clsx(
-            roomInfo.isRecording ? 'text-red-500' : 'text-white',
-            'text-4xl',
-          )}
-        />
-      </Tooltip>
     </div>
   );
 }
