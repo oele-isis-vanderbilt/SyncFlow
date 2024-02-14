@@ -1,10 +1,9 @@
 import type { VideoGrant } from 'livekit-server-sdk';
 import {
-  AccessToken,
   CreateOptions,
-  EgressClient,
   Room,
   RoomServiceClient,
+  AccessToken,
 } from 'livekit-server-sdk';
 import { unstable_noStore as noStore } from 'next/cache';
 
