@@ -79,24 +79,24 @@ const AudioRenderer = ({
   track: LocalAudioTrack | RemoteAudioTrack | undefined;
   shouldMute: boolean;
 }) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      track?.attach(audioRef.current);
+      audioRef.current.muted = shouldMute;
+    }
+    return () => {
+      track?.detach();
+    };
+  }, [track, shouldMute]);
+
   if (
     !(track instanceof LocalAudioTrack) &&
     !(track instanceof RemoteAudioTrack)
   ) {
     return null;
   }
-
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      track.attach(audioRef.current);
-      audioRef.current.muted = shouldMute;
-    }
-    return () => {
-      track.detach();
-    };
-  }, [track, shouldMute]);
 
   return <audio ref={audioRef} muted={shouldMute} controls={true} />;
 };
