@@ -5,17 +5,24 @@ import VideoGallery from '@/app/ui/dashboard/rooms/video-gallery';
 import {
   LiveKitRoom,
   RoomName,
-  GridLayout,
-  ParticipantTile,
-  useTracks,
   ControlBar,
-  FocusLayout,
-  CarouselLayout,
+  useRoomInfo,
+  useRoomContext,
+  useTracks,
 } from '@livekit/components-react';
 
-import { Track } from 'livekit-client';
+import AudioStreams from '@/app/ui/dashboard/rooms/audio-streams';
+
 import { lusitana } from '@/app/ui/fonts';
-import { redirectToDashboard } from '@/app/lib/actions';
+import {
+  beginRoomCompositeEgress,
+  redirectToDashboard,
+  stopRoomCompositeEgress,
+} from '@/app/lib/actions';
+import { BsRecordBtn } from 'react-icons/bs';
+import clsx from 'clsx';
+import { Tooltip } from 'flowbite-react';
+import { useState } from 'react';
 
 export default function Room({ token }: { token: string }) {
   return (
@@ -35,14 +42,12 @@ export default function Room({ token }: { token: string }) {
           <div className="h-full w-1/2 flex-1">
             <VideoGallery title={'Videos'} />
           </div>
-          <div className="h-full flex-1 border-l-4 border-red-900 bg-gray-100">
-            <div className="flex h-full w-full flex-col items-center justify-center">
-              <h2
-                className={`${lusitana.className} p-2 text-xl text-black md:text-2xl`}
-              >
-                ToDo: Audio Components
-              </h2>
-              <p className="text-lg text-black md:text-xl">Coming soon...</p>
+          <div className="h-full w-1/2">
+            <div className="flex h-full w-full flex-col">
+              <div className="h-1/2 w-full bg-white">
+                <AudioStreams title={'Audio Streams'} />
+              </div>
+              <div className="h-1/2 w-full">Remaining content</div>
             </div>
           </div>
         </div>
@@ -60,7 +65,7 @@ function TopBar() {
       <div className="flex w-1/2 items-center justify-end gap-4">
         <ControlBar
           controls={{
-            microphone: false,
+            microphone: true,
             camera: true,
             chat: false,
             screenShare: true,
@@ -69,7 +74,50 @@ function TopBar() {
           className={`flex text-xl`}
           variation={'verbose'}
         />
+        <RoomRecorder />
       </div>
+    </div>
+  );
+}
+
+export function RoomRecorder() {
+  const roomInfo = useRoomContext();
+  const tracks = useTracks();
+
+  const [activeEgressId, setActiveEgressId] = useState<string | null>(null);
+  const [isProcessingEgress, setIsProcessingEgress] = useState(false);
+
+  return (
+    <div
+      role={'button'}
+      aria-disabled={tracks.length > 0 ? 'true' : 'false'}
+      onClick={async () => {
+        setIsProcessingEgress(true);
+        if (!roomInfo.isRecording) {
+          const egressInfo = await beginRoomCompositeEgress(roomInfo.name);
+          setActiveEgressId(egressInfo?.egressId || null);
+        } else {
+          if (activeEgressId) await stopRoomCompositeEgress(activeEgressId!);
+        }
+        setIsProcessingEgress(false);
+      }}
+      className={
+        tracks.length > 0 || isProcessingEgress
+          ? 'cursor-pointer'
+          : 'cursor-not-allowed'
+      }
+    >
+      <Tooltip
+        content={roomInfo.isRecording ? 'Stop Recording' : 'Start Recording'}
+        className={tracks.length > 0 ? 'block' : 'hidden'}
+      >
+        <BsRecordBtn
+          className={clsx(
+            roomInfo.isRecording ? 'text-red-500' : 'text-white',
+            'text-4xl',
+          )}
+        />
+      </Tooltip>
     </div>
   );
 }

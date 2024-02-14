@@ -88,3 +88,20 @@ export async function redirectToDashboard() {
   revalidatePath('/dashboard');
   redirect('/dashboard');
 }
+
+export async function beginRoomCompositeEgress(roomName: string) {
+  try {
+    return await liveKitService.beginRoomCompositeEgress(roomName);
+  } catch (error) {
+    console.error('Error starting egress', error);
+    return null;
+  }
+}
+
+export async function stopRoomCompositeEgress(egressId: string) {
+  try {
+    await liveKitService.stopRoomCompositeEgress(egressId);
+  } catch (error) {
+    console.error('Error stopping egress', error);
+  }
+}
