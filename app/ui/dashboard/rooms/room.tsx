@@ -57,7 +57,7 @@ function TopBar() {
       <div className="flex w-1/2 items-center justify-end gap-4">
         <ControlBar
           controls={{
-            microphone: true,
+            microphone: false,
             camera: true,
             chat: false,
             screenShare: true,

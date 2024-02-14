@@ -10,16 +10,9 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 class LiveKitService {
   roomService: RoomServiceClient;
-  egressClient: EgressClient;
 
   constructor() {
     this.roomService = new RoomServiceClient(
-      process.env.LIVEKIT_SERVER_URL!,
-      process.env.LIVEKIT_API_KEY!,
-      process.env.LIVEKIT_API_SECRET!,
-    );
-
-    this.egressClient = new EgressClient(
       process.env.LIVEKIT_SERVER_URL!,
       process.env.LIVEKIT_API_KEY!,
       process.env.LIVEKIT_API_SECRET!,
@@ -46,7 +39,6 @@ class LiveKitService {
       process.env.LIVEKIT_API_SECRET,
       {
         identity,
-        name
       },
     );
     token.addGrant(grant);
