@@ -9,3 +9,5 @@ keys:
 logging:
     json: false
     level: info
+redis:
+    address: 172.18.0.2:6379

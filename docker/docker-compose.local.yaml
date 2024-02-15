@@ -10,6 +10,8 @@ services:
       - "7882:7882"
     volumes:
       - ./livekit.yaml:/etc/livekit.yaml
+    depends_on:
+      - redis
   redis:
     image: redis:7-alpine
     command: redis-server /etc/redis.conf

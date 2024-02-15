@@ -10,6 +10,7 @@ redis:
     sentinel_addresses: []
     cluster_addresses: []
     max_redirects: null
-api_key: APIEHGtzk9DKyjY
-api_secret: 8dINIFYmXdB4lJf9LFlrV5XsuMkmjWH2QT32iYLUw4b
+api_key: APIfJENwGJaE6DD
+api_secret: cmPbeYxmovNQ4zb7HnABS1eKF4GSm0PX9MTtci0fFi7A
 ws_url: ws://localhost:7880
+insecure: true
