@@ -1,4 +1,4 @@
-import ELPLogo from '@/app/ui/elp-logo';
+import ELPLogo from '@/app/ui/app-logo';
 import LoginForm from '@/app/ui/login-form';
 
 export default function LoginPage() {

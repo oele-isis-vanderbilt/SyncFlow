@@ -1,23 +1,21 @@
-import ELPLogo from '@/app/ui/elp-logo';
+import AppLogo from '@/app/ui/app-logo';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
+import deploymentConfig from '@/deployment-config';
 
 export default function Page() {
   return (
     <main className="flex h-full flex-col p-6">
       <div className="m-20 flex h-20 shrink-0 items-end rounded-lg p-4 md:h-64">
-        <ELPLogo />
+        <AppLogo />
       </div>
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
         <div className="flex flex-col justify-center gap-6 rounded-lg px-6 py-10 md:w-2/5 md:px-20">
           <p
             className={`${lusitana.className} text-xl md:text-3xl md:leading-normal`}
-          >
-            <strong>Welcome to LiveKitELP.</strong> Use the dashboard to manage
-            embodied learning [<code>GEM-STEP</code>] data collection with
-            LiveKit.
-          </p>
+            dangerouslySetInnerHTML={{ __html: deploymentConfig.tagLine }}
+          />
           <Link
             href="/login"
             className="flex items-center gap-5 self-start rounded-lg bg-teal-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"

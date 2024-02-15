@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import NavLinks from '@/app/ui/dashboard/nav-links';
-import ElpLogo from '@/app/ui/elp-logo';
+import AppLogo from '@/app/ui/app-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { signOut } from '@/auth';
 import { auth } from '@/auth';
@@ -14,7 +14,7 @@ export default async function SideNav() {
         href="/dashboard"
       >
         <div className="w-32 text-white md:w-64">
-          <ElpLogo />
+          <AppLogo />
         </div>
       </Link>
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
