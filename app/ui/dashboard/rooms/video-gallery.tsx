@@ -13,21 +13,9 @@ import { Pagination, Tooltip } from 'flowbite-react';
 import { useMediaQuery } from '@uidotdev/usehooks';
 import { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
-import { RxEnterFullScreen, RxExitFullScreen } from 'react-icons/rx';
+import { RxEnterFullScreen } from 'react-icons/rx';
 import { FullScreen, useFullScreenHandle } from 'react-full-screen';
-
-function getHelpText(track: TrackReferenceOrPlaceholder) {
-  if (track.publication?.source === Track.Source.Camera) {
-    return track.participant.identity + "'s Video";
-  }
-  if (track.publication?.source === Track.Source.Microphone) {
-    return track.participant.identity + "'s Audio";
-  }
-  if (track.publication?.source === Track.Source.ScreenShare) {
-    return track.participant.identity + "'s Screen";
-  }
-  return 'Unknown';
-}
+import { getHelpText } from '@/app/ui/dashboard/rooms/utils';
 
 export default function VideoGallery(
   { title }: { title: string } = { title: 'Video Streams' },
