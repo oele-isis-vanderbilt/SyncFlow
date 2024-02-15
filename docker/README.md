@@ -18,7 +18,7 @@ This guide provides instructions for setting up a local LiveKit deployment using
 
 2. **Configuration Files**: Review and modify the configuration files (`livekit.yaml`, `egress.yaml`) as needed to fit your deployment scenario. Be especially mindful of the secrets (API keys and secrets) and network settings.
 
-3. **Docker Compose**: Navigate to the directory containing your `docker-compose.yml` and configuration files, then start your services:
+3. **Docker Compose**: Navigate to the directory containing your `docker-compose.local.yaml` and configuration files, then start your services:
 
     ```bash
     cd docker
