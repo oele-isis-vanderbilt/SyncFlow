@@ -7,7 +7,6 @@ import {
   LiveKitRoom,
   RoomName,
   ControlBar,
-  useRoomInfo,
   useRoomContext,
   useTracks,
 } from '@livekit/components-react';
@@ -21,11 +20,12 @@ import { Tooltip } from 'flowbite-react';
 import AudioStreams from '@/app/ui/dashboard/rooms/audio-streams';
 
 import { lusitana } from '@/app/ui/fonts';
-import { redirectToDashboard } from '@/app/lib/actions';
+import { redirectToDashboard, getRoomRecordings } from '@/app/lib/actions';
 import { BsRecordBtn } from 'react-icons/bs';
 import clsx from 'clsx';
 import { Button } from '@/app/ui/button';
-import {useFormState, useFormStatus} from "react-dom";
+import { useFormState, useFormStatus } from 'react-dom';
+import RoomRecordingsList from '@/app/ui/dashboard/rooms/room-recording-list';
 
 export default function Room({ token }: { token: string }) {
   return (
@@ -86,17 +86,6 @@ function TopBar() {
 export function RoomRecorder() {
   const roomInfo = useRoomContext();
   const tracks = useTracks();
-  const {pending} = useFormStatus();
-
-  function logData(prevState: { selectedOptions: any[] },
-  formData: { selectedOptions: any[]}) {
-    'use server';
-    console.log(formData);
-    return {
-      text: 'Recording',
-    };
-  }
-  const [errorMessage, dispatch] = useFormState(logData, {selectedOptions: []});
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -104,17 +93,15 @@ export function RoomRecorder() {
     return {
       label: getHelpText(track),
       value: track.publication?.trackSid!,
+      kind: track.publication.kind,
     };
   });
-
 
   const animatedComponents = makeAnimated();
 
   const [selections, setSelections] = useState<
     { label: string; value: string }[]
   >([]);
-
-  const [text, setText] = useState('Start Recording');
 
   const handleSelectedChange = (option) => {
     setSelections(option);
@@ -153,30 +140,34 @@ export function RoomRecorder() {
         <Modal.Header>Record Room ({roomInfo.name})</Modal.Header>
         <Modal.Body>
           <div className="min-h-96 w-full space-y-6">
-              <h2 className={`${lusitana.className} text-2xl text-black`}>
-                Select Tracks to Record
-              </h2>
-              <div className={'flex w-full flex-row items-center gap-2 p-5'}>
-                <Select
-                  options={trackSelections}
-                  value={selections}
-                  onChange={handleSelectedChange}
-                  closeMenuOnSelect={false}
-                  components={animatedComponents}
-                  isMulti
-                  className={'w-full flex-1 text-black'}
-                />
-                <Button onClick={isAllSelected ? clearAll : selectAll}>
-                  {isAllSelected ? 'Clear All' : 'Select All'}
-                </Button>
-              </div>
-              <input type='text' className={'text-black'} />
-              <div className={'flex w-full flex-row justify-center gap-2 p-5'}>
-              <Button type={"submit"} className={'float-end mt-10'} >
-                {text}
+            <h2 className={`${lusitana.className} text-2xl text-black`}>
+              Select Tracks to Record
+            </h2>
+            <div className={'flex w-full flex-row items-center gap-2 p-5'}>
+              <Select
+                options={trackSelections}
+                value={selections}
+                onChange={handleSelectedChange}
+                closeMenuOnSelect={false}
+                components={animatedComponents}
+                isMulti
+                className={'w-full flex-1 text-black'}
+              />
+              <Button onClick={isAllSelected ? clearAll : selectAll}>
+                {isAllSelected ? 'Clear All' : 'Select All'}
               </Button>
-              </div>
+            </div>
+            <div className={'flex w-full flex-row justify-center gap-2 p-5'}>
+              <Button
+                className={'float-end mt-10'}
+                disabled={selections.length === 0}
+                aria-disabled={selections.length === 0}
+              >
+                Record Selected Tracks
+              </Button>
+            </div>
           </div>
+          {/*<RoomRecordingsList roomName={roomInfo.name} />*/}
         </Modal.Body>
       </Modal>
     </Tooltip>

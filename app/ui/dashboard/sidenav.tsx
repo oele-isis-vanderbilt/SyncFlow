@@ -22,7 +22,7 @@ export default async function SideNav() {
           {session?.user?.name ? `Welcome! ${session.user.name!}` : 'Welcome'}{' '}
         </div>
 
-        <NavLinks />
+        <NavLinks user={session?.user} />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-900 md:block"></div>
         <form
           action={async () => {

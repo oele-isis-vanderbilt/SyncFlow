@@ -105,3 +105,17 @@ export async function stopRoomCompositeEgress(egressId: string) {
     console.error('Error stopping egress', error);
   }
 }
+
+export async function getRoomRecordings(roomName: string) {
+  try {
+    return await liveKitService.getRoomEgresses(roomName);
+  } catch (error) {
+    console.error('Error getting room recordings', error);
+    return [];
+  }
+}
+
+export async function redirectToRoomRecording(roomName) {
+  revalidatePath(`/dashboard/recordings/${roomName}`);
+  redirect(`/dashboard/recordings/${roomName}`);
+}

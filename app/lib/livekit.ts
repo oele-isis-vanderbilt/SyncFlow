@@ -88,6 +88,11 @@ class LiveKitService {
     noStore();
     return await this.egressService.listEgress({ roomName });
   }
+
+  async listParticipants(roomName: string) {
+    noStore();
+    return await this.roomService.listParticipants(roomName);
+  }
 }
 
 export const liveKitService = new LiveKitService();

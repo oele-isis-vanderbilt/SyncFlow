@@ -2,10 +2,14 @@ import type { Room } from 'livekit-server-sdk';
 import { liveKitService } from '@/app/lib/livekit';
 import RoomActions from '@/app/ui/dashboard/room-actions';
 import Link from 'next/link';
+import { auth } from '@/auth';
+import { Role } from '@prisma/client';
 
 export default async function RoomsTable() {
   const rooms = await liveKitService.listRooms();
   const names = rooms.map((room: Room) => room.name);
+  const session = await auth();
+  const isAdmin = session?.user?.role === Role.ADMIN;
   return (
     <>
       {names.length === 0 ? (
@@ -71,7 +75,7 @@ export default async function RoomsTable() {
                   </td>
 
                   <td className="whitespace-nowrap px-6 py-4">
-                    <RoomActions room={room} />
+                    <RoomActions room={room} isAdmin={isAdmin} />
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
                     <div className="text-sm">{room.metadata || 'N/A'}</div>
