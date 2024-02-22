@@ -10,7 +10,8 @@ import { BsRecordBtn } from 'react-icons/bs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
+import { SessionUser } from '@/types/next-auth';
 
 // Map of links to display in the side navigation.
 const links = [
@@ -32,11 +33,14 @@ const links = [
   },
 ];
 
-export default function NavLinks({ user }: { user: User | undefined }) {
+export default function NavLinks({ user }: { user: SessionUser | undefined }) {
   const pathName = usePathname();
+  let linksToDisplay = links.filter(
+    (link) => !link.adminOnly || user?.role === Role.ADMIN,
+  );
   return (
     <>
-      {links.map((link) => {
+      {linksToDisplay.map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link

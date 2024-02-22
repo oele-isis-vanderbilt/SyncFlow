@@ -1,8 +1,6 @@
 'use client';
 import '@livekit/components-styles';
 import VideoGallery from '@/app/ui/dashboard/rooms/video-gallery';
-import { Modal } from 'flowbite-react';
-import { getHelpText } from '@/app/ui/dashboard/rooms/utils';
 import {
   LiveKitRoom,
   RoomName,
@@ -11,23 +9,24 @@ import {
   useTracks,
 } from '@livekit/components-react';
 
-import Select from 'react-select';
-import makeAnimated from 'react-select/animated';
-
-import { useState } from 'react';
 import { Tooltip } from 'flowbite-react';
 
+import Link from 'next/link';
 import AudioStreams from '@/app/ui/dashboard/rooms/audio-streams';
 
 import { lusitana } from '@/app/ui/fonts';
-import { redirectToDashboard, getRoomRecordings } from '@/app/lib/actions';
+import { redirectToDashboard } from '@/app/lib/actions';
 import { BsRecordBtn } from 'react-icons/bs';
-import clsx from 'clsx';
-import { Button } from '@/app/ui/button';
-import { useFormState, useFormStatus } from 'react-dom';
-import RoomRecordingsList from '@/app/ui/dashboard/rooms/room-recording-list';
+import type { SessionUser } from '@/types/next-auth';
+import { isAdmin } from '@/app/lib/utils';
 
-export default function Room({ token }: { token: string }) {
+export default function Room({
+  token,
+  user,
+}: {
+  token: string;
+  user: SessionUser | undefined;
+}) {
   return (
     <LiveKitRoom
       video={false}
@@ -40,7 +39,7 @@ export default function Room({ token }: { token: string }) {
       }}
     >
       <div className="flex h-full w-full flex-col bg-black">
-        <TopBar />
+        <TopBar user={user} />
         <div className="flex h-full w-full flex-row bg-black">
           <div className="h-full w-1/2 flex-1">
             <VideoGallery title={'Videos'} />
@@ -59,7 +58,7 @@ export default function Room({ token }: { token: string }) {
   );
 }
 
-function TopBar() {
+function TopBar({ user }: { user: SessionUser | undefined }) {
   return (
     <div className="flex h-20 w-full items-center justify-between bg-black py-2 md:py-5">
       <div className="w-1/2">
@@ -77,99 +76,26 @@ function TopBar() {
           className={`flex text-xl`}
           variation={'verbose'}
         />
-        <RoomRecorder />
+        {isAdmin(user) && <RoomRecorderNavigator />}
       </div>
     </div>
   );
 }
 
-export function RoomRecorder() {
+export function RoomRecorderNavigator() {
   const roomInfo = useRoomContext();
   const tracks = useTracks();
 
-  const [openModal, setOpenModal] = useState(false);
-
-  const trackSelections = tracks.map((track) => {
-    return {
-      label: getHelpText(track),
-      value: track.publication?.trackSid!,
-      kind: track.publication.kind,
-    };
-  });
-
-  const animatedComponents = makeAnimated();
-
-  const [selections, setSelections] = useState<
-    { label: string; value: string }[]
-  >([]);
-
-  const handleSelectedChange = (option) => {
-    setSelections(option);
-  };
-
-  const selectAll = () => {
-    setSelections(trackSelections);
-  };
-
-  const clearAll = () => {
-    setSelections([]);
-  };
-
-  const isAllSelected = selections.length === trackSelections.length;
-
   return (
-    <Tooltip
-      content={roomInfo.isRecording ? 'Stop Recording' : 'Start Recording'}
-      className={tracks.length > 0 ? 'block' : 'hidden'}
-    >
-      <BsRecordBtn
-        className={clsx(
-          roomInfo.isRecording ? 'text-red-500' : 'text-white',
-          'cursor-pointer text-4xl transition-colors duration-300 ease-in-out hover:text-red-500',
-        )}
-        onClick={() => {
-          setOpenModal(true);
-        }}
-      />
-      <Modal
-        dismissible
-        size="7xl"
-        show={openModal}
-        onClose={() => setOpenModal(false)}
-      >
-        <Modal.Header>Record Room ({roomInfo.name})</Modal.Header>
-        <Modal.Body>
-          <div className="min-h-96 w-full space-y-6">
-            <h2 className={`${lusitana.className} text-2xl text-black`}>
-              Select Tracks to Record
-            </h2>
-            <div className={'flex w-full flex-row items-center gap-2 p-5'}>
-              <Select
-                options={trackSelections}
-                value={selections}
-                onChange={handleSelectedChange}
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                className={'w-full flex-1 text-black'}
-              />
-              <Button onClick={isAllSelected ? clearAll : selectAll}>
-                {isAllSelected ? 'Clear All' : 'Select All'}
-              </Button>
-            </div>
-            <div className={'flex w-full flex-row justify-center gap-2 p-5'}>
-              <Button
-                className={'float-end mt-10'}
-                disabled={selections.length === 0}
-                aria-disabled={selections.length === 0}
-              >
-                Record Selected Tracks
-              </Button>
-            </div>
-          </div>
-          {/*<RoomRecordingsList roomName={roomInfo.name} />*/}
-        </Modal.Body>
-      </Modal>
-    </Tooltip>
+    <div className={tracks.length > 0 ? 'block' : 'hidden'}>
+      <Tooltip content={'Manage Room Recordings'}>
+        <Link href={`/dashboard/recordings/${roomInfo.name!}/`} target="_blank">
+          <BsRecordBtn
+            className="cursor-pointer text-4xl hover:text-red-500"
+            onClick={() => {}}
+          />
+        </Link>
+      </Tooltip>
+    </div>
   );
 }

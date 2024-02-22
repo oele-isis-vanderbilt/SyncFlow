@@ -6,8 +6,9 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { signIn } from '@/auth';
 
-import type { CreateOptions, VideoGrant } from 'livekit-server-sdk';
+import type { CreateOptions, EgressInfo, VideoGrant } from 'livekit-server-sdk';
 import { AuthError } from 'next-auth';
+import { Egress } from 'livekit-server-sdk/dist/proto/livekit_egress';
 
 const APP_NAME = 'LiveKitELP';
 const USER_NAME = 'admin';
@@ -89,23 +90,6 @@ export async function redirectToDashboard() {
   redirect('/dashboard');
 }
 
-export async function startRoomCompositeEgress(roomName: string) {
-  try {
-    return await liveKitService.startRoomCompositeEgress(roomName);
-  } catch (error) {
-    console.error('Error starting egress', error);
-    return null;
-  }
-}
-
-export async function stopRoomCompositeEgress(egressId: string) {
-  try {
-    await liveKitService.stopRoomCompositeEgress(egressId);
-  } catch (error) {
-    console.error('Error stopping egress', error);
-  }
-}
-
 export async function getRoomRecordings(roomName: string) {
   try {
     return await liveKitService.getRoomEgresses(roomName);
@@ -115,7 +99,65 @@ export async function getRoomRecordings(roomName: string) {
   }
 }
 
-export async function redirectToRoomRecording(roomName) {
+export async function redirectToRoomRecording(roomName: string) {
+  revalidatePath(`/dashboard/recordings/${roomName}`);
+  redirect(`/dashboard/recordings/${roomName}`);
+}
+
+export async function beginTrackEgress(roomName: string, trackId: string) {
+  try {
+    const egressInfo = await liveKitService.startTrackEgress(
+      roomName,
+      {
+        filepath:
+          'tracks/{room_name}/{publisher_identity}/{track_type}-{track_source}-{track_id}-{time}',
+        s3: {
+          bucket: process.env.S3_BUCKET_NAME!,
+          region: process.env.S3_REGION!,
+          accessKey: process.env.S3_ACCESS_KEY!,
+          secret: process.env.S3_SECRET_KEY!,
+          endpoint: process.env.S3_ENDPOINT!,
+        },
+      },
+      trackId,
+    );
+    return egressInfo;
+  } catch (error) {
+    console.error('Error beginning track egress', error);
+    revalidatePath(`/dashboard/recordings/${roomName}`);
+    redirect(`/dashboard/recordings/${roomName}`);
+  }
+}
+
+export async function stopEgress(roomName: string, egressId: string) {
+  try {
+    const egressInfo = await liveKitService.stopEgress(egressId);
+    return egressInfo;
+  } catch (error) {
+    console.error('Error stopping track egress', error);
+    revalidatePath(`/dashboard/recordings/${roomName}`);
+    redirect(`/dashboard/recordings/${roomName}`);
+  }
+}
+
+export async function beginTracksEgress(trackIds: string[], roomName: string) {
+  const egresses = await Promise.all(
+    trackIds.map((trackId) => {
+      return beginTrackEgress(roomName, trackId);
+    }),
+  );
+
+  revalidatePath(`/dashboard/recordings/${roomName}`);
+  redirect(`/dashboard/recordings/${roomName}`);
+}
+
+export async function stopTracksEgress(egressIds: string[], roomName: string) {
+  const egresses = await Promise.all(
+    egressIds.map(liveKitService.stopEgress.bind(liveKitService)),
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
   revalidatePath(`/dashboard/recordings/${roomName}`);
   redirect(`/dashboard/recordings/${roomName}`);
 }

@@ -4,12 +4,12 @@ import RoomActions from '@/app/ui/dashboard/room-actions';
 import Link from 'next/link';
 import { auth } from '@/auth';
 import { Role } from '@prisma/client';
+import { isAdmin } from '@/app/lib/utils';
 
-export default async function RoomsTable() {
+export default async function RoomsTable({ navPath }: { navPath: string }) {
   const rooms = await liveKitService.listRooms();
   const names = rooms.map((room: Room) => room.name);
   const session = await auth();
-  const isAdmin = session?.user?.role === Role.ADMIN;
   return (
     <>
       {names.length === 0 ? (
@@ -47,14 +47,14 @@ export default async function RoomsTable() {
               return (
                 <tr key={index} className="border-5 border-indigo-200 bg-black">
                   <td className="whitespace-nowrap px-6 py-4">
-                    <Link href={`/dashboard/rooms/${room.name}`}>
+                    <Link href={`/dashboard/${navPath}/${room.name}`}>
                       <div className="text-blue text-sm hover:text-blue-400 hover:underline">
                         {room.sid.trim()}
                       </div>
                     </Link>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <Link href={`/dashboard/rooms/${room.name}`}>
+                    <Link href={`/dashboard/${navPath}/${room.name}`}>
                       <div className="text-blue text-sm hover:text-blue-400 hover:underline">
                         {room.name.trim()}
                       </div>
@@ -75,7 +75,7 @@ export default async function RoomsTable() {
                   </td>
 
                   <td className="whitespace-nowrap px-6 py-4">
-                    <RoomActions room={room} isAdmin={isAdmin} />
+                    <RoomActions room={room} isAdmin={isAdmin(session?.user)} />
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
                     <div className="text-sm">{room.metadata || 'N/A'}</div>

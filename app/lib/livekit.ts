@@ -1,6 +1,7 @@
 import {
   AccessToken,
   CreateOptions,
+  DirectFileOutput,
   EgressClient,
   EncodedFileType,
   Room,
@@ -79,9 +80,9 @@ class LiveKitService {
     return egressInfo;
   }
 
-  async stopRoomCompositeEgress(egressId: string) {
+  async stopEgress(egressId: string) {
     noStore();
-    await this.egressService.stopEgress(egressId);
+    return await this.egressService.stopEgress(egressId);
   }
 
   async getRoomEgresses(roomName: string) {
@@ -92,6 +93,15 @@ class LiveKitService {
   async listParticipants(roomName: string) {
     noStore();
     return await this.roomService.listParticipants(roomName);
+  }
+
+  async startTrackEgress(
+    roomName: string,
+    output: DirectFileOutput | string,
+    trackId: string,
+  ) {
+    noStore();
+    return await this.egressService.startTrackEgress(roomName, output, trackId);
   }
 }
 

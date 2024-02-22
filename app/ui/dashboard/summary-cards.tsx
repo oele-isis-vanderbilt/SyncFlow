@@ -31,7 +31,10 @@ export async function SummaryCards() {
     (acc, room) => acc + room.participants,
     0,
   );
-  const numRecordings = rooms.reduce((acc, room) => acc + room.recording, 0);
+  const numRecordings = rooms.reduce(
+    (acc, room) => acc + (room.recording ? 1 : 0),
+    0,
+  );
 
   return (
     <>
