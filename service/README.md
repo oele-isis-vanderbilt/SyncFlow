@@ -15,7 +15,8 @@ After cloning the repository, create an environement file `.env` in the root dir
 LIVEKIT_SERVER_URL="YOUR_LIVEKIT_SERVER_URL"
 LIVEKIT_API_KEY="YOUR_LIVEKIT_API_KEY"
 LIVEKIT_API_SECRET="YOUR_LIVEKIT_API_SECRET"
-PORT = "8081"
+PORT="8081"
+HOST=0.0.0.0
 ```
 
 Run the following command to start the server:
