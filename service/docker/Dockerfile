@@ -1,6 +1,10 @@
+# build stage
 FROM rust:slim as builder
 
-RUN apt-get update && USER=root cargo new --bin app
+RUN apt-get update  \
+    && apt-get install -y musl-tools  \
+    && rm -rf /var/lib/apt/lists/* && \
+    USER=root cargo new --bin app
 
 WORKDIR /app
 
@@ -10,13 +14,11 @@ RUN cargo build && rm src/*.rs
 
 COPY ./src ./src
 
-RUN cargo build --release
+RUN rm -rf ./target/* && cargo build --release
 
+FROM ubuntu:latest
 
-
-FROM debian:buster-slim
-
-RUN mkdir app
+RUN mkdir /app
 
 WORKDIR /app
 
@@ -24,8 +26,6 @@ RUN apt-get update
 
 COPY --from=builder /app/target/release/livekit-mmla-api .
 
-# expose port
 EXPOSE 8081
-
 
 CMD ["/app/livekit-mmla-api"]

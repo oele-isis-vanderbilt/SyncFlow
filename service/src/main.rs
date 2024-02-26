@@ -7,7 +7,9 @@ use std::env;
 
 mod livekit;
 mod models;
+mod utils;
 
+use crate::utils::load_env;
 use utoipa::{OpenApi, ToSchema};
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
@@ -117,7 +119,7 @@ pub async fn not_found() -> actix_web::Result<HttpResponse> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv::dotenv().expect("Failed to read .env file");
+    load_env();
     env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
 
@@ -144,10 +146,14 @@ async fn main() -> std::io::Result<()> {
 
     let openapi = ApiDoc::openapi();
 
-    let port: u16 = match std::env::var("PORT") {
+    let app_port: u16 = match std::env::var("PORT") {
         Ok(val) => val.parse().unwrap_or(8081),
         Err(_) => 8081,
     };
+
+    let app_host = std::env::var("HOST").expect("HOST must be set");
+
+    let server_addr = format!("{}:{}", app_host, app_port);
 
     HttpServer::new(move || {
         App::new()
@@ -164,7 +170,7 @@ async fn main() -> std::io::Result<()> {
             .service(RapiDoc::new("/api-docs/openapi.json").path("/rapidoc"))
             .wrap(actix_web::middleware::Logger::default())
     })
-    .bind(("127.0.0.1", port))?
+    .bind(server_addr)?
     .run()
     .await
 }

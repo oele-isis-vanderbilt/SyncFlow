@@ -1,4 +1,4 @@
-use dotenv::dotenv;
+use crate::utils::load_env;
 use livekit_api::services::room::{CreateRoomOptions, RoomClient};
 use livekit_api::services::ServiceResult;
 use livekit_protocol as proto;
@@ -35,7 +35,7 @@ pub struct RoomService {
 
 impl RoomService {
     pub fn new() -> Self {
-        dotenv().ok();
+        load_env();
         let server_url = std::env::var("LIVEKIT_SERVER_URL")
             .expect("LIVEKIT_SERVER_URL must be set")
             .replace("ws", "http");
