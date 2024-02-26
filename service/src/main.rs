@@ -5,6 +5,7 @@ use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Serialize;
 use std::env;
 
+mod auth;
 mod livekit;
 mod models;
 mod utils;
