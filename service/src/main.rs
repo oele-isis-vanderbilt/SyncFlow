@@ -8,6 +8,7 @@ use std::env;
 mod auth;
 mod livekit;
 mod models;
+mod schema;
 mod utils;
 
 use crate::utils::load_env;

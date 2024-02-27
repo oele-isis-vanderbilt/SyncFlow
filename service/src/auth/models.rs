@@ -1,56 +1,46 @@
-use diesel::backend::Backend;
 use diesel::deserialize::{self, FromSql};
 use diesel::expression::AsExpression;
-use diesel::serialize::{self, Output, ToSql};
-use diesel::sql_types::Text;
-use diesel::AsExpression;
-use std::io::Write;
+use diesel::serialize::ToSql;
 
+use crate::schema::users;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use diesel_derive_enum::*;
 
-#[derive(Debug, Clone, Copy, AsExpression, FromSqlRow)]
-#[diesel(sql_type = Text)]
+#[derive(Debug, Clone, Copy, DbEnum)]
+#[ExistingTypePath = "crate::schema::sql_types::Role"]
+#[DbValueStyle = "UPPERCASE"]
 pub enum Role {
     User,
     Admin,
 }
 
-impl<DB> ToSql<Text, DB> for Role
-where
-    DB: Backend,
-    String: ToSql<Text, DB>,
-{
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
-        match *self {
-            Role::User => "USER".to_sql(out),
-            Role::Admin => "ADMIN".to_sql(out),
-        }
-    }
-}
-
-impl<DB> FromSql<Text, DB> for Role
-where
-    DB: Backend,
-    String: FromSql<Text, DB>,
-{
-    fn from_sql(bytes: Option<&DB::RawValue>) -> deserialize::Result<Self> {
-        match String::from_sql(bytes)?.as_str() {
-            "USER" => Ok(Role::User),
-            "ADMIN" => Ok(Role::Admin),
-            _ => Err("Unrecognized role".into()),
-        }
-    }
-}
-
-#[derive(Queryable, Insertable, AsChangeset, Debug)]
-#[table_name = "users"]
+#[derive(Queryable, Insertable, Debug)]
+#[diesel(table_name = users)]
 pub struct User {
     pub id: i32,
     pub username: String,
     pub email: String,
     pub password: String,
+
+    #[diesel(column_name = "createdAt")]
     pub created_at: NaiveDateTime,
+
+    #[diesel(column_name = "updatedAt")]
     pub updated_at: NaiveDateTime,
     pub role: Role,
+}
+
+#[derive(Debug, Insertable)]
+#[diesel(table_name = users)]
+pub struct NewUser {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+    pub role: Role,
+
+    #[diesel(column_name = "createdAt")]
+    pub created_at: NaiveDateTime,
+    #[diesel(column_name = "updatedAt")]
+    pub updated_at: NaiveDateTime,
 }
