@@ -62,4 +62,9 @@ impl RoomService {
     pub async fn delete_room(&self, name: &str) -> ServiceResult<()> {
         self.client.delete_room(name).await
     }
+
+    pub async fn list_rooms(&self, names: Option<Vec<String>>) -> ServiceResult<Vec<proto::Room>> {
+        let room_names = names.unwrap_or_default();
+        self.client.list_rooms(room_names).await
+    }
 }
