@@ -1,9 +1,11 @@
 [workspace]
+resolver = "2"
 members = [
     "api",
     "domain",
     "application",
     "infrastructure",
     "shared",
-    "apidoc", "client", "cli",
+    "client",
+    "cli",
 ]

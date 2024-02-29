@@ -6,3 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+actix-web = "4.5.1"
+serde = { version = "1.0.197", features = ["derive"] }
+shared = { path = "../shared" }
+utoipa = { version = "4.2.0", features = ["actix_extras"] }
+application = { path = "../application" }
+utoipa-rapidoc = { version = "3.0.0", features = ["actix-web"] }
+utoipa-redoc = { version = "3.0.0", features = ["actix-web"] }
+utoipa-swagger-ui = { version = "6.0.0", features = ["actix-web"] }
+env_logger = "0.11.2"

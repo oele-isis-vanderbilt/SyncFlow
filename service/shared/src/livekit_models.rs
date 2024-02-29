@@ -1,12 +1,36 @@
 use livekit_api::access_token::VideoGrants;
 use livekit_protocol::Room;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct TokenRequest {
     pub identity: String,
-    pub video_grants: VideoGrants
+    pub video_grants: VideoGrantsWrapper,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct CreateRoomRequest {
+    pub name: String,
+    #[serde(default)]
+    pub options: RoomOptions,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct RoomOptions {
+    pub empty_timeout: u32,
+    pub max_participants: u32,
+    pub metadata: String,
+}
+
+impl Default for RoomOptions {
+    fn default() -> Self {
+        Self {
+            empty_timeout: 10 * 60,
+            max_participants: 100,
+            metadata: "".into(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
