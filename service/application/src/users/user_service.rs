@@ -1,11 +1,12 @@
 use shared::user_models::LoginRequest;
-use infrastructure::{get_connection_pool, DbPool};
+use infrastructure::{establish_connection_pool, DbPool};
 use domain::models::User;
 use bcrypt::{verify};
 use diesel::prelude::*;
+use std::sync::Arc;
 
 pub struct UserAuth {
-    pool: DbPool
+    pool: Arc<DbPool>
 }
 
 fn verify_passwd(password: &str, hash: &str) -> bool {
@@ -14,8 +15,7 @@ fn verify_passwd(password: &str, hash: &str) -> bool {
 }
 
 impl UserAuth {
-    pub fn new() -> Self {
-        let pool = get_connection_pool();
+    pub fn new(pool: Arc<DbPool>) -> Self {
         UserAuth { pool }
     }
 

@@ -2,14 +2,14 @@ use serde::{Deserialize, Serialize};
 use diesel_derive_enum::DbEnum;
 use utoipa::ToSchema;
 use diesel::prelude::*;
-use crate::schema::users;
+use crate::schema::{users};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
-#[db_rename = "UPPERCASE"]
 #[ExistingTypePath = "crate::schema::sql_types::Role"]
+#[DbValueStyle = "UPPERCASE"]
 pub enum Role {
-    Admin,
-    User,
+    ADMIN,
+    USER,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
@@ -21,12 +21,11 @@ pub struct User {
     pub password: String,
 
     #[diesel(column_name = "createdAt")]
-    pub created_at: chrono::NaiveDateTime,
+    pub created_at: Option<chrono::NaiveDateTime>,
 
     #[diesel(column_name = "updatedAt")]
-    pub updated_at: chrono::NaiveDateTime,
+    pub updated_at: Option<chrono::NaiveDateTime>,
 
     pub role: Role,
 }
-
 
