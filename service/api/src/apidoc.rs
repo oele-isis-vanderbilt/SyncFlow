@@ -3,8 +3,8 @@ use shared::livekit_models::{
     CreateRoomRequest, RoomCreationResult, RoomOptions, TokenRequest, TokenResponse,
     VideoGrantsWrapper,
 };
-use shared::user_models::LoginRequest;
 use shared::response_models::Response;
+use shared::user_models::LoginRequest;
 use utoipa::OpenApi;
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
@@ -20,6 +20,7 @@ pub fn init_api_doc(config: &mut ServiceConfig) {
             crate::livekit_handlers::delete_room,
             crate::livekit_handlers::list_rooms,
             crate::login_handlers::login,
+            crate::login_handlers::logout,
         ),
         components(
             schemas(Response, LoginRequest,
