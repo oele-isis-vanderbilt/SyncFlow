@@ -22,7 +22,7 @@ impl AccountService {
                 match token {
                     Ok(t) => Ok(t),
                     Err(e) => {
-                        user::delete_login_session(
+                        let _ = user::delete_login_session(
                             &session_info.session_id,
                             &mut self.pool.get().unwrap(),
                         );

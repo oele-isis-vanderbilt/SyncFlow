@@ -20,9 +20,6 @@ fn verify_passwd(password: &str, hash: &str) -> bool {
     password_match.unwrap_or(false)
 }
 
-fn generate_login_session_id() -> Uuid {
-    Uuid::new_v4()
-}
 
 pub fn login(
     login_request: LoginRequest,

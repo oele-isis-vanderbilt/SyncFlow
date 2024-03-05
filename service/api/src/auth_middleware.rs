@@ -1,5 +1,4 @@
 use std::future::{ready, Ready};
-use actix_service::ServiceFactoryExt;
 
 use actix_web::http::Method;
 use actix_web::{
@@ -25,8 +24,8 @@ where
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
-    type Transform = AuthMiddleware<S>;
     type InitError = ();
+    type Transform = AuthMiddleware<S>;
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
@@ -100,15 +99,18 @@ where
             let response = HttpResponse::Unauthorized()
                 .json(Response {
                     message: constants::MESSAGE_INVALID_TOKEN.to_string(),
-                    status: 404.to_string(),
+                    status: 401.to_string(),
                 })
-                .map_into_left_body();
+                .map_into_right_body();
 
             return Box::pin(async { Ok(ServiceResponse::new(request, response)) });
         }
 
         let res = self.service.call(req);
 
-        Box::pin(async move { res.await.map(ServiceResponse::map_into_left_body).map_err(|e| e) })
+        Box::pin(async move {
+            let res = res.await?;
+            Ok(res.map_body(|_, _body| EitherBody::left(_body)))
+        })
     }
 }

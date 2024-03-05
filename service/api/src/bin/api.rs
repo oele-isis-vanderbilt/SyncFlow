@@ -1,9 +1,8 @@
-use actix_web::{dev::Service as _, web, App, HttpResponse, HttpServer};
+use actix_web::{web, App, HttpResponse, HttpServer};
 use api::apidoc::init_api_doc;
 use api::auth_middleware;
 use api::livekit_handlers::init_routes as lk_init_routes;
 use api::login_handlers::init_routes as login_init_routes;
-use env_logger;
 use shared::response_models::Response;
 use shared::utils::load_env;
 use std::env;
