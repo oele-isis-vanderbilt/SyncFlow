@@ -2,7 +2,7 @@ use bcrypt::verify;
 use diesel::prelude::*;
 use diesel::PgConnection;
 use domain::models::{LoginSession, NewLoginSession, Role, User};
-use domain::schema::login_sessions::dsl::login_sessions;
+
 use serde::{Deserialize, Serialize};
 use shared::user_models::LoginRequest;
 use uuid::Uuid;

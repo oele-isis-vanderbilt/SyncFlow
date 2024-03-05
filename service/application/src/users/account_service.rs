@@ -39,7 +39,7 @@ impl AccountService {
         let decoded_token = token::decode_token(token.to_string());
         match decoded_token {
             Ok(token) => {
-                let session_id = token.login_session;
+                let session_id = token.claims.login_session;
                 if user::is_valid_login_session(&session_id, &mut self.pool.get().unwrap()) {
                     user::delete_login_session(&session_id, &mut self.pool.get().unwrap())
                         .map(|_| ())
@@ -48,8 +48,12 @@ impl AccountService {
                     Err("Invalid session".to_string())
                 }
             }
-            Err(e) => Err(e),
+            Err(e) => Err(e.to_string()),
         }
+    }
+
+    pub fn get_pool(&self) -> Arc<DbPool> {
+        self.pool.clone()
     }
 }
 

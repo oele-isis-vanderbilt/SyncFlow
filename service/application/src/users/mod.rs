@@ -1,3 +1,3 @@
 pub mod account_service;
-mod token;
+pub mod token;
 pub mod user;

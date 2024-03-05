@@ -1,5 +1,6 @@
-use actix_web::{web, App, HttpResponse, HttpServer};
+use actix_web::{dev::Service as _, web, App, HttpResponse, HttpServer};
 use api::apidoc::init_api_doc;
+use api::auth_middleware;
 use api::livekit_handlers::init_routes as lk_init_routes;
 use api::login_handlers::init_routes as login_init_routes;
 use env_logger;
@@ -33,11 +34,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(auth_middleware::Authentication) // Comment this line if you want to integrate with yew-address-book-frontend
             .default_service(web::route().to(not_found))
+            .wrap(actix_web::middleware::Logger::default())
             .configure(lk_init_routes)
             .configure(login_init_routes)
             .configure(init_api_doc)
-            .wrap(actix_web::middleware::Logger::default())
     })
     .workers(num_workers)
     .bind(server_addr)?

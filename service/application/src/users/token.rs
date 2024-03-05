@@ -1,5 +1,9 @@
 use crate::users::user::LoginSessionInfo;
-use jsonwebtoken::{encode, Algorithm, DecodingKey, EncodingKey, Header};
+use diesel::PgConnection;
+use jsonwebtoken::errors as jwt_errors;
+use jsonwebtoken::{
+    decode, encode, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
+};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::SystemTime;
@@ -37,14 +41,24 @@ pub fn generate_jwt_token(login_session_info: &LoginSessionInfo) -> Result<Strin
     .map_err(|e| e.to_string())
 }
 
-pub fn decode_token(token: String) -> Result<UserToken, String> {
+pub fn decode_token(token: String) -> jwt_errors::Result<TokenData<UserToken>> {
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-
-    jsonwebtoken::decode::<UserToken>(
+    decode::<UserToken>(
         &token,
         &DecodingKey::from_secret(secret.as_ref()),
-        &jsonwebtoken::Validation::default(),
+        &Validation::default(),
     )
-    .map(|data| data.claims)
-    .map_err(|e| e.to_string())
+}
+
+pub fn verify_token(
+    token_data: &TokenData<UserToken>,
+    conn: &mut PgConnection,
+) -> Result<String, String> {
+    let claims = &token_data.claims;
+    let session_id = &claims.login_session;
+    if super::user::is_valid_login_session(session_id, conn) {
+        Ok("Valid session".to_string())
+    } else {
+        Err("Invalid session".to_string())
+    }
 }
