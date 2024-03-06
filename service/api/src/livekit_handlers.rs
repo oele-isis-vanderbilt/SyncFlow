@@ -1,5 +1,5 @@
 use actix_web::web::Json;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use application::livekit::room::RoomService;
 use application::livekit::token::create_token;
 use shared::livekit_models::{CreateRoomRequest, RoomCreationResult, TokenRequest, TokenResponse};
@@ -81,7 +81,7 @@ pub async fn create_room(
         ("room_name", description = "The name of the room to delete")
     )
 )]
-#[post("/delete-room/{room_name}")]
+#[delete("/delete-room/{room_name}")]
 pub async fn delete_room(
     room_service: web::Data<RoomService>,
     room_name: web::Path<String>,

@@ -1,11 +1,9 @@
 use actix_web::web::Json;
 use actix_web::{post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
-use infrastructure::establish_connection_pool;
-use serde_json::json;
 use shared::constants;
+use shared::response_models::Response;
 use shared::user_models::{LoginRequest, TokenResponse};
-use std::sync::Arc;
 
 #[utoipa::path(
     post,
@@ -39,24 +37,22 @@ pub async fn login(
 )]
 #[post("/logout")]
 pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> HttpResponse {
-    let auth_header = req.headers().get(constants::AUTHORIZATION_HEADER);
-    match auth_header {
-        Some(header) => match user_auth.logout(header.to_str().unwrap().to_string()) {
-            Ok(_) => HttpResponse::Ok().json(json!({"message": "User logged out successfully"})),
-            Err(e) => HttpResponse::InternalServerError().body(e),
-        },
-        None => HttpResponse::BadRequest().body("Authorization header not found"),
+    match req.headers().get(constants::AUTHORIZATION_HEADER) {
+        Some(header) => {
+            let token = header.to_str().unwrap().split(" ").collect::<Vec<&str>>()[1];
+            match user_auth.logout(token) {
+                Ok(_) => HttpResponse::Ok().json(Response {
+                    status: "200".to_string(),
+                    message: "User logged out successfully".to_string(),
+                }),
+                Err(e) => HttpResponse::InternalServerError().body(e),
+            }
+        }
+        None => HttpResponse::InternalServerError().body("Invalid token"),
     }
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = Arc::new(establish_connection_pool(&database_url));
-    let auth_service = AccountService::new(pool);
-    let users_scope = web::scope("/users")
-        .app_data(web::Data::new(auth_service.clone()))
-        .service(login)
-        .service(logout);
-
+    let users_scope = web::scope("/users").service(login).service(logout);
     cfg.service(users_scope);
 }

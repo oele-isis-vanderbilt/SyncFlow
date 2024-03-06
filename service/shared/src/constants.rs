@@ -1,7 +1,7 @@
 pub const AUTHORIZATION_HEADER: &str = "Authorization";
 
 pub const IGNORE_ROUTES: [&str; 5] = [
-    "/api/users/login",
+    "/users/login",
     "/rapidoc",
     "/redoc",
     "/swagger-ui",

@@ -35,7 +35,7 @@ impl AccountService {
     }
 
     /// Logs out a user
-    pub fn logout(&self, token: String) -> Result<(), String> {
+    pub fn logout(&self, token: &str) -> Result<(), String> {
         let decoded_token = token::decode_token(token.to_string());
         match decoded_token {
             Ok(token) => {

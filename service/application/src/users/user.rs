@@ -20,7 +20,6 @@ fn verify_passwd(password: &str, hash: &str) -> bool {
     password_match.unwrap_or(false)
 }
 
-
 pub fn login(
     login_request: LoginRequest,
     conn: &mut PgConnection,

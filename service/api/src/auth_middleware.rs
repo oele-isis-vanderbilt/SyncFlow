@@ -70,7 +70,6 @@ where
                 let pool = account_service.get_pool();
 
                 let mut conn = pool.get().unwrap();
-
                 if let Some(auth_header) = req.headers().get(constants::AUTHORIZATION_HEADER) {
                     info!("Parsing authorization header...");
                     if let Ok(auth_string) = auth_header.to_str() {
