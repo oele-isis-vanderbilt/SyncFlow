@@ -74,13 +74,12 @@ impl LoginClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dotenv::dotenv;
-    use std::env;
+    use shared::deployment_config::DeploymentConfig;
 
     fn setup_login_client() -> Option<LoginClient> {
-        dotenv().ok();
-        let app_host: String = env::var("APP_HOST").unwrap_or("localhost".to_string());
-        let app_port: String = env::var("APP_PORT").unwrap_or("8081".to_string());
+        let config = DeploymentConfig::load();
+        let app_host = config.app_host;
+        let app_port = config.app_port;
         let base_url: String = format!("http://{}:{}", app_host, app_port);
 
         let login_client = LoginClient::new(&base_url);
@@ -90,8 +89,9 @@ mod tests {
     #[test]
     fn test_login_logout() {
         let login_client = setup_login_client().unwrap();
-        let username = env::var("TEST_USER").unwrap_or("test_user".to_string());
-        let password = env::var("TEST_PASSWORD").unwrap_or("test_password".to_string());
+        let config = DeploymentConfig::load();
+        let username = config.test_user.unwrap();
+        let password = config.test_password.unwrap();
 
         let login_result = login_client.login(&username, &password);
         assert!(login_result.is_ok());

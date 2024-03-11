@@ -95,16 +95,12 @@ impl LiveKitClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dotenv::dotenv;
-    use std::env;
+    use shared::deployment_config::DeploymentConfig;
 
     fn setup_lk_client() -> Option<LiveKitClient> {
-        dotenv().ok();
-        let app_host: String = env::var("APP_HOST").unwrap_or("localhost".to_string());
-        let app_port: String = env::var("APP_PORT").unwrap_or("8081".to_string());
-        let base_url: String = format!("http://{}:{}", app_host, app_port);
-
-        let login_token: Option<String> = env::var("LOGIN_TOKEN").ok();
+        let config = DeploymentConfig::load();
+        let base_url = config.livekit_server_url.replace("ws", "http");
+        let login_token = config.login_token;
 
         match login_token {
             Some(token) => {
