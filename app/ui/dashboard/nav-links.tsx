@@ -5,9 +5,13 @@ import {
   Cog8ToothIcon as SettingsIcon,
 } from '@heroicons/react/24/outline';
 
+import { BsRecordBtn } from 'react-icons/bs';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
+import { Role, User } from '@prisma/client';
+import { SessionUser } from '@/types/next-auth';
 
 // Map of links to display in the side navigation.
 const links = [
@@ -21,13 +25,22 @@ const links = [
     href: '/dashboard/settings',
     icon: SettingsIcon,
   },
+  {
+    name: 'Recordings',
+    href: '/dashboard/recordings',
+    icon: BsRecordBtn,
+    adminOnly: true,
+  },
 ];
 
-export default function NavLinks() {
+export default function NavLinks({ user }: { user: SessionUser | undefined }) {
   const pathName = usePathname();
+  let linksToDisplay = links.filter(
+    (link) => !link.adminOnly || user?.role === Role.ADMIN,
+  );
   return (
     <>
-      {links.map((link) => {
+      {linksToDisplay.map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link

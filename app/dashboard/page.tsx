@@ -35,7 +35,7 @@ export default async function Page() {
         {session?.user?.role === Role.ADMIN ? <CreateRoom /> : null}
       </div>
       <div className="mt-8 flex items-center">
-        <RoomsTable />
+        <RoomsTable navPath={'rooms'} />
       </div>
     </main>
   );

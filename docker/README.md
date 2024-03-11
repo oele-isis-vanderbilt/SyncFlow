@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides instructions for setting up a local LiveKit deployment using Docker Compose.  This setup includes LiveKit server, Redis for messaging and coordination, and LiveKit's Egress service for handling media recording and streaming outside of real-time sessions.
+This guide provides instructions for setting up a local LiveKit deployment using Docker Compose. This setup includes LiveKit server, Redis for messaging and coordination, and LiveKit's Egress service for handling media recording and streaming outside of real-time sessions.
 
 ### Warning on Secrets Management
 
@@ -20,23 +20,21 @@ This guide provides instructions for setting up a local LiveKit deployment using
 
 3. **Docker Compose**: Navigate to the directory containing your `docker-compose.local.yaml` and configuration files, then start your services:
 
-    ```bash
-    cd docker
-    docker-compose --file docker-compose.local.yaml up -d
-    ```
+   ```bash
+   cd docker
+   docker-compose --file docker-compose.local.yaml up -d
+   ```
 
-    This command will pull the necessary Docker images and start the services defined in your `docker-compose.yml` file.
+   This command will pull the necessary Docker images and start the services defined in your `docker-compose.yml` file.
 
 4. **Verify Operation**: After starting the services, ensure that they are running correctly. You can check the logs of each service using Docker Compose:
 
-    ```bash
-    docker-compose logs [service_name]
-    ```
+   ```bash
+   docker-compose logs [service_name]
+   ```
 
-    Replace `[service_name]` with the name of the service you wish to inspect (e.g., `livekit`, `redis`, `egress`).
-
+   Replace `[service_name]` with the name of the service you wish to inspect (e.g., `livekit`, `redis`, `egress`).
 
 ## Support
 
 For issues specific to LiveKit or its components, consult the [LiveKit documentation](https://docs.livekit.io/) or their support channels. For Docker or Docker Compose related queries, the Docker documentation and community forums are excellent resources.
-

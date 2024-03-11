@@ -4,6 +4,7 @@ import AppLogo from '@/app/ui/app-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { signOut } from '@/auth';
 import { auth } from '@/auth';
+import { User } from '@prisma/client';
 
 export default async function SideNav() {
   const session = await auth();
@@ -22,7 +23,7 @@ export default async function SideNav() {
           {session?.user?.name ? `Welcome! ${session.user.name!}` : 'Welcome'}{' '}
         </div>
 
-        <NavLinks />
+        <NavLinks user={session?.user} />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-900 md:block"></div>
         <form
           action={async () => {
