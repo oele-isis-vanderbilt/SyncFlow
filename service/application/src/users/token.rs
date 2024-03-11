@@ -17,7 +17,7 @@ pub struct UserToken {
     pub login_session: String,
 }
 
-pub fn generate_jwt_token(login_session_info: &LoginSessionInfo) -> Result<String, String> {
+pub fn generate_jwt_token(login_session_info: &LoginSessionInfo) -> jwt_errors::Result<String> {
     let claims = UserToken {
         exp: 10000000000,
         iat: SystemTime::now()
@@ -38,7 +38,6 @@ pub fn generate_jwt_token(login_session_info: &LoginSessionInfo) -> Result<Strin
         &claims,
         &EncodingKey::from_secret(secret.as_ref()),
     )
-    .map_err(|e| e.to_string())
 }
 
 pub fn decode_token(token: String) -> jwt_errors::Result<TokenData<UserToken>> {

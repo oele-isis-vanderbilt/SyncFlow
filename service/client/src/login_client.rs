@@ -1,3 +1,4 @@
+use crate::http_client::ClientError;
 use crate::http_client::JSONResult;
 use reqwest::blocking::Client;
 use shared::response_models::Response;
@@ -32,10 +33,16 @@ impl LoginClient {
 
         match response {
             Ok(r) => {
+                if !r.status().is_success() {
+                    return Err(ClientError::from(Response {
+                        status: r.status().as_u16(),
+                        message: r.text().unwrap(),
+                    }));
+                }
                 let token_response = r.json::<TokenResponse>();
-                token_response.map_err(|e| e)
+                token_response.map_err(|e| ClientError::from(e))
             }
-            Err(e) => Err(e),
+            Err(e) => Err(ClientError::from(e)),
         }
     }
 
@@ -49,10 +56,17 @@ impl LoginClient {
 
         match response {
             Ok(r) => {
-                let logout_response = r.json::<Response>();
-                logout_response.map_err(|e| e)
+                if !r.status().is_success() {
+                    return Err(ClientError::from(Response {
+                        status: r.status().as_u16(),
+                        message: r.text().unwrap(),
+                    }));
+                } else {
+                    let logout_response = r.json::<Response>();
+                    logout_response.map_err(|e| ClientError::from(e))
+                }
             }
-            Err(e) => Err(e),
+            Err(e) => Err(ClientError::from(e)),
         }
     }
 }

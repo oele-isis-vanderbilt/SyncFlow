@@ -12,7 +12,7 @@ use std::sync::Arc;
 
 pub async fn not_found() -> actix_web::Result<HttpResponse> {
     let response = Response {
-        status: "404".to_string(),
+        status: 404,
         message: "Resource not found".to_string(),
     };
 

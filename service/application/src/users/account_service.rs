@@ -14,7 +14,7 @@ impl AccountService {
     }
 
     /// Logs in a user
-    pub fn login(&self, request: LoginRequest) -> Result<String, String> {
+    pub fn login(&self, request: LoginRequest) -> Result<String, user::UserError> {
         let session_info_result = user::login(request, &mut self.pool.get().unwrap());
         match session_info_result {
             Ok(session_info) => {
@@ -26,7 +26,7 @@ impl AccountService {
                             &session_info.session_id,
                             &mut self.pool.get().unwrap(),
                         );
-                        Err(e.to_string())
+                        Err(user::UserError::TokenError(e.to_string()))
                     }
                 }
             }
@@ -35,7 +35,7 @@ impl AccountService {
     }
 
     /// Logs out a user
-    pub fn logout(&self, token: &str) -> Result<(), String> {
+    pub fn logout(&self, token: &str) -> Result<(), user::UserError> {
         let decoded_token = token::decode_token(token.to_string());
         match decoded_token {
             Ok(token) => {
@@ -43,12 +43,13 @@ impl AccountService {
                 if user::is_valid_login_session(&session_id, &mut self.pool.get().unwrap()) {
                     user::delete_login_session(&session_id, &mut self.pool.get().unwrap())
                         .map(|_| ())
-                        .map_err(|e| e.to_string())
                 } else {
-                    Err("Invalid session".to_string())
+                    Err(user::UserError::LoginSessionNotFound(
+                        "Login session not found".to_string(),
+                    ))
                 }
             }
-            Err(e) => Err(e.to_string()),
+            Err(e) => Err(user::UserError::TokenError(e.to_string())),
         }
     }
 

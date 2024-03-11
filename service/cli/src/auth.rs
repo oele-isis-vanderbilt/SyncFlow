@@ -35,7 +35,7 @@ pub struct Login {
     pub password: String,
 }
 
-#[derive(Debug, Parser, Clone, Default)]
+#[derive(Debug, Parser, Clone)]
 pub struct Auth {
     // SubCommand
     #[clap(subcommand)]
@@ -67,7 +67,7 @@ impl Auth {
                             }
                         }
                         Err(e) => {
-                            println!("Error: {}", e);
+                            println!("Error: {:?}", e);
                         }
                     }
                 }
@@ -88,7 +88,7 @@ impl Auth {
                                         });
                                 }
                                 Err(e) => {
-                                    println!("Error: {}. Error from server", e);
+                                    println!("Error: {:?}. Error from server", e);
                                 }
                             }
                         })

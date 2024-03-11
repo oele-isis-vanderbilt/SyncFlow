@@ -8,7 +8,7 @@ use shared::{
 
 use crate::http_client::{HTTPAuthTokenClient, JSONResult};
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum TokenGeneratePermissions {
     Publish,
     Subscribe,
@@ -20,7 +20,7 @@ pub struct LiveKitClient {
 }
 
 impl LiveKitClient {
-    pub fn new(base_url: String, token: String) -> Self {
+    pub fn new(base_url: &str, token: &str) -> Self {
         let http_client = HTTPAuthTokenClient::new(base_url, token);
         LiveKitClient { http_client }
     }
@@ -108,7 +108,7 @@ mod tests {
 
         match login_token {
             Some(token) => {
-                let livekit_client = LiveKitClient::new(base_url, token);
+                let livekit_client = LiveKitClient::new(&base_url, &token);
                 Some(livekit_client)
             }
             None => {

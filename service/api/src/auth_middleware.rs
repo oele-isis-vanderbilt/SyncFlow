@@ -24,8 +24,8 @@ where
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
-    type InitError = ();
     type Transform = AuthMiddleware<S>;
+    type InitError = ();
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
@@ -98,7 +98,7 @@ where
             let response = HttpResponse::Unauthorized()
                 .json(Response {
                     message: constants::MESSAGE_INVALID_TOKEN.to_string(),
-                    status: 401.to_string(),
+                    status: 401,
                 })
                 .map_into_right_body();
 

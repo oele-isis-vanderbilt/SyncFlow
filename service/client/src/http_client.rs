@@ -1,7 +1,26 @@
 use reqwest::blocking::{Client, Response};
 use serde::Serialize;
+use shared::response_models::Response as SharedResponse;
 
-pub type JSONResult<T> = std::result::Result<T, reqwest::Error>;
+#[derive(Debug)]
+pub enum ClientError {
+    ReqwestError(reqwest::Error),
+    HTTPError(SharedResponse),
+}
+
+impl From<reqwest::Error> for ClientError {
+    fn from(error: reqwest::Error) -> Self {
+        ClientError::ReqwestError(error)
+    }
+}
+
+impl From<SharedResponse> for ClientError {
+    fn from(error: SharedResponse) -> Self {
+        ClientError::HTTPError(error)
+    }
+}
+
+pub type JSONResult<T> = std::result::Result<T, ClientError>;
 
 // ToDo: Use API Key and Secret based authentication
 pub struct HTTPAuthTokenClient {
@@ -11,12 +30,12 @@ pub struct HTTPAuthTokenClient {
 }
 
 impl HTTPAuthTokenClient {
-    pub fn new(base_url: String, token: String) -> Self {
+    pub fn new(base_url: &str, token: &str) -> Self {
         let client = Client::new();
         let base_url = format!("{}", base_url);
         HTTPAuthTokenClient {
             base_url,
-            token,
+            token: token.to_string(),
             client,
         }
     }
@@ -75,9 +94,9 @@ impl HTTPAuthTokenClient {
         match response {
             Ok(response) => {
                 let parsed = response.json::<T>();
-                parsed.map_err(|e| e)
+                parsed.map_err(|e| ClientError::from(e))
             }
-            Err(e) => Err(e),
+            Err(e) => Err(ClientError::from(e)),
         }
     }
 }

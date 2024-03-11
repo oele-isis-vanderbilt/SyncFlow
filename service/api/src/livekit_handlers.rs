@@ -17,7 +17,7 @@ pub async fn healthcheck() -> impl Responder {
 
     if response {
         HttpResponse::Ok().json(Response {
-            status: "200".to_string(),
+            status: 200,
             message: "Livekit server is healthy".to_string(),
         })
     } else {
@@ -36,10 +36,13 @@ pub async fn healthcheck() -> impl Responder {
 )]
 #[post("/token")]
 pub async fn generate_token(token_request: Json<TokenRequest>) -> HttpResponse {
-    let token = create_token(&token_request);
+    let token = create_token(&token_request).map_err(|e| Response {
+        status: 500,
+        message: e.to_string(),
+    });
     match token {
         Ok(t) => HttpResponse::Ok().json(TokenResponse::new(t, token_request.identity.clone())),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Err(e) => e.into(),
     }
 }
 
@@ -90,7 +93,7 @@ pub async fn delete_room(
 
     match delete_room_result {
         Ok(_) => HttpResponse::Ok().json(Response {
-            status: "200".to_string(),
+            status: 200,
             message: format!(" Room {} deleted successfully", room_name),
         }),
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),

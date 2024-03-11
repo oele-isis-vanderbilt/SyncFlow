@@ -4,6 +4,7 @@ use diesel::PgConnection;
 use domain::models::{LoginSession, NewLoginSession, Role, User};
 
 use serde::{Deserialize, Serialize};
+use shared::response_models::Response;
 use shared::user_models::LoginRequest;
 use uuid::Uuid;
 
@@ -15,6 +16,47 @@ pub struct LoginSessionInfo {
     pub user_role: Role,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub enum UserError {
+    UserNotFound(String),
+    PasswordMismatch(String),
+    DatabaseError(String),
+    TokenExpired(String),
+    LoginSessionNotFound(String),
+    TokenError(String),
+}
+
+impl Into<Response> for UserError {
+    fn into(self) -> Response {
+        match self {
+            UserError::UserNotFound(e) => Response {
+                status: 404,
+                message: e,
+            },
+            UserError::PasswordMismatch(e) => Response {
+                status: 401,
+                message: e,
+            },
+            UserError::DatabaseError(e) => Response {
+                status: 500,
+                message: e,
+            },
+            UserError::TokenExpired(e) => Response {
+                status: 401,
+                message: e,
+            },
+            UserError::LoginSessionNotFound(e) => Response {
+                status: 404,
+                message: e,
+            },
+            UserError::TokenError(e) => Response {
+                status: 401,
+                message: e,
+            },
+        }
+    }
+}
+
 fn verify_passwd(password: &str, hash: &str) -> bool {
     let password_match = verify(password, hash);
     password_match.unwrap_or(false)
@@ -23,7 +65,7 @@ fn verify_passwd(password: &str, hash: &str) -> bool {
 pub fn login(
     login_request: LoginRequest,
     conn: &mut PgConnection,
-) -> Result<LoginSessionInfo, String> {
+) -> Result<LoginSessionInfo, UserError> {
     use domain::schema::login_sessions::dsl::*;
     use domain::schema::users::dsl::*;
 
@@ -50,17 +92,17 @@ pub fn login(
                         };
                         Ok(session_info)
                     }
-                    Err(e) => Err(e.to_string()),
+                    Err(e) => Err(UserError::DatabaseError(e.to_string())),
                 }
             } else {
-                Err("Password does not match".to_string())
+                Err(UserError::PasswordMismatch("Password Mismatch".to_string()))
             }
         }
-        Err(e) => Err(e.to_string()),
+        Err(e) => Err(UserError::UserNotFound(e.to_string())),
     }
 }
 
-pub fn delete_login_session(sid: &str, conn: &mut PgConnection) -> Result<bool, String> {
+pub fn delete_login_session(sid: &str, conn: &mut PgConnection) -> Result<bool, UserError> {
     use domain::schema::login_sessions::dsl::*;
 
     let session_uuid = Uuid::parse_str(sid);
@@ -77,13 +119,13 @@ pub fn delete_login_session(sid: &str, conn: &mut PgConnection) -> Result<bool, 
                         diesel::delete(login_sessions.filter(session_id.eq(suuid))).execute(conn);
                     match delete_result {
                         Ok(_) => Ok(true),
-                        Err(e) => Err(e.to_string()),
+                        Err(e) => Err(UserError::DatabaseError(e.to_string())),
                     }
                 }
-                Err(e) => Err(e.to_string()),
+                Err(e) => Err(UserError::LoginSessionNotFound(e.to_string())),
             }
         }
-        Err(e) => Err(e.to_string()),
+        Err(e) => Err(UserError::LoginSessionNotFound(e.to_string())),
     }
 }
 
