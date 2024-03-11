@@ -2,7 +2,7 @@ use livekit_api::access_token;
 use livekit_api::access_token::AccessTokenError;
 use std::env;
 
-use crate::models::TokenRequest;
+use shared::livekit_models::TokenRequest;
 
 pub fn create_token(req: &TokenRequest) -> Result<String, AccessTokenError> {
     let api_key = env::var("LIVEKIT_API_KEY")?;

@@ -6,8 +6,31 @@ use utoipa::ToSchema;
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct TokenRequest {
     pub identity: String,
-    #[serde(default)]
     pub video_grants: VideoGrantsWrapper,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct CreateRoomRequest {
+    pub name: String,
+    #[serde(default)]
+    pub options: RoomOptions,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct RoomOptions {
+    pub empty_timeout: u32,
+    pub max_participants: u32,
+    pub metadata: String,
+}
+
+impl Default for RoomOptions {
+    fn default() -> Self {
+        Self {
+            empty_timeout: 10 * 60,
+            max_participants: 100,
+            metadata: "".into(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
