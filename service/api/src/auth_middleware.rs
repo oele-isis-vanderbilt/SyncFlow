@@ -73,7 +73,8 @@ where
                             info!("Parsing Token...");
                             let token = auth_string[6..auth_string.len()].trim();
 
-                            if let Ok(token_data) = account_service.decode_token(token.to_string()) {
+                            if let Ok(token_data) = account_service.decode_token(token.to_string())
+                            {
                                 info!("Decoding Token...");
                                 if account_service.verify_token(&token_data).is_ok() {
                                     info!("Valid Token");

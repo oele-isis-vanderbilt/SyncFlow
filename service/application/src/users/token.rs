@@ -22,10 +22,15 @@ pub struct JWTImplementation {
 
 impl JWTImplementation {
     pub fn new(jwt_secret: &str) -> Self {
-        JWTImplementation { jwt_secret: jwt_secret.to_string() }
+        JWTImplementation {
+            jwt_secret: jwt_secret.to_string(),
+        }
     }
 
-    pub fn generate_jwt_token(&self, login_session_info: &LoginSessionInfo) -> jwt_errors::Result<String> {
+    pub fn generate_jwt_token(
+        &self,
+        login_session_info: &LoginSessionInfo,
+    ) -> jwt_errors::Result<String> {
         let claims = UserToken {
             exp: 10000000000,
             iat: SystemTime::now()
@@ -70,7 +75,4 @@ impl JWTImplementation {
             Err("Invalid session".to_string())
         }
     }
-
 }
-
-

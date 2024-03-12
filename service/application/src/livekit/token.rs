@@ -4,7 +4,10 @@ use shared::deployment_config::DeploymentConfig;
 
 use shared::livekit_models::TokenRequest;
 
-pub fn create_token(req: &TokenRequest, config: &DeploymentConfig) -> Result<String, AccessTokenError> {
+pub fn create_token(
+    req: &TokenRequest,
+    config: &DeploymentConfig,
+) -> Result<String, AccessTokenError> {
     let api_key = config.livekit_api_key.clone();
     let api_secret = config.livekit_api_secret.clone();
 
