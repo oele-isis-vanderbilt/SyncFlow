@@ -36,7 +36,10 @@ pub async fn healthcheck() -> impl Responder {
     )
 )]
 #[post("/token")]
-pub async fn generate_token(token_request: Json<TokenRequest>, deployment_config: web::Data<DeploymentConfig>) -> HttpResponse {
+pub async fn generate_token(
+    token_request: Json<TokenRequest>,
+    deployment_config: web::Data<DeploymentConfig>,
+) -> HttpResponse {
     let token = create_token(&token_request, &deployment_config).map_err(|e| Response {
         status: 500,
         message: e.to_string(),

@@ -1,9 +1,9 @@
 use infrastructure::DbPool;
+use jsonwebtoken::errors as jwt_errors;
+use jsonwebtoken::TokenData;
+use shared::deployment_config::DeploymentConfig;
 use shared::user_models::LoginRequest;
 use std::sync::Arc;
-use shared::deployment_config::DeploymentConfig;
-use jsonwebtoken::TokenData;
-use jsonwebtoken::errors as jwt_errors;
 
 use super::{token, user};
 
@@ -16,7 +16,11 @@ pub struct AccountService {
 impl AccountService {
     pub fn new(pool: Arc<DbPool>, config: DeploymentConfig) -> Self {
         let secret = config.jwt_secret.clone();
-        AccountService { pool, config, tokens_manager: token::JWTImplementation::new(&secret) }
+        AccountService {
+            pool,
+            config,
+            tokens_manager: token::JWTImplementation::new(&secret),
+        }
     }
 
     /// Logs in a user
@@ -63,15 +67,22 @@ impl AccountService {
         self.pool.clone()
     }
 
-    pub fn decode_token(&self, token: String) -> Result<TokenData<token::UserToken>, jwt_errors::Error> {
+    pub fn decode_token(
+        &self,
+        token: String,
+    ) -> Result<TokenData<token::UserToken>, jwt_errors::Error> {
         self.tokens_manager.decode_token(token)
     }
 
     pub fn verify_token(&self, token_data: &TokenData<token::UserToken>) -> Result<String, String> {
-        self.tokens_manager.verify_token(token_data, &mut self.pool.get().unwrap())
+        self.tokens_manager
+            .verify_token(token_data, &mut self.pool.get().unwrap())
     }
 
-    pub fn generate_jwt_token(&self, login_session_info: &user::LoginSessionInfo) -> Result<String, jwt_errors::Error> {
+    pub fn generate_jwt_token(
+        &self,
+        login_session_info: &user::LoginSessionInfo,
+    ) -> Result<String, jwt_errors::Error> {
         self.tokens_manager.generate_jwt_token(login_session_info)
     }
 }
