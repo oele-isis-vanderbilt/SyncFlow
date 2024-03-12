@@ -1,5 +1,5 @@
 use std::future::{ready, Ready};
-
+use actix_web::HttpMessage;
 use actix_web::http::Method;
 use actix_web::{
     body::EitherBody,
@@ -78,6 +78,8 @@ where
                                 info!("Decoding Token...");
                                 if account_service.verify_token(&token_data).is_ok() {
                                     info!("Valid Token");
+                                    // Inject the token_data into the request
+                                    req.extensions_mut().insert(token_data);
                                     auth_success = true;
                                 }
                             } else {

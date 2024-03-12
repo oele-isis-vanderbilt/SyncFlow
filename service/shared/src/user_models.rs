@@ -25,3 +25,10 @@ impl TokenResponse {
         }
     }
 }
+
+pub enum UserActions {
+    CreateRoom,
+    DeleteRoom,
+    ListRooms,
+    GenerateToken,
+}

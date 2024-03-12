@@ -4,6 +4,7 @@ use api::auth_middleware;
 use api::livekit_handlers::init_routes as lk_init_routes;
 use api::login_handlers::init_routes as login_init_routes;
 use application::users::account_service::AccountService;
+use application::users::user_action_service::UserActionRegisterer;
 use infrastructure::establish_connection_pool;
 use shared::deployment_config::DeploymentConfig;
 use shared::response_models::Response;
@@ -35,6 +36,7 @@ async fn main() -> std::io::Result<()> {
     let database_url = config.database_url.clone();
     let pool = Arc::new(establish_connection_pool(&database_url));
     let auth_service = AccountService::new(pool, config.clone());
+    let user_action_service = UserActionRegisterer::new(pool.clone());
 
     HttpServer::new(move || {
         App::new()
@@ -42,6 +44,7 @@ async fn main() -> std::io::Result<()> {
             .default_service(web::route().to(not_found))
             .wrap(actix_web::middleware::Logger::default())
             .app_data(web::Data::new(auth_service.clone()))
+            .app_data(web::Data::new(user_action_service.clone()))
             .app_data(web::Data::new(config.clone()))
             .configure(lk_init_routes)
             .configure(login_init_routes)

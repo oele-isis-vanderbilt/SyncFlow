@@ -1,4 +1,4 @@
-use crate::schema::{login_sessions, users};
+use crate::schema::{login_sessions, users, create_room_actions, delete_room_actions, generate_token_actions, list_rooms_actions, user_actions};
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
@@ -51,5 +51,70 @@ pub struct LoginSession {
 #[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
 #[diesel(table_name = login_sessions)]
 pub struct NewLoginSession {
+    pub user_id: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = create_room_actions)]
+pub struct CreateRoomAction {
+    pub id: i32,
+    pub room_name: String,
+    pub user_id: i32,
+    pub created_at: Option<chrono::NaiveDateTime>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = create_room_actions)]
+pub struct NewCreateRoomAction {
+    pub room_name: String,
+    pub user_id: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = delete_room_actions)]
+pub struct DeleteRoomAction {
+    pub id: i32,
+    pub room_name: String,
+    pub user_id: i32,
+    pub deleted_at: Option<chrono::NaiveDateTime>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = delete_room_actions)]
+pub struct NewDeleteRoomAction {
+    pub room_name: String,
+    pub user_id: i32,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = generate_token_actions)]
+pub struct GenerateTokenAction {
+    pub id: i32,
+    pub user_id: i32,
+    pub token_identity: String,
+    pub token_room: String,
+    pub generated_at: Option<chrono::NaiveDateTime>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = generate_token_actions)]
+pub struct NewGenerateTokenAction {
+    pub user_id: i32,
+    pub token_identity: String,
+    pub token_room: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = list_room_actions)]
+pub struct ListRoomAction {
+    pub id: i32,
+    pub user_id: i32,
+    pub listed_at: Option<chrono::NaiveDateTime>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = list_rooms_actions)]
+pub struct NewListRoomsAction {
     pub user_id: i32,
 }

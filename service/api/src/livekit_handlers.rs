@@ -1,10 +1,13 @@
-use actix_web::web::Json;
+use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use application::livekit::room::RoomService;
 use application::livekit::token::create_token;
+use application::users::token::UserTokenType;
+use application::users::user_action_service::UserActionRegisterer;
 use shared::deployment_config::DeploymentConfig;
 use shared::livekit_models::{CreateRoomRequest, RoomCreationResult, TokenRequest, TokenResponse};
 use shared::response_models::Response;
+use shared::user_models::UserActions;
 use shared::utils::ping_livekit;
 
 #[utoipa::path(
@@ -39,13 +42,24 @@ pub async fn healthcheck() -> impl Responder {
 pub async fn generate_token(
     token_request: Json<TokenRequest>,
     deployment_config: web::Data<DeploymentConfig>,
+    user_action_registerer: UserActionRegisterer,
+    token_data: Option<ReqData<UserTokenType>>,
 ) -> HttpResponse {
     let token = create_token(&token_request, &deployment_config).map_err(|e| Response {
         status: 500,
         message: e.to_string(),
     });
+
     match token {
-        Ok(t) => HttpResponse::Ok().json(TokenResponse::new(t, token_request.identity.clone())),
+        Ok(t) => {
+            if let Some(user_token) = token_data.into_inner() {
+                user_action_registerer.register(
+                    user_token.claims.user_id,
+                    UserActions::GenerateToken,
+                )
+            }
+            HttpResponse::Ok().json(TokenResponse::new(t, token_request.identity.clone()))
+        },
         Err(e) => e.into(),
     }
 }
@@ -63,6 +77,8 @@ pub async fn generate_token(
 pub async fn create_room(
     room_service: web::Data<RoomService>,
     room_create_request: Json<CreateRoomRequest>,
+    user_action_registerer: UserActionRegisterer,
+    token_data: Option<ReqData<UserTokenType>>,
 ) -> HttpResponse {
     let create_room_result = room_service
         .create_room(
@@ -72,7 +88,15 @@ pub async fn create_room(
         .await;
 
     match create_room_result {
-        Ok(room) => HttpResponse::Ok().json(RoomCreationResult::from(room)),
+        Ok(room) => {
+            if let Some(user_token) = token_data.into_inner() {
+                user_action_registerer.register(
+                    user_token.claims.user_id,
+                    UserActions::CreateRoom,
+                )
+            }
+            HttpResponse::Ok().json(RoomCreationResult::from(room))
+        },
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
@@ -92,14 +116,25 @@ pub async fn create_room(
 pub async fn delete_room(
     room_service: web::Data<RoomService>,
     room_name: web::Path<String>,
+    user_action_registerer: UserActionRegisterer,
+    token_data: Option<ReqData<UserTokenType>>,
 ) -> HttpResponse {
     let delete_room_result = room_service.delete_room(&room_name).await;
 
     match delete_room_result {
-        Ok(_) => HttpResponse::Ok().json(Response {
-            status: 200,
-            message: format!(" Room {} deleted successfully", room_name),
-        }),
+        Ok(_) => {
+            if let Some(user_token) = token_data.into_inner() {
+                user_action_registerer.register(
+                    user_token.claims.user_id,
+                    UserActions::DeleteRoom,
+                )
+            }
+
+            HttpResponse::Ok().json(Response {
+                status: 200,
+                message: format!(" Room {} deleted successfully", room_name),
+            })
+        },
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
@@ -113,13 +148,24 @@ pub async fn delete_room(
     )
 )]
 #[get("/list-rooms")]
-pub async fn list_rooms(room_service: web::Data<RoomService>) -> HttpResponse {
+pub async fn list_rooms(
+    room_service: web::Data<RoomService>,
+    user_action_registerer: UserActionRegisterer,
+    token_data: Option<ReqData<UserTokenType>>,
+) -> HttpResponse {
     let list_rooms_result = room_service.list_rooms(None).await;
 
     match list_rooms_result {
         Ok(rooms) => {
             let room_results: Vec<RoomCreationResult> =
                 rooms.into_iter().map(RoomCreationResult::from).collect();
+
+            if let Some(user_token) = token_data.into_inner() {
+                user_action_registerer.register(
+                    user_token.claims.user_id,
+                    UserActions::ListRooms,
+                )
+            }
             HttpResponse::Ok().json(room_results)
         }
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
