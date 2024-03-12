@@ -34,7 +34,7 @@ async fn main() -> std::io::Result<()> {
     let server_addr = format!("{}:{}", app_host, app_port);
     let database_url = config.database_url.clone();
     let pool = Arc::new(establish_connection_pool(&database_url));
-    let auth_service = AccountService::new(pool);
+    let auth_service = AccountService::new(pool, config.clone());
 
     HttpServer::new(move || {
         App::new()

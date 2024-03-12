@@ -8,7 +8,6 @@ use actix_web::{
     Error, HttpResponse,
 };
 use application::users::account_service::AccountService;
-use application::users::token::{decode_token, verify_token};
 use futures_util::future::LocalBoxFuture;
 use log::{error, info};
 use shared::constants;
@@ -67,9 +66,6 @@ where
         if !auth_success {
             if let Some(account_service) = req.app_data::<Data<AccountService>>() {
                 info!("Connecting to database");
-                let pool = account_service.get_pool();
-
-                let mut conn = pool.get().unwrap();
                 if let Some(auth_header) = req.headers().get(constants::AUTHORIZATION_HEADER) {
                     info!("Parsing authorization header...");
                     if let Ok(auth_string) = auth_header.to_str() {
@@ -77,9 +73,9 @@ where
                             info!("Parsing Token...");
                             let token = auth_string[6..auth_string.len()].trim();
 
-                            if let Ok(token_data) = decode_token(token.to_string()) {
+                            if let Ok(token_data) = account_service.decode_token(token.to_string()) {
                                 info!("Decoding Token...");
-                                if verify_token(&token_data, &mut conn).is_ok() {
+                                if account_service.verify_token(&token_data).is_ok() {
                                     info!("Valid Token");
                                     auth_success = true;
                                 }
