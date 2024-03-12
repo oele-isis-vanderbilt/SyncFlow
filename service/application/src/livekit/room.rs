@@ -2,23 +2,14 @@ use livekit_api::services::room::{CreateRoomOptions, RoomClient};
 use livekit_api::services::ServiceResult;
 use livekit_protocol as proto;
 use shared::livekit_models::RoomOptions;
-use shared::utils::load_env;
 
 pub struct RoomService {
     client: RoomClient,
 }
 
 impl RoomService {
-    pub fn new() -> Self {
-        load_env();
-
-        let server_url = std::env::var("LIVEKIT_SERVER_URL")
-            .expect("LIVEKIT_SERVER_URL must be set")
-            .replace("ws", "http");
-
-        let api_key = std::env::var("LIVEKIT_API_KEY").expect("LIVEKIT_API_KEY must be set");
-
-        let api_secret = std::env::var("LIVEKIT_API_SECRET").expect("LIVEKIT_API_KEY must be set");
+    pub fn new(server_url: String, api_key: String, api_secret: String) -> Self {
+        let server_url = server_url.to_string().replace("ws", "http");
 
         Self {
             client: RoomClient::with_api_key(&server_url, &api_key, &api_secret),

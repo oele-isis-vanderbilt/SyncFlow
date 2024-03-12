@@ -2,6 +2,7 @@ use actix_web::web::Json;
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use application::livekit::room::RoomService;
 use application::livekit::token::create_token;
+use shared::deployment_config::DeploymentConfig;
 use shared::livekit_models::{CreateRoomRequest, RoomCreationResult, TokenRequest, TokenResponse};
 use shared::response_models::Response;
 use shared::utils::ping_livekit;
@@ -35,8 +36,8 @@ pub async fn healthcheck() -> impl Responder {
     )
 )]
 #[post("/token")]
-pub async fn generate_token(token_request: Json<TokenRequest>) -> HttpResponse {
-    let token = create_token(&token_request).map_err(|e| Response {
+pub async fn generate_token(token_request: Json<TokenRequest>, deployment_config: web::Data<DeploymentConfig>) -> HttpResponse {
+    let token = create_token(&token_request, &deployment_config).map_err(|e| Response {
         status: 500,
         message: e.to_string(),
     });
@@ -123,7 +124,13 @@ pub async fn list_rooms(room_service: web::Data<RoomService>) -> HttpResponse {
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
-    let app_data = web::Data::new(RoomService::new());
+    let config: DeploymentConfig = DeploymentConfig::load();
+    let app_data = web::Data::new(RoomService::new(
+        config.livekit_server_url.clone(),
+        config.livekit_api_key.clone(),
+        config.livekit_api_secret.clone(),
+    ));
+
     let livekit_scope = web::scope("/livekit")
         .app_data(app_data.clone())
         .service(healthcheck)
