@@ -1,0 +1,22 @@
+
+version: "3.9"
+
+services:
+  postgres-livekit-iot:
+    image: postgres:14-alpine
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file: ../.env
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    env_file: ../.env
+    depends_on:
+      - postgres-livekit-iot
+
+volumes:
+  postgres-data:
