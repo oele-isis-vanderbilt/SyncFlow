@@ -1,9 +1,10 @@
-import Image from "next/image";
 import Greet from "./greet"
+import NavBar from "@/components/NavBar";
 
 export default function Page() {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col justify-between">
+      <NavBar />
       <Greet />
     </div>
   );
