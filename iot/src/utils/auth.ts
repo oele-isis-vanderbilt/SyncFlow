@@ -17,3 +17,7 @@ export function getProfile(setProfile: (profile: Profile) => void) {
 
   }, [])
 }
+
+export async function loggingOut() {
+  await store.clear()
+}

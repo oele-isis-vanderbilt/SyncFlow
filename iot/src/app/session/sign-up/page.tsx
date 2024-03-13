@@ -35,10 +35,10 @@ export default function SignUp() {
             {error && <div className="mt-4 text-error">{error}</div>}
             {successMsg && <div className="mt-4 text-success">{successMsg}</div>}
             <div className="flex justify-between items-center mt-4">
-            <Link href="login">
-              <button className="text-sm btn btn-ghost text-primary hover:underline">Already have an account? Sign In</button>
-            </Link>
-          </div>
+              <Link href="login">
+                <button className="text-sm btn btn-ghost text-primary hover:underline">Already have an account? Sign In</button>
+              </Link>
+            </div>
         </div>
       </div>
     </div>
