@@ -20,7 +20,7 @@ const config: Config = {
     themes: [
       {
         "light": {
-          "primary": "#d45628",
+          "primary": "#3266a8",
           "primary-content": "#ffffff",
           "secondary": "#6ea545",
           "accent": "#941914",
@@ -34,7 +34,7 @@ const config: Config = {
           "error": "#ef4444",
         },
         "dark": {
-          "primary": "#d45628",
+          "primary": "#3266a8",
           "secondary": "#6ea545",
           "accent": "#941914",
           "neutral": "#575656",

@@ -4,14 +4,17 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/NavBar";
+import { Store } from "tauri-plugin-store-api"
 
 const Page = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
   const router = useRouter();
+  const store = new Store(".settings.json");
 
   function validateInput() {
+    console.log(email, password)
     if (email === '' || password === '' || password.length < 8) {
       setError("Please fill out all fields.");
       return false;
@@ -25,6 +28,9 @@ const Page = () => {
     if (!validateInput()) {
       return;
     }
+    
+    await store.set("profile", { email: email, password: password });
+    router.push("/access");
   }
 
   return (
