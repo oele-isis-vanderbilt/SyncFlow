@@ -10,6 +10,7 @@ use shared::response_models::Response;
 use shared::utils::load_env;
 use std::env;
 use std::sync::Arc;
+use env_logger;
 
 pub async fn not_found() -> actix_web::Result<HttpResponse> {
     let response = Response {
@@ -23,7 +24,7 @@ pub async fn not_found() -> actix_web::Result<HttpResponse> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     load_env();
-    env::set_var("RUST_LOG", "actix_web=debug");
+    env::set_var("RUST_LOG", "actix_web=debug,api=debug");
     env_logger::init();
     let config = DeploymentConfig::load();
 
