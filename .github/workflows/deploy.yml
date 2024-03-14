@@ -34,6 +34,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          openssl rsa -in private_key -check
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             rm -rf LivekitMMLADeployment
             mkdir LivekitMMLADeployment
