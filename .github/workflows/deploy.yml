@@ -45,6 +45,7 @@ jobs:
             cd service
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config .env.prod
+            sudo chmod 666 /var/run/docker.sock
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
