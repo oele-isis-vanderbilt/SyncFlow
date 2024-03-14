@@ -32,7 +32,7 @@ class ConfigGenerator:
                 value = os.environ.get(var)
                 if value is None:
                     raise ValueError(f"Environment variable {var} is not set")
-                f.write(f'"{var}={value}"\n')
+                f.write(f'{var}="{value}"\n')
 
 
 
