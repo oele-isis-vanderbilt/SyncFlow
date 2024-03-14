@@ -1,0 +1,48 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - 38-dockerized-ec2-deployment
+
+jobs:
+  DeployToEC2:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and Deploy
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USERNAME: ${{ secrets.EC2_USERNAME }}
+          LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+          LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+          LIVEKIT_SERVER_URL: ${{ secrets.LIVEKIT_SERVER_URL }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          PGADMIN_DEFAULT_EMAIL: ${{ secrets.PGADMIN_DEFAULT_EMAIL }}
+          PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
+          PGADMIN_LISTEN_PORT: ${{ secrets.PGADMIN_LISTEN_PORT }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          APP_HOST: ${{ secrets.APP_HOST }}
+          APP_PORT: ${{ secrets.APP_PORT }}
+          NUM_ACTIX_WORKERS: ${{ secrets.NUM_ACTIX_WORKERS }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run:
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+            # Run the commands on the remote server
+            rm -rf LivekitMMLADeployment
+            mkdir LivekitMMLADeployment
+            cd LivekitMMLADeployment
+            git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
+            cd LiveKitMMLA
+            cd service
+            chmod +x docker/generate-prod-config
+            ./docker/generate-prod-config .env.prod
+            docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod
+            docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod
+            docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
+          '
