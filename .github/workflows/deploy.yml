@@ -34,7 +34,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           echo "$PRIVATE_KEY" > private_key.pem && chmod 400 private_key.pem
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST} '
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER_NAME}@${HOST} '
             # Run the commands on the remote server
             rm -rf LivekitMMLADeployment
             mkdir LivekitMMLADeployment
