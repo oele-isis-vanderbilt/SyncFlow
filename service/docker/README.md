@@ -59,7 +59,7 @@ $ docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml dow
 ```
 
 ## Development Database
-For development purposes, you can use the `docker-compose.postgres.yaml` file to run the service with a development database. To run the service with a development database, run the following command(use `.env` file to set the environment variables):
+For development purposes, you can use the `docker-compose.postgres.yaml` file to run a postgres instance locally ( in this case use `.env` file name to set the environment variables):
 
 ```shell
 $ docker-compose -p livekit-mmla-dev --file docker/docker-compose.postgres.yaml up -d
