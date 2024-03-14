@@ -8,6 +8,7 @@ on:
 
 jobs:
   DeployToEC2:
+    name: Deploy API to EC2
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -30,9 +31,9 @@ jobs:
           APP_PORT: ${{ secrets.APP_PORT }}
           NUM_ACTIX_WORKERS: ${{ secrets.NUM_ACTIX_WORKERS }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run:
+        run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST} '
             # Run the commands on the remote server
             rm -rf LivekitMMLADeployment
             mkdir LivekitMMLADeployment
