@@ -35,7 +35,6 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST} '
-            # Run the commands on the remote server
             rm -rf LivekitMMLADeployment
             mkdir LivekitMMLADeployment
             cd LivekitMMLADeployment
