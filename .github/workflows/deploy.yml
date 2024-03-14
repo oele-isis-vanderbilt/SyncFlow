@@ -1,10 +1,13 @@
-name: Deploy to EC2
+name: Deploy to EC2 / Docker Cleanup
 
 on:
   push:
     branches:
       - main
       - 38-dockerized-ec2-deployment
+
+  schedule:
+    - cron: '0 0 * * *' # Run every day at 00:00 UTC
 
 jobs:
   DeployToEC2:
@@ -49,4 +52,21 @@ jobs:
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
+          '
+          
+      
+
+
+      - name: Docker Cleanup on EC2
+        if: github.event_name == 'schedule'
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          openssl rsa -in private_key -check
+          ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
+            sudo chmod 666 /var/run/docker.sock
+            docker system prune -f
           '
