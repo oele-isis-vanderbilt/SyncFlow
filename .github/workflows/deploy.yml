@@ -1,0 +1,67 @@
+name: Deploy to EC2 / Docker Cleanup
+
+on:
+  push:
+    branches:
+      - main
+
+  schedule:
+    - cron: '0 0 * * *' # Run every day at 00:00 UTC
+
+jobs:
+  DeployToEC2:
+    name: Deploy API to EC2
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and Deploy
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          openssl rsa -in private_key -check
+          ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
+            export DATABASE_URL='${{ secrets.DATABASE_URL }}'
+            export APP_HOST='${{ secrets.APP_HOST }}'
+            export APP_PORT='${{ secrets.APP_PORT }}'
+            export NUM_ACTIX_WORKERS='${{ secrets.NUM_ACTIX_WORKERS }}'
+            export JWT_SECRET='${{ secrets.JWT_SECRET }}'
+            export LIVEKIT_API_KEY='${{ secrets.LIVEKIT_API_KEY }}'
+            export LIVEKIT_API_SECRET='${{ secrets.LIVEKIT_API_SECRET }}'
+            export LIVEKIT_SERVER_URL='${{ secrets.LIVEKIT_SERVER_URL }}'
+            export POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
+            export POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
+            export POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
+            export PGADMIN_DEFAULT_EMAIL='${{ secrets.PGADMIN_DEFAULT_EMAIL }}'
+            export PGADMIN_DEFAULT_PASSWORD='${{ secrets.PGADMIN_DEFAULT_PASSWORD }}'
+            export PGADMIN_LISTEN_PORT='${{ secrets.PGADMIN_LISTEN_PORT }}'
+            rm -rf LivekitMMLADeployment
+            mkdir LivekitMMLADeployment
+            cd LivekitMMLADeployment
+            git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
+            cd LiveKitMMLA
+            cd service
+            chmod +x docker/generate-prod-config
+            ./docker/generate-prod-config .env.prod
+            sudo chmod 666 /var/run/docker.sock
+            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod
+            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod
+            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
+          '
+
+      - name: Docker Cleanup on EC2
+        if: github.event_name == 'schedule'
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          openssl rsa -in private_key -check
+          ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
+            sudo chmod 666 /var/run/docker.sock
+            docker system prune -f
+          '
