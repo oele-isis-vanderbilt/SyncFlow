@@ -25,7 +25,7 @@ NUM_ACTIX_WORKERS="NUM_ACTIX_WORKERS" # The number of actix workers
 JWT_SECRET="JWT_SECRET" # The jwt secret
 ```
 
-The environment variables should be self-explanatory. For using the compose files in this directory, you can create an `.env.prod` file and set the environment variables there.  
+The environment variables should be self-explanatory. For using the compose files in this directory, you can create an `.env.prod`(in the [`service`](../../service) directory) and set the environment variables there.  
 
 ## Images used for Deployment
 Postgres and pgAdmin are used for the database and database management respectively. The service is built and run using the [`Dockerfile`](./Dockerfile). The database migrations are run using the [`Dockerfile.migrations`](./Dockerfile.migrations) file.
@@ -34,5 +34,33 @@ Postgres and pgAdmin are used for the database and database management respectiv
 ## Deployment Commands
 To build and run the service using docker compose, run the following commands :
 
-Todo
+## Initial Deployment
+> [!IMPORTANT]  
+> Make sure you run these commands from the [`service`](../../service) directory.
 
+```shell
+$ docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
+```
+
+## Update Deployment
+Unless you have to stop the database and pgadmin for maintenance purposes, you can update the deployment by re-building the service/migration and running the following command:
+
+```shell
+$ docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod
+$ docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod
+$ docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
+```
+
+## Stopping the Deployment
+To stop the deployment, run the following command:
+
+```shell
+$ docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down
+```
+
+## Development Database
+For development purposes, you can use the `docker-compose.postgres.yaml` file to run the service with a development database. To run the service with a development database, run the following command(use `.env` file to set the environment variables):
+
+```shell
+$ docker-compose -p livekit-mmla-dev --file docker/docker-compose.postgres.yaml up -d
+```
