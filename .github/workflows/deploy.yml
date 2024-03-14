@@ -40,6 +40,7 @@ jobs:
             mkdir LivekitMMLADeployment
             cd LivekitMMLADeployment
             git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
+            cd LiveKitMMLA
             git checkout -b 38-dockerized-ec2-deployment origin/38-dockerized-ec2-deployment
             cd LiveKitMMLA
             cd service
