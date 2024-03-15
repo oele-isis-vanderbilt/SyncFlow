@@ -1,4 +1,4 @@
-use crate::schema::{login_sessions, users};
+use crate::schema::{create_room_actions, login_sessions, users};
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
@@ -51,5 +51,21 @@ pub struct LoginSession {
 #[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
 #[diesel(table_name = login_sessions)]
 pub struct NewLoginSession {
+    pub user_id: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable, Queryable)]
+#[diesel(table_name = create_room_actions)]
+pub struct CreateRoomAction {
+    pub id: i32,
+    pub room_name: String,
+    pub user_id: i32,
+    pub created_at: Option<chrono::NaiveDateTime>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = create_room_actions)]
+pub struct NewCreateRoomAction {
+    pub room_name: String,
     pub user_id: i32,
 }

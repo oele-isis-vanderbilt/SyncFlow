@@ -5,7 +5,7 @@ use actix_web::{
     body::EitherBody,
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     web::Data,
-    Error, HttpResponse,
+    Error, HttpMessage, HttpResponse,
 };
 use application::users::account_service::AccountService;
 use futures_util::future::LocalBoxFuture;
@@ -78,6 +78,8 @@ where
                                 info!("Decoding Token...");
                                 if account_service.verify_token(&token_data).is_ok() {
                                     info!("Valid Token");
+                                    // Insert Token Data into Request Extensions
+                                    req.extensions_mut().insert(token_data);
                                     auth_success = true;
                                 }
                             } else {

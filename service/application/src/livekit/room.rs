@@ -3,8 +3,12 @@ use livekit_api::services::ServiceResult;
 use livekit_protocol as proto;
 use shared::livekit_models::RoomOptions;
 
+#[derive(Debug)]
 pub struct RoomService {
     client: RoomClient,
+    server_url: String,
+    api_key: String,
+    api_secret: String,
 }
 
 impl RoomService {
@@ -13,6 +17,9 @@ impl RoomService {
 
         Self {
             client: RoomClient::with_api_key(&server_url, &api_key, &api_secret),
+            server_url,
+            api_key,
+            api_secret,
         }
     }
 
@@ -36,5 +43,16 @@ impl RoomService {
     pub async fn list_rooms(&self, names: Option<Vec<String>>) -> ServiceResult<Vec<proto::Room>> {
         let room_names = names.unwrap_or_default();
         self.client.list_rooms(room_names).await
+    }
+}
+
+impl Clone for RoomService {
+    fn clone(&self) -> Self {
+        Self {
+            client: RoomClient::with_api_key(&self.server_url, &self.api_key, &self.api_secret),
+            server_url: self.server_url.clone(),
+            api_key: self.api_key.clone(),
+            api_secret: self.api_secret.clone(),
+        }
     }
 }

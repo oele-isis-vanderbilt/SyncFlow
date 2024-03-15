@@ -1,9 +1,12 @@
-use actix_web::web::Json;
+use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use application::livekit::room::RoomService;
 use application::livekit::token::create_token;
+use application::mmla::mmla_service::MMLAService;
+use application::users::token::UserTokenType;
+use log::{error, info};
 use shared::deployment_config::DeploymentConfig;
-use shared::livekit_models::{CreateRoomRequest, RoomCreationResult, TokenRequest, TokenResponse};
+use shared::livekit_models::{CreateRoomRequest, LivekitRoom, TokenRequest, TokenResponse};
 use shared::response_models::Response;
 use shared::utils::ping_livekit;
 
@@ -61,19 +64,31 @@ pub async fn generate_token(
 )]
 #[post("/create-room")]
 pub async fn create_room(
-    room_service: web::Data<RoomService>,
+    mmla_service: web::Data<MMLAService>,
     room_create_request: Json<CreateRoomRequest>,
+    token_data: Option<ReqData<UserTokenType>>,
 ) -> HttpResponse {
-    let create_room_result = room_service
-        .create_room(
-            &room_create_request.name,
-            room_create_request.options.clone(),
-        )
-        .await;
+    match token_data {
+        Some(token) => {
+            let token_inner = token.into_inner();
+            let create_room_result = mmla_service
+                .create_room(token_inner.claims.user_id, room_create_request.into_inner())
+                .await;
 
-    match create_room_result {
-        Ok(room) => HttpResponse::Ok().json(RoomCreationResult::from(room)),
-        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+            match create_room_result {
+                Ok(room) => {
+                    info!("Room created successfully: {:?}", room);
+                    HttpResponse::Ok().json(room)
+                }
+                Err(err) => {
+                    error!("Error creating room: {}", err);
+                    HttpResponse::InternalServerError().body(err.to_string())
+                }
+            }
+        }
+        None => {
+            return HttpResponse::Unauthorized().body("Unauthorized");
+        }
     }
 }
 
@@ -118,8 +133,7 @@ pub async fn list_rooms(room_service: web::Data<RoomService>) -> HttpResponse {
 
     match list_rooms_result {
         Ok(rooms) => {
-            let room_results: Vec<RoomCreationResult> =
-                rooms.into_iter().map(RoomCreationResult::from).collect();
+            let room_results: Vec<LivekitRoom> = rooms.into_iter().map(LivekitRoom::from).collect();
             HttpResponse::Ok().json(room_results)
         }
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),

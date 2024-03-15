@@ -1,7 +1,6 @@
 use actix_web::web::ServiceConfig;
 use shared::livekit_models::{
-    CreateRoomRequest, RoomCreationResult, RoomOptions, TokenRequest, TokenResponse,
-    VideoGrantsWrapper,
+    CreateRoomRequest, LivekitRoom, RoomOptions, TokenRequest, TokenResponse, VideoGrantsWrapper,
 };
 use shared::response_models::Response;
 use shared::user_models::LoginRequest;
@@ -24,7 +23,7 @@ pub fn init_api_doc(config: &mut ServiceConfig) {
         ),
         components(
             schemas(Response, LoginRequest,
-            TokenRequest, TokenResponse, VideoGrantsWrapper, CreateRoomRequest, RoomOptions, RoomCreationResult)
+            TokenRequest, TokenResponse, VideoGrantsWrapper, CreateRoomRequest, RoomOptions, LivekitRoom)
         ),
         tags(
             (name = "LiveKit MMLA API", description = "Room and Token Management Endpoints")
