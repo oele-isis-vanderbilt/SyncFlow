@@ -1,6 +1,6 @@
 use shared::{
     livekit_models::{
-        CreateRoomRequest, RoomCreationResult, RoomOptions, TokenRequest, TokenResponse,
+        CreateRoomRequest, LivekitRoom, RoomOptions, TokenRequest, TokenResponse,
         VideoGrantsWrapper,
     },
     response_models::Response as ApiResponse,
@@ -64,7 +64,7 @@ impl LiveKitClient {
             .map_response::<TokenResponse>(token_response)
     }
 
-    pub fn create_room(&self, name: &str) -> JSONResult<RoomCreationResult> {
+    pub fn create_room(&self, name: &str) -> JSONResult<LivekitRoom> {
         let create_room_request = CreateRoomRequest {
             name: name.to_string(),
             options: RoomOptions::default(),
@@ -74,14 +74,14 @@ impl LiveKitClient {
             .post("livekit/create-room", create_room_request);
 
         self.http_client
-            .map_response::<RoomCreationResult>(response_result)
+            .map_response::<LivekitRoom>(response_result)
     }
 
-    pub fn list_rooms(&self) -> JSONResult<Vec<RoomCreationResult>> {
+    pub fn list_rooms(&self) -> JSONResult<Vec<LivekitRoom>> {
         let list_result = self.http_client.get("livekit/list-rooms");
 
         self.http_client
-            .map_response::<Vec<RoomCreationResult>>(list_result)
+            .map_response::<Vec<LivekitRoom>>(list_result)
     }
 
     pub fn delete_room(self, room_name: &str) -> JSONResult<ApiResponse> {

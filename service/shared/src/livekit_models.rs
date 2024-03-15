@@ -128,7 +128,7 @@ impl TokenResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct RoomCreationResult {
+pub struct LivekitRoom {
     pub sid: String,
     pub name: String,
     pub empty_timeout: u32,
@@ -142,9 +142,9 @@ pub struct RoomCreationResult {
     pub active_recording: bool,
 }
 
-impl From<Room> for RoomCreationResult {
+impl From<Room> for LivekitRoom {
     fn from(value: Room) -> Self {
-        RoomCreationResult {
+        LivekitRoom {
             sid: value.sid,
             name: value.name,
             empty_timeout: value.empty_timeout,
