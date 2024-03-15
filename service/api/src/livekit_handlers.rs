@@ -1,12 +1,9 @@
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
-use application::livekit::room::RoomService;
-use application::livekit::token::create_token;
 use application::mmla::mmla_service::MMLAService;
 use application::users::token::UserTokenType;
-use log::{error, info};
 use shared::deployment_config::DeploymentConfig;
-use shared::livekit_models::{CreateRoomRequest, LivekitRoom, TokenRequest, TokenResponse};
+use shared::livekit_models::{CreateRoomRequest, TokenRequest};
 use shared::response_models::Response;
 use shared::utils::ping_livekit;
 
@@ -41,15 +38,32 @@ pub async fn healthcheck() -> impl Responder {
 #[post("/token")]
 pub async fn generate_token(
     token_request: Json<TokenRequest>,
+    mmla_service: web::Data<MMLAService>,
     deployment_config: web::Data<DeploymentConfig>,
+    token_data: Option<ReqData<UserTokenType>>,
 ) -> HttpResponse {
-    let token = create_token(&token_request, &deployment_config).map_err(|e| Response {
-        status: 500,
-        message: e.to_string(),
-    });
-    match token {
-        Ok(t) => HttpResponse::Ok().json(TokenResponse::new(t, token_request.identity.clone())),
-        Err(e) => e.into(),
+    match token_data {
+        Some(token) => {
+            let token_result = mmla_service
+                .generate_token(
+                    token.into_inner().claims.user_id,
+                    token_request.into_inner(),
+                    deployment_config.livekit_api_key.clone(),
+                    deployment_config.livekit_api_secret.clone(),
+                )
+                .await;
+
+            match token_result {
+                Ok(token) => HttpResponse::Ok().json(token),
+                Err(err) => {
+                    let response: Response = err.into();
+                    response.into()
+                }
+            }
+        }
+        None => {
+            return HttpResponse::Unauthorized().body("Unauthorized");
+        }
     }
 }
 
@@ -76,13 +90,10 @@ pub async fn create_room(
                 .await;
 
             match create_room_result {
-                Ok(room) => {
-                    info!("Room created successfully: {:?}", room);
-                    HttpResponse::Ok().json(room)
-                }
+                Ok(room) => HttpResponse::Ok().json(room),
                 Err(err) => {
-                    error!("Error creating room: {}", err);
-                    HttpResponse::InternalServerError().body(err.to_string())
+                    let response: Response = err.into();
+                    response.into()
                 }
             }
         }
@@ -105,17 +116,28 @@ pub async fn create_room(
 )]
 #[delete("/delete-room/{room_name}")]
 pub async fn delete_room(
-    room_service: web::Data<RoomService>,
+    mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
+    token_data: Option<ReqData<UserTokenType>>,
 ) -> HttpResponse {
-    let delete_room_result = room_service.delete_room(&room_name).await;
+    match token_data {
+        Some(token) => {
+            let token_inner = token.into_inner();
+            let delete_room_result = mmla_service
+                .delete_room(token_inner.claims.user_id, room_name.to_owned())
+                .await;
 
-    match delete_room_result {
-        Ok(_) => HttpResponse::Ok().json(Response {
-            status: 200,
-            message: format!(" Room {} deleted successfully", room_name),
-        }),
-        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+            match delete_room_result {
+                Ok(success) => success.into(),
+                Err(err) => {
+                    let response: Response = err.into();
+                    response.into()
+                }
+            }
+        }
+        None => {
+            return HttpResponse::Unauthorized().body("Unauthorized");
+        }
     }
 }
 
@@ -128,28 +150,31 @@ pub async fn delete_room(
     )
 )]
 #[get("/list-rooms")]
-pub async fn list_rooms(room_service: web::Data<RoomService>) -> HttpResponse {
-    let list_rooms_result = room_service.list_rooms(None).await;
+pub async fn list_rooms(
+    mmla_service: web::Data<MMLAService>,
+    token_data: Option<ReqData<UserTokenType>>,
+) -> HttpResponse {
+    match token_data {
+        Some(token) => {
+            let token_inner = token.into_inner();
+            let list_rooms_result = mmla_service.list_rooms(token_inner.claims.user_id).await;
 
-    match list_rooms_result {
-        Ok(rooms) => {
-            let room_results: Vec<LivekitRoom> = rooms.into_iter().map(LivekitRoom::from).collect();
-            HttpResponse::Ok().json(room_results)
+            match list_rooms_result {
+                Ok(rooms) => HttpResponse::Ok().json(rooms),
+                Err(err) => {
+                    let response: Response = err.into();
+                    response.into()
+                }
+            }
         }
-        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+        None => {
+            return HttpResponse::Unauthorized().body("Unauthorized");
+        }
     }
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
-    let config: DeploymentConfig = DeploymentConfig::load();
-    let app_data = web::Data::new(RoomService::new(
-        config.livekit_server_url.clone(),
-        config.livekit_api_key.clone(),
-        config.livekit_api_secret.clone(),
-    ));
-
     let livekit_scope = web::scope("/livekit")
-        .app_data(app_data.clone())
         .service(healthcheck)
         .service(generate_token)
         .service(create_room)
