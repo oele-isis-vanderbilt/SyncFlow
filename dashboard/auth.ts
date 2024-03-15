@@ -6,6 +6,7 @@ import type { User, Role } from '@prisma/client';
 import { authConfig } from './auth.config';
 import { z } from 'zod';
 import { PrismaAdapter } from '@auth/prisma-adapter';
+import {jwtDecode} from "jwt-decode";
 
 async function getUser(email: string): Promise<User> {
   try {
@@ -51,6 +52,20 @@ export const { auth, signIn, signOut } = NextAuth({
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
+          const resp = await fetch("http://localhost:8081/users/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username_or_email: email,
+              password: password,
+            }),
+          });
+
+          const data = await resp.json();
+          console.log(jwtDecode(data.token));
+
           if (user) {
             const passwordMatch = await bcrypt.compare(password, user.password);
 

@@ -69,8 +69,11 @@ pub fn login(
     use domain::schema::login_sessions::dsl::*;
     use domain::schema::users::dsl::*;
 
-    let (uname, passwd) = (login_request.username, login_request.password);
-    let user_to_verify = users.filter(username.eq(uname)).first::<User>(conn);
+    let (uname, passwd) = (login_request.username_or_email, login_request.password);
+    // let user_to_verify = users.filter(username.eq(uname)).first::<User>(conn);
+    let user_to_verify = users
+        .filter(username.eq(&uname).or(email.eq(&uname)))
+        .first::<User>(conn);
 
     match user_to_verify {
         Ok(usr) => {

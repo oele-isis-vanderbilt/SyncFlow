@@ -21,7 +21,7 @@ impl LoginClient {
     pub fn login(&self, username: &str, password: &str) -> JSONResult<TokenResponse> {
         let url = format!("{}/users/login", self.base_url);
         let login_request = LoginRequest {
-            username: username.to_string(),
+            username_or_email: username.to_string(),
             password: password.to_string(),
         };
         let response = self

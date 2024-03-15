@@ -6,6 +6,7 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
+use domain::models::Role;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserToken {
@@ -14,6 +15,7 @@ pub struct UserToken {
     // Data
     pub user_name: String,
     pub user_id: i32,
+    pub role: Role,
     pub login_session: String,
 }
 
@@ -40,9 +42,10 @@ impl JWTImplementation {
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .unwrap()
                 .as_secs() as usize,
-            user_name: login_session_info.user_name.clone(),
+            user_name: login_session_info.user_name.to_owned(),
             user_id: login_session_info.user_id,
-            login_session: login_session_info.session_id.clone(),
+            role: login_session_info.user_role.to_owned(),
+            login_session: login_session_info.session_id.to_owned(),
         };
 
         let secret = self.jwt_secret.clone();
