@@ -27,7 +27,7 @@ pub async fn not_found() -> actix_web::Result<HttpResponse> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     load_env();
-    env::set_var("RUST_LOG", "actix_web=debug,api=debug");
+    env::set_var("RUST_LOG", "actix_web=debug,api=debug,application=debug,infrastructure=debug,shared=debug");
     env_logger::init();
     let config = DeploymentConfig::load();
 

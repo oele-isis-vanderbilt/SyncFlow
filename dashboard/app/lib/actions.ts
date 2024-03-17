@@ -5,6 +5,7 @@ import { liveKitService } from './livekit';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { signIn } from '@/auth';
+import { mmlaClient } from '@/app/lib/mmlaClient';
 
 import type { CreateOptions, EgressInfo, VideoGrant } from 'livekit-server-sdk';
 import { AuthError } from 'next-auth';
@@ -37,13 +38,13 @@ export async function createRoom() {
     maxParticipants: 10,
     metadata: 'LiveKit ELP Room',
   };
-  const room = await liveKitService.createRoom(options);
+  await mmlaClient.createRoom(options);
   revalidatePath('/dashboard');
   redirect('/dashboard');
 }
 
 export async function deleteRoom(roomName: string) {
-  await liveKitService.deleteRoom(roomName);
+  await mmlaClient.deleteRoom(roomName);
   revalidatePath('/dashboard');
   redirect('/dashboard');
 }

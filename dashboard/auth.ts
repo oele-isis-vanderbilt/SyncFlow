@@ -1,42 +1,92 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcrypt';
 import prisma from '@/app/lib/prisma';
 import type { User, Role } from '@prisma/client';
 import { authConfig } from './auth.config';
 import { z } from 'zod';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
+import type { SessionUser } from '@/types/next-auth';
+import deploymentConfig from '@/deployment-config';
+import { Awaitable } from '@auth/core/src/types';
 
-async function getUser(email: string): Promise<User> {
-  try {
-    return await prisma.user.findUniqueOrThrow({
-      where: {
-        email: email,
-      },
-    });
-  } catch (error) {
-    console.error('Failed to fetch user', error);
-    throw new Error('Failed to fetch user');
+async function login(
+  id: string,
+  password: string,
+): Promise<SessionUser | null> {
+  let server_url = deploymentConfig.mmla_api_url;
+  let credentials = {
+    username_or_email: id,
+    password: password,
+  };
+
+  let response = await fetch(server_url + '/users/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credentials),
+  });
+
+  if (response.ok) {
+    let data = await response.json();
+    let token = data.token;
+    let decoded_jwt = jwtDecode(token);
+    return {
+      id: decoded_jwt.user_name,
+      name: decoded_jwt.user_name,
+      email: decoded_jwt.user_name,
+      role: decoded_jwt.role as Role,
+      apiToken: token,
+    } as SessionUser;
   }
+
+  return null;
+}
+
+async function apiSignOut(token: string) {
+  let server_url = deploymentConfig.mmla_api_url;
+  let response = await fetch(server_url + '/users/logout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.ok) {
+    return null;
+  }
+  return null;
 }
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        // @ts-ignore
-        token.role = user.role;
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+          jwt: user.apiToken,
+        };
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.role = token.role as Role;
+      if (token) {
+        session.jwt = token.jwt;
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
       return session;
+    },
+  },
+  events: {
+    signOut: async ({ token, session }) => {
+      await apiSignOut(token?.jwt as string);
     },
   },
   providers: [
@@ -51,32 +101,12 @@ export const { auth, signIn, signOut } = NextAuth({
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
-          const user = await getUser(email);
-          const resp = await fetch("http://localhost:8081/users/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              username_or_email: email,
-              password: password,
-            }),
-          });
 
-          const data = await resp.json();
-          console.log(jwtDecode(data.token));
-
+          let user = await login(email, password);
           if (user) {
-            const passwordMatch = await bcrypt.compare(password, user.password);
-
-            if (passwordMatch) {
-              return {
-                name: user.username,
-                email: user.email,
-                role: user.role,
-              };
-            }
+            return user;
           }
+          return null;
         }
         return null;
       },

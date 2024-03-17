@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 
-import type { Role } from '@prisma/client';
+export type Role = 'ADMIN' | 'USER';
 
 declare module 'next-auth' {
   interface Session {
@@ -12,4 +12,5 @@ export type SessionUser = {
   role: Role;
   email: string;
   name: string;
+  apiToken: string;
 };
