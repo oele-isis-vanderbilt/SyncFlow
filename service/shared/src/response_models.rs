@@ -11,6 +11,6 @@ pub struct Response {
 impl Into<HttpResponse> for Response {
     fn into(self) -> HttpResponse {
         HttpResponse::build(actix_web::http::StatusCode::from_u16(self.status as u16).unwrap())
-            .body(self.message)
+            .json(&self)
     }
 }
