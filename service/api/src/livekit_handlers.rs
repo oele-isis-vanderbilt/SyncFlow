@@ -85,8 +85,11 @@ pub async fn create_room(
     match token_data {
         Some(token) => {
             let token_inner = token.into_inner();
+
+            let req_json = room_create_request.into_inner();
+            println!("{:?}", req_json);
             let create_room_result = mmla_service
-                .create_room(token_inner.claims.user_id, room_create_request.into_inner())
+                .create_room(token_inner.claims.user_id, req_json)
                 .await;
 
             match create_room_result {

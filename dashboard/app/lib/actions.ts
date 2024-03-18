@@ -7,7 +7,8 @@ import { revalidatePath } from 'next/cache';
 import { signIn } from '@/auth';
 import { mmlaClient } from '@/app/lib/mmlaClient';
 
-import type { CreateOptions, EgressInfo, VideoGrant } from 'livekit-server-sdk';
+import type { EgressInfo, VideoGrant } from 'livekit-server-sdk';
+import type { CreateRoomRequest } from '@/types/mmla';
 import { AuthError } from 'next-auth';
 import { Egress } from 'livekit-server-sdk/dist/proto/livekit_egress';
 
@@ -32,11 +33,13 @@ const randomRoomName = () => {
 };
 
 export async function createRoom() {
-  const options: CreateOptions = {
+  const options: CreateRoomRequest = {
     name: randomRoomName(),
-    emptyTimeout: 60 * 10,
-    maxParticipants: 10,
-    metadata: 'LiveKit ELP Room',
+    options: {
+      emptyTimeout: 60 * 10,
+      maxParticipants: 10,
+      metadata: 'LiveKit ELP Room',
+    },
   };
   await mmlaClient.createRoom(options);
   revalidatePath('/dashboard');

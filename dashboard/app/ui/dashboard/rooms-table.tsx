@@ -1,14 +1,18 @@
 import type { Room } from 'livekit-server-sdk';
-import { liveKitService } from '@/app/lib/livekit';
+import { mmlaClient } from '@/app/lib/mmlaClient';
 import RoomActions from '@/app/ui/dashboard/room-actions';
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { Role } from '@prisma/client';
 import { isAdmin } from '@/app/lib/utils';
 
 export default async function RoomsTable({ navPath }: { navPath: string }) {
-  const rooms = await liveKitService.listRooms();
-  const names = rooms.map((room: Room) => room.name);
+  const roomsResult = await mmlaClient.listRooms();
+  let names: string[] = [];
+  roomsResult
+    .map((rooms) => {
+      names = rooms.map((room) => room.name).flat();
+    })
+    .mapError((err) => (names = []));
   const session = await auth();
   return (
     <>
@@ -43,7 +47,7 @@ export default async function RoomsTable({ navPath }: { navPath: string }) {
             </tr>
           </thead>
           <tbody>
-            {rooms.map((room, index: number) => {
+            {roomsResult.unwrap().map((room, index: number) => {
               return (
                 <tr key={index} className="border-5 border-indigo-200 bg-black">
                   <td className="whitespace-nowrap px-6 py-4">

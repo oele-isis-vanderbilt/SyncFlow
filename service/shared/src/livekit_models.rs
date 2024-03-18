@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct TokenRequest {
     pub identity: String,
     pub video_grants: VideoGrantsWrapper,
@@ -17,6 +18,7 @@ pub struct CreateRoomRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct RoomOptions {
     pub empty_timeout: u32,
     pub max_participants: u32,
@@ -34,6 +36,7 @@ impl Default for RoomOptions {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct VideoGrantsWrapper {
     // actions on rooms
     pub room_create: bool,
@@ -128,6 +131,7 @@ impl TokenResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct LivekitRoom {
     pub sid: String,
     pub name: String,
