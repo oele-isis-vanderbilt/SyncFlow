@@ -796,12 +796,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "envy"
-version = "0.4.2"
+name = "envious"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f47e0157f2cb54f5ae1bd371b30a2ae4311e1c028f575cd4e81de7353215965"
+checksum = "3e52788a407588138195a40c991f500621fea2cffa87e7345d86dbab77287dc7"
 dependencies = [
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -2102,7 +2103,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "dotenvy",
- "envy",
+ "envious",
  "livekit-api",
  "livekit-protocol",
  "log",
