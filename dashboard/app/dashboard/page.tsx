@@ -7,8 +7,6 @@ import RoomsTable from '@/app/ui/dashboard/rooms-table';
 import { auth } from '@/auth';
 
 import { Suspense } from 'react';
-import { Role } from '@prisma/client';
-import { mmlaClient } from '@/app/lib/mmlaClient';
 import { isAdmin } from '@/app/lib/utils';
 
 export const metadata: Metadata = {

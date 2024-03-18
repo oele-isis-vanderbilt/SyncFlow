@@ -1,16 +1,12 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import prisma from '@/app/lib/prisma';
-import type { User, Role } from '@prisma/client';
 import { authConfig } from './auth.config';
 import { z } from 'zod';
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import { jwtDecode } from 'jwt-decode';
 import type { SessionUser } from '@/types/next-auth';
 import deploymentConfig from '@/deployment-config';
-import { Awaitable } from '@auth/core/src/types';
 
-async function login(
+async function apiSignIn(
   id: string,
   password: string,
 ): Promise<SessionUser | null> {
@@ -33,10 +29,10 @@ async function login(
     let token = data.token;
     let decoded_jwt = jwtDecode(token);
     return {
-      id: decoded_jwt.user_name,
-      name: decoded_jwt.user_name,
-      email: decoded_jwt.user_name,
-      role: decoded_jwt.role as Role,
+      id: decoded_jwt.userName,
+      name: decoded_jwt.userName,
+      email: decoded_jwt.userName,
+      role: decoded_jwt.role,
       apiToken: token,
     } as SessionUser;
   }
@@ -78,8 +74,8 @@ export const { auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token) {
         session.jwt = token.jwt;
-        session.user.id = token.id;
-        session.user.role = token.role;
+        session.user? session.user.id = token.id : null;
+        session.user? session.user.role = token.role: null;
       }
       return session;
     },
@@ -102,7 +98,7 @@ export const { auth, signIn, signOut } = NextAuth({
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
 
-          let user = await login(email, password);
+          let user = await apiSignIn(email, password);
           if (user) {
             return user;
           }

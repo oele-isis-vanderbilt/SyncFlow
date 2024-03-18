@@ -9,6 +9,7 @@ use std::time::SystemTime;
 use domain::models::Role;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct UserToken {
     pub iat: usize,
     pub exp: usize,

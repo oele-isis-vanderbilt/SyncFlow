@@ -4,7 +4,6 @@ import AppLogo from '@/app/ui/app-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { signOut } from '@/auth';
 import { auth } from '@/auth';
-import { User } from '@prisma/client';
 
 export default async function SideNav() {
   const session = await auth();
