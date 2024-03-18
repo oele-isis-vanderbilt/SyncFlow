@@ -7,7 +7,7 @@ import RoomsTable from '@/app/ui/dashboard/rooms-table';
 import { auth } from '@/auth';
 
 import { Suspense } from 'react';
-import { Role } from '@prisma/client';
+import { isAdmin } from '@/app/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -32,7 +32,7 @@ export default async function Page() {
             Rooms
           </h1>
         </div>
-        {session?.user?.role === Role.ADMIN ? <CreateRoom /> : null}
+        {isAdmin(session?.user) ? <CreateRoom /> : null}
       </div>
       <div className="mt-8 flex items-center">
         <RoomsTable navPath={'rooms'} />

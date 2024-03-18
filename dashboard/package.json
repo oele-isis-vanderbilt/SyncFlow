@@ -6,22 +6,20 @@
     "build": "next build",
     "create-user": "node ./scripts/create-user.js",
     "dev": "next dev",
-    "postinstall": "prisma generate",
     "lint": "next lint",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^1.3.2",
     "@heroicons/react": "^2.1.1",
     "@livekit/components-react": "^1.5.3",
     "@livekit/components-styles": "^1.0.9",
-    "@prisma/client": "^5.9.1",
     "@uidotdev/usehooks": "^2.4.1",
     "bcrypt": "^5.1.1",
     "clsx": "^2.1.0",
     "flowbite-react": "^0.7.2",
+    "jwt-decode": "^4.0.0",
     "livekit-client": "^1.15.11",
     "livekit-server-sdk": "^1.2.7",
     "next": "14.1.0",
@@ -30,6 +28,7 @@
     "react-dom": "^18.2.0",
     "react-full-screen": "^1.1.1",
     "react-select": "^5.8.0",
+    "ts-monads": "github:umesh-timalsina/ts-monads",
     "ts-node": "^10.9.2",
     "zod": "^3.22.4"
   },
@@ -48,7 +47,6 @@
     "postcss": "^8",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "prisma": "^5.9.1",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }
