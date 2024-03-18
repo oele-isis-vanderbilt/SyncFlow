@@ -1,6 +1,7 @@
 use livekit_api::services::egress::{EgressClient, EgressListFilter, EgressListOptions};
 use livekit_api::services::ServiceResult;
 use livekit_protocol::EgressInfo;
+use shared::deployment_config::StorageConfig;
 
 #[derive(Debug)]
 pub struct EgressService {
@@ -8,6 +9,7 @@ pub struct EgressService {
     server_url: String,
     api_key: String,
     api_secret: String,
+    storage_config: StorageConfig,
 }
 
 impl EgressService {
@@ -22,16 +24,17 @@ impl EgressService {
         }
     }
 
-    pub async fn list_egresses(&self, room_name: String) -> ServiceResult<Vec<EgressInfo>> {
+    pub async fn list_egresses(&self, room_name: &str) -> ServiceResult<Vec<EgressInfo>> {
         let options = EgressListOptions {
             active: false,
-            filter: EgressListFilter::Room(room_name),
+            filter: EgressListFilter::Room(room_name.into()),
         };
 
         self.client.list_egress(options).await
     }
 
-    pub async fn start_track_egress(&self, room_name: String, track_sid: String) -> ServiceResult<EgressInfo> {
+    pub async fn start_track_egress(&self, room_name: &str, track_sid: &str) -> ServiceResult<EgressInfo> {
+
 
     }
 }

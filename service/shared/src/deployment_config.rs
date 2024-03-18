@@ -12,12 +12,34 @@ pub struct DeploymentConfig {
     pub livekit_api_secret: String,
     pub jwt_secret: String,
     pub database_url: String,
+    pub storage_config: StorageConfig,
 
     /// Test configuration
     pub login_token: Option<String>,
     pub test_user: Option<String>,
     pub test_password: Option<String>,
 }
+
+#[derive(Deserialize, Debug, Clone)]
+pub enum StorageConfig {
+    S3(S3Config),
+    Local(LocalConfig),
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct S3Config {
+    pub bucket: String,
+    pub region: String,
+    pub access_key: String,
+    pub secret_key: String,
+    pub endpoint: Option<String>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct LocalConfig {
+    pub recording_root_path: String,
+}
+
 
 impl DeploymentConfig {
     pub fn load() -> Self {
