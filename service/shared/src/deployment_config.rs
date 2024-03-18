@@ -1,5 +1,5 @@
 use crate::utils::load_env;
-use envy;
+use envious;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
@@ -22,7 +22,7 @@ pub struct DeploymentConfig {
 impl DeploymentConfig {
     pub fn load() -> Self {
         load_env();
-        match envy::from_env::<DeploymentConfig>() {
+        match envious::Config::default().build_from_env::<DeploymentConfig>() {
             Ok(config) => config,
             Err(e) => panic!("Failed to load deployment config: {}", e),
         }
@@ -30,7 +30,7 @@ impl DeploymentConfig {
 
     pub fn load_from_file(filepath: String) -> Self {
         dotenvy::from_path(filepath).expect("Failed to load deployment config");
-        match envy::from_env::<DeploymentConfig>() {
+        match envious::Config::default().build_from_env::<DeploymentConfig>() {
             Ok(config) => config,
             Err(e) => panic!("Failed to load deployment config: {}", e),
         }
