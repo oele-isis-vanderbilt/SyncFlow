@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import deploymentConfig from '@/deployment-config';
 import { Ok, Err } from 'ts-monads';
 import type { Result } from 'ts-monads/lib/Result';
-import { Room, VideoGrant } from 'livekit-server-sdk';
+import {EgressInfo, ParticipantInfo, Room, VideoGrant} from 'livekit-server-sdk';
 import { CreateRoomRequest, TokenResponse } from '@/types/mmla';
 
 interface MMLAClientError {
@@ -15,6 +15,8 @@ const PREFIXES = {
   GENERATE_TOKEN: '/livekit/token',
   CREATE_ROOM: '/livekit/create-room',
   DELETE_ROOM: '/livekit/delete-room',
+  LIST_PARTICIPANTS: '/livekit/list-participants',
+  LIST_EGRESSES: '/livekit/list-egresses',
 };
 
 export class MMLAClient {
@@ -156,6 +158,22 @@ export class MMLAClient {
       TokenResponse,
       { identity: string; videoGrants: VideoGrant }
     >(PREFIXES.GENERATE_TOKEN, req);
+  }
+
+  async listParticipants(roomName: string) {
+    let response = await this.authenticatedGet<any[]>(PREFIXES.LIST_PARTICIPANTS + '/' + roomName);
+    let parsed = response.map((data) => data.map((p: any) => ParticipantInfo.fromJSON(p)));
+    return parsed;
+  }
+
+  async listEgresses(roomName: string) {
+    let response = await this.authenticatedGet<any[]>(
+      PREFIXES.LIST_EGRESSES + '/' + roomName,
+    );
+
+    let parsed = response.map((data) => data.map((p: any) => EgressInfo.fromJSON(p)));
+
+    return parsed;
   }
 }
 

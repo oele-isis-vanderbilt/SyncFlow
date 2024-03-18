@@ -7,12 +7,15 @@ use domain::models::{
 use shared::livekit_models::{CreateRoomRequest, LivekitRoom, TokenRequest, TokenResponse};
 use shared::response_models::Response;
 use std::fmt::Display;
+use livekit_protocol::{EgressInfo, ParticipantInfo};
+use crate::livekit::egress::EgressService;
 
 #[derive(Debug)]
 pub enum ServiceError {
     RoomCreationError(String),
     DeleteRoomError(String),
     RoomListError(String),
+    EgressListError(String),
     PermissionError(String),
     AccessTokenError(String),
 }
@@ -40,6 +43,10 @@ impl Into<Response> for ServiceError {
                 status: 500,
                 message: e,
             },
+            ServiceError::EgressListError(e) => Response {
+                status: 500,
+                message: e,
+            },
         }
     }
 }
@@ -52,6 +59,7 @@ impl Display for ServiceError {
             ServiceError::PermissionError(e) => write!(f, "PermissionError: {}", e),
             ServiceError::RoomListError(e) => write!(f, "RoomListError: {}", e),
             ServiceError::AccessTokenError(e) => write!(f, "AccessTokenError: {}", e),
+            ServiceError::EgressListError(e) => write!(f, "EgressListError: {}", e),
         }
     }
 }
@@ -59,14 +67,16 @@ impl Display for ServiceError {
 #[derive(Debug, Clone)]
 pub struct MMLAService {
     room_service: RoomService,
+    egress_service: EgressService,
     user_actions: UserActions,
 }
 
 impl MMLAService {
-    pub fn new(room_service: RoomService, user_actions: UserActions) -> Self {
+    pub fn new(room_service: RoomService, egress_service: EgressService, user_actions: UserActions) -> Self {
         MMLAService {
             room_service,
             user_actions,
+            egress_service,
         }
     }
 
@@ -216,6 +226,43 @@ impl MMLAService {
 
                     TokenResponse::new(t, token_request.identity.clone())
                 })
+        }
+    }
+
+    pub async fn list_participants(&self, user_id: i32, room_name: &str) -> Result<Vec<ParticipantInfo>, ServiceError> {
+        // self.room_service.list_participants(room_name).await
+        let user_rooms = self.user_actions.list_created_rooms(user_id);
+        if let Ok(rooms) = user_rooms {
+            if rooms.iter().any(|room| room.room_name == room_name) {
+                self.room_service.list_participants(room_name).await
+                    .map_err(|e| ServiceError::EgressListError(e.to_string()))
+            } else {
+                Err(ServiceError::PermissionError(
+                    "Permission denied".to_string(),
+                ))
+            }
+        } else {
+            Err(ServiceError::PermissionError(
+                "Permission denied".to_string(),
+            ))
+        }
+    }
+
+    pub async fn list_egresses(&self, user_id: i32, room_name: &str) -> Result<Vec<EgressInfo>, ServiceError> {
+        let user_rooms = self.user_actions.list_created_rooms(user_id);
+        if let Ok(rooms) = user_rooms {
+            if rooms.iter().any(|room| room.room_name == room_name) {
+                self.egress_service.list_egresses(room_name.into()).await
+                    .map_err(|e| ServiceError::RoomListError(e.to_string()))
+            } else {
+                Err(ServiceError::PermissionError(
+                    "Permission denied".to_string(),
+                ))
+            }
+        } else {
+            Err(ServiceError::PermissionError(
+                "Permission denied".to_string(),
+            ))
         }
     }
 }

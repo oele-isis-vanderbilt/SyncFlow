@@ -114,14 +114,7 @@ export async function beginTrackEgress(roomName: string, trackId: string) {
       roomName,
       {
         filepath:
-          'tracks/{room_name}/{publisher_identity}/{track_type}-{track_source}-{track_id}-{time}',
-        s3: {
-          bucket: process.env.S3_BUCKET_NAME!,
-          region: process.env.S3_REGION!,
-          accessKey: process.env.S3_ACCESS_KEY!,
-          secret: process.env.S3_SECRET_KEY!,
-          endpoint: process.env.S3_ENDPOINT!,
-        },
+          '/out/tracks/{room_name}/{publisher_identity}/{track_type}-{track_source}-{track_id}-{time}',
       },
       trackId,
     );

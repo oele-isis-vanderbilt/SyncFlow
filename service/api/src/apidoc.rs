@@ -18,6 +18,7 @@ pub fn init_api_doc(config: &mut ServiceConfig) {
             crate::livekit_handlers::create_room,
             crate::livekit_handlers::delete_room,
             crate::livekit_handlers::list_rooms,
+            crate::livekit_handlers::list_participants,
             crate::login_handlers::login,
             crate::login_handlers::logout,
         ),

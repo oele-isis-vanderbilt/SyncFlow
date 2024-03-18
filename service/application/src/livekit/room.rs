@@ -44,6 +44,10 @@ impl RoomService {
         let room_names = names.unwrap_or_default();
         self.client.list_rooms(room_names).await
     }
+
+    pub async fn list_participants(&self, room_name: &str) -> ServiceResult<Vec<proto::ParticipantInfo>> {
+        self.client.list_participants(room_name).await
+    }
 }
 
 impl Clone for RoomService {

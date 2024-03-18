@@ -28,5 +28,6 @@ services:
     network_mode: 'host'
     volumes:
       - ./egress.yaml:/etc/egress.yaml
+      - ./egress-out:/out/
     cap_add:
       - CAP_SYS_ADMIN

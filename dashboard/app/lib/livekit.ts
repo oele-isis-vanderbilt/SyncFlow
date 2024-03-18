@@ -76,7 +76,7 @@ class LiveKitService {
         },
       },
     );
-    console.log('Egress started', egressInfo);
+    console.log('Egress started>>>', egressInfo);
     return egressInfo;
   }
 
@@ -101,7 +101,9 @@ class LiveKitService {
     trackId: string,
   ) {
     noStore();
-    return await this.egressService.startTrackEgress(roomName, output, trackId);
+    let result = await this.egressService.startTrackEgress(roomName, output, trackId);
+    console.log('Egress started>>>', JSON.stringify(result));
+    return result;
   }
 }
 

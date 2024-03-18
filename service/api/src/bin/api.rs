@@ -14,6 +14,7 @@ use shared::response_models::Response;
 use shared::utils::load_env;
 use std::env;
 use std::sync::Arc;
+use application::livekit::egress::EgressService;
 
 pub async fn not_found() -> actix_web::Result<HttpResponse> {
     let response = Response {
@@ -44,8 +45,13 @@ async fn main() -> std::io::Result<()> {
         config.livekit_api_key.clone(),
         config.livekit_api_secret.clone(),
     );
+    let egress_service = EgressService::new(
+        config.livekit_server_url.clone(),
+        config.livekit_api_key.clone(),
+        config.livekit_api_secret.clone(),
+    );
     let user_actions = UserActions::new(pool.clone());
-    let mmla_service = MMLAService::new(room_service, user_actions);
+    let mmla_service = MMLAService::new(room_service, egress_service, user_actions);
 
     HttpServer::new(move || {
         App::new()

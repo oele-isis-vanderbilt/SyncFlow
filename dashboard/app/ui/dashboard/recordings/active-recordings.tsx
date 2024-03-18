@@ -7,14 +7,18 @@ import {
   TrackRecordButton,
 } from '@/app/ui/dashboard/recordings/record-buttons';
 import { EgressStatus } from 'livekit-server-sdk/dist/proto/livekit_egress';
+import {mmlaClient} from "@/app/lib/mmlaClient";
 
 export default async function ActiveRecordings({
   roomName,
 }: {
   roomName: string;
 }) {
-  const participantInfos = await liveKitService.listParticipants(roomName);
-  const egresses = await liveKitService.getRoomEgresses(roomName);
+  const participantInfoResult = await mmlaClient.listParticipants(roomName);
+  const participantsInfo = participantInfoResult.unwrap();
+  const egressesResult = await mmlaClient.listEgresses(roomName);
+  let egresses = egressesResult.unwrap();
+  console.log(egresses, participantsInfo);
 
   const getTrackKind = (track: TrackInfo) => {
     switch (track.source) {
@@ -33,7 +37,7 @@ export default async function ActiveRecordings({
     }
   };
 
-  const tracks = participantInfos
+  const tracks = participantsInfo
     .map((participantInfo) => {
       return participantInfo.tracks.map((track) => {
         return {
