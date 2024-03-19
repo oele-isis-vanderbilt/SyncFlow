@@ -1,16 +1,13 @@
 'use server';
 
 import { z } from 'zod';
-import { liveKitService } from './livekit';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { signIn } from '@/auth';
 import { mmlaClient } from '@/app/lib/mmlaClient';
 
-import type { EgressInfo, VideoGrant } from 'livekit-server-sdk';
 import type { CreateRoomRequest } from '@/types/mmla';
 import { AuthError } from 'next-auth';
-import { Egress } from 'livekit-server-sdk/dist/proto/livekit_egress';
 
 const APP_NAME = 'LiveKitELP';
 const USER_NAME = 'admin';
@@ -52,24 +49,6 @@ export async function deleteRoom(roomName: string) {
   redirect('/dashboard');
 }
 
-// ToDo: Add a function to get all rooms
-export async function generateToken(tokenOptions: VideoGrant = {}) {
-  const grant = {
-    ...{
-      canPublish: true,
-      canSubscribe: true,
-      canUpdateOwnMetadata: true,
-      roomJoin: true,
-      roomCreate: false,
-    },
-    ...tokenOptions,
-  };
-
-  // ToDo: Add a function to get the user's identity after DB integration
-  const token = await liveKitService.generateToken(USER_NAME, USER_NAME, grant);
-  return token;
-}
-
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
@@ -94,44 +73,26 @@ export async function redirectToDashboard() {
   redirect('/dashboard');
 }
 
-export async function getRoomRecordings(roomName: string) {
-  try {
-    return await liveKitService.getRoomEgresses(roomName);
-  } catch (error) {
-    console.error('Error getting room recordings', error);
-    return [];
-  }
-}
-
 export async function redirectToRoomRecording(roomName: string) {
   revalidatePath(`/dashboard/recordings/${roomName}`);
   redirect(`/dashboard/recordings/${roomName}`);
 }
 
 export async function beginTrackEgress(roomName: string, trackId: string) {
-  try {
-    const egressInfo = await liveKitService.startTrackEgress(
-      roomName,
-      {
-        filepath:
-          '/out/tracks/{room_name}/{publisher_identity}/{track_type}-{track_source}-{track_id}-{time}',
-      },
-      trackId,
-    );
-    return egressInfo;
-  } catch (error) {
-    console.error('Error beginning track egress', error);
+  const egressResult = await mmlaClient.recordTrack(roomName, trackId);
+  if (egressResult.ok()) {
+    return egressResult.unwrap();
+  } else {
     revalidatePath(`/dashboard/recordings/${roomName}`);
     redirect(`/dashboard/recordings/${roomName}`);
   }
 }
 
 export async function stopEgress(roomName: string, egressId: string) {
-  try {
-    const egressInfo = await liveKitService.stopEgress(egressId);
-    return egressInfo;
-  } catch (error) {
-    console.error('Error stopping track egress', error);
+  let egressResult = await mmlaClient.stopEgress(roomName, egressId);
+  if (egressResult.ok()) {
+    return egressResult.unwrap();
+  } else {
     revalidatePath(`/dashboard/recordings/${roomName}`);
     redirect(`/dashboard/recordings/${roomName}`);
   }
@@ -140,7 +101,7 @@ export async function stopEgress(roomName: string, egressId: string) {
 export async function beginTracksEgress(trackIds: string[], roomName: string) {
   const egresses = await Promise.all(
     trackIds.map((trackId) => {
-      return beginTrackEgress(roomName, trackId);
+      return mmlaClient.recordTrack(roomName, trackId);
     }),
   );
 
@@ -150,7 +111,9 @@ export async function beginTracksEgress(trackIds: string[], roomName: string) {
 
 export async function stopTracksEgress(egressIds: string[], roomName: string) {
   const egresses = await Promise.all(
-    egressIds.map(liveKitService.stopEgress.bind(liveKitService)),
+    egressIds.map((egressId) => {
+      return mmlaClient.stopEgress(roomName, egressId);
+    }),
   );
 
   await new Promise((resolve) => setTimeout(resolve, 1000));

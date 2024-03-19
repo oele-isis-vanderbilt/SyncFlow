@@ -254,29 +254,69 @@ pub async fn list_egresses(
 
 #[utoipa::path(
     post,
-    path = "/livekit/record-room/{room_name}",
+    path = "/livekit/begin-track-egress/{room_name}/{track_sid}",
     responses(
-        (status = 200, description = "Room recording started"),
+        (status = 200, description = "Track egress started"),
         (status = 500, description = "Internal Server Error")
-    ),
-    params(
-        ("room_name", description = "The name of the room to start recording")
     )
 )]
-#[post("/record-room/{room_name}")]
-pub async fn record_room(
+#[post("/begin-track-egress/{room_name}/{track_sid}")]
+pub async fn begin_track_egress(
     mmla_service: web::Data<MMLAService>,
-    room_name: web::Path<String>,
+    params: web::Path<(String, String)>,
     token_data: Option<ReqData<UserTokenType>>,
 ) -> HttpResponse {
+    let (room_name, track_sid) = params.into_inner();
     match token_data {
         Some(token) => {
             let token_inner = token.into_inner();
-            let record_room_result = mmla_service
-                .record_room(token_inner.claims.user_id, &room_name)
+            let begin_egress_result = mmla_service
+                .record_track(token_inner.claims.user_id, &room_name, &track_sid)
                 .await;
 
-            HttpResponse::Ok().json(record_room_result.0)
+            match begin_egress_result {
+                Ok(egress_result) => HttpResponse::Ok().json(egress_result),
+                Err(err) => {
+                    let response: Response = err.into();
+                    response.into()
+                }
+            }
+        }
+        None => {
+            return HttpResponse::Unauthorized().body("Unauthorized");
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/livekit/stop-recording/{room_name}/{egress_id}",
+    responses(
+        (status = 200, description = "Recording stopped"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
+#[post("/stop-recording/{room_name}/{egress_id}")]
+pub async fn stop_recording(
+    mmla_service: web::Data<MMLAService>,
+    params: web::Path<(String, String)>,
+    token_data: Option<ReqData<UserTokenType>>,
+) -> HttpResponse {
+    let (room_name, track_sid) = params.into_inner();
+    match token_data {
+        Some(token) => {
+            let token_inner = token.into_inner();
+            let stop_recording_result = mmla_service
+                .stop_recording(token_inner.claims.user_id, &room_name, &track_sid)
+                .await;
+
+            match stop_recording_result {
+                Ok(egress_result) => HttpResponse::Ok().json(egress_result),
+                Err(err) => {
+                    let response: Response = err.into();
+                    response.into()
+                }
+            }
         }
         None => {
             return HttpResponse::Unauthorized().body("Unauthorized");
@@ -292,7 +332,9 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
         .service(delete_room)
         .service(list_rooms)
         .service(list_participants)
-        .service(list_egresses);
+        .service(list_egresses)
+        .service(begin_track_egress)
+        .service(stop_recording);
 
     cfg.service(livekit_scope);
 }

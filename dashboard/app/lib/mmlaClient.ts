@@ -22,7 +22,8 @@ const PREFIXES = {
   DELETE_ROOM: '/livekit/delete-room',
   LIST_PARTICIPANTS: '/livekit/list-participants',
   LIST_EGRESSES: '/livekit/list-egresses',
-  RECORD_ROOM: '/livekit/record-room',
+  BEGIN_TRACK_EGRESS: '/livekit/begin-track-egress',
+  STOP_EGRESS: '/livekit/stop-recording',
 };
 
 export class MMLAClient {
@@ -33,6 +34,7 @@ export class MMLAClient {
   }
 
   private async getAuthToken(): Promise<string | null> {
+    // @ts-ignore
     return (await auth())?.jwt;
   }
 
@@ -188,11 +190,26 @@ export class MMLAClient {
     return parsed;
   }
 
-  async recordRoom(roomName: string) {
-    let response = await this.authenticatedPost(
-      PREFIXES.RECORD_ROOM + '/' + roomName,
+  async recordTrack(roomName: string, trackSid: string) {
+    let responseResult = await this.authenticatedPost<any, {}>(
+      PREFIXES.BEGIN_TRACK_EGRESS + '/' + roomName + '/' + trackSid,
       {},
     );
+
+    let egressInfo = responseResult.map((data) => EgressInfo.fromJSON(data));
+
+    return egressInfo;
+  }
+
+  async stopEgress(roomName: string, egressId: string) {
+    let responseResult = await this.authenticatedPost<any, {}>(
+      PREFIXES.STOP_EGRESS + '/' + roomName + '/' + egressId,
+      {},
+    );
+
+    let egressInfo = responseResult.map((data) => EgressInfo.fromJSON(data));
+
+    return egressInfo;
   }
 }
 

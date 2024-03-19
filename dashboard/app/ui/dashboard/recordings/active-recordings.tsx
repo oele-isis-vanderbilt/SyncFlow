@@ -1,4 +1,3 @@
-import { liveKitService } from '@/app/lib/livekit';
 import type { TrackInfo } from 'livekit-server-sdk';
 import { TrackSource } from 'livekit-server-sdk/dist/proto/livekit_models';
 import { lusitana } from '@/app/ui/fonts';
@@ -18,7 +17,6 @@ export default async function ActiveRecordings({
   const participantsInfo = participantInfoResult.unwrap();
   const egressesResult = await mmlaClient.listEgresses(roomName);
   let egresses = egressesResult.unwrap();
-  console.log(egresses, participantsInfo);
 
   const getTrackKind = (track: TrackInfo) => {
     switch (track.source) {
@@ -114,7 +112,6 @@ function TracksTable({
         </thead>
         <tbody>
           {tracks.map((track, index: number) => {
-            console.log(track, index);
             return (
               <tr key={index} className="border-5 border-indigo-200 bg-black">
                 <td className="whitespace-nowrap px-6 py-4">

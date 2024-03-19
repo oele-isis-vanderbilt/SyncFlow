@@ -32,7 +32,7 @@ pub struct S3Config {
     pub region: String,
     pub access_key: String,
     pub secret_key: String,
-    pub endpoint: Option<String>,
+    pub endpoint: String,
 }
 
 #[derive(Deserialize, Debug, Clone)]

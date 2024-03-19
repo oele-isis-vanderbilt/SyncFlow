@@ -1,4 +1,4 @@
-import { liveKitService } from '@/app/lib/livekit';
+import { mmlaClient } from '@/app/lib/mmlaClient';
 import {
   HomeModernIcon,
   UserGroupIcon,
@@ -13,7 +13,8 @@ const iconMap = {
 };
 
 async function roomsSummary() {
-  const rooms = await liveKitService.listRooms();
+  const roomsResult = await mmlaClient.listRooms();
+  let rooms = roomsResult.unwrap();
   return rooms
     .filter((room) => !!room.name)
     .map((room) => {

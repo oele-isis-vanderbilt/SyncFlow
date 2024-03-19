@@ -23,6 +23,7 @@ type TrackInfo = {
 };
 
 export function TrackRecordButton({ trackInfo }: { trackInfo: TrackInfo }) {
+  console.log(trackInfo, '>>>>>>');
   const { trackId, roomName } = trackInfo;
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [isRecording, setIsRecording] = useState(!!trackInfo.egressId);

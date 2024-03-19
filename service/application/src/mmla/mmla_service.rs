@@ -275,41 +275,39 @@ impl MMLAService {
         }
     }
 
-    pub async fn record_room(
+    pub async fn record_track(
         &self,
         user_id: i32,
         room_name: &str,
-    ) -> (Vec<EgressInfo>, Vec<ServiceError>) {
+        track_id: &str,
+    ) -> Result<EgressInfo, ServiceError> {
         if self.is_user_created_room(user_id, room_name) {
-            let tracks = self.room_service.list_tracks(room_name).await;
-            match tracks {
-                Ok(room_tracks) => {
-                    let mut egress_results = vec![];
-                    let mut egress_errors = vec![];
-                    for t in room_tracks {
-                        let egress = self
-                            .egress_service
-                            .start_local_track_egress(room_name, &t.sid)
-                            .await;
-                        match egress {
-                            Ok(e) => {
-                                egress_results.push(e);
-                            }
-                            Err(e) => {
-                                egress_errors.push(ServiceError::EgressError(e.to_string()));
-                            }
-                        }
-                    }
-                    (egress_results, egress_errors)
-                }
-                Err(e) => {
-                    vec![ServiceError::EgressError(e.to_string())]
-                }
-            }
+            self.egress_service
+                .start_local_track_egress(room_name, track_id)
+                .await
+                .map_err(|e| ServiceError::EgressError(e.to_string()))
         } else {
-            vec![ServiceError::PermissionError(
+            Err(ServiceError::PermissionError(
                 "Permission denied".to_string(),
-            )]
+            ))
+        }
+    }
+
+    pub async fn stop_recording(
+        &self,
+        user_id: i32,
+        room_name: &str,
+        egress_id: &str,
+    ) -> Result<EgressInfo, ServiceError> {
+        if self.is_user_created_room(user_id, room_name) {
+            self.egress_service
+                .stop_egress(egress_id)
+                .await
+                .map_err(|e| ServiceError::EgressError(e.to_string()))
+        } else {
+            Err(ServiceError::PermissionError(
+                "Permission denied".to_string(),
+            ))
         }
     }
 

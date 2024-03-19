@@ -1,10 +1,12 @@
+use diesel::insertable::DefaultableColumnInsertValue::Default;
 use livekit_api::services::egress::{
     EgressClient, EgressListFilter, EgressListOptions, EgressOutput, TrackEgressOutput,
 };
-use livekit_api::services::ServiceResult;
+use livekit_api::services::{ServiceError, ServiceResult};
 use livekit_protocol::track_egress_request::Output;
-use livekit_protocol::{DirectFileOutput, EgressInfo, TrackEgressRequest};
+use livekit_protocol::{DirectFileOutput, EgressInfo, S3Upload, TrackEgressRequest};
 use shared::deployment_config::StorageConfig;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct EgressService {
@@ -47,18 +49,60 @@ impl EgressService {
         room_name: &str,
         track_sid: &str,
     ) -> ServiceResult<EgressInfo> {
-        let output = TrackEgressOutput::File(
-            Box::new(
-                DirectFileOutput {
-                    filepath: "/out/tracks/{room_name}/{publisher_identity}/{track_type}-{track_source}-{track_id}-{time}".to_string(),
+        match &self.storage_config {
+            StorageConfig::Local(ref local_config) => {
+                let output = TrackEgressOutput::File(Box::new(DirectFileOutput {
+                    filepath: format!(
+                        "{}/tracks/{}/{}/{}-{}-{}-{}",
+                        local_config.recording_root_path,
+                        room_name,
+                        "{publisher_identity}",
+                        "{track_type}",
+                        "{track_source}",
+                        "{track_id}",
+                        "{time}"
+                    ),
                     output: None,
-                    disable_manifest: false
-            })
-        );
+                    disable_manifest: false,
+                }));
+                self.client
+                    .start_track_egress(room_name, output, track_sid)
+                    .await
+            }
+            StorageConfig::S3(s3_config) => {
+                let output = TrackEgressOutput::File(Box::new(DirectFileOutput {
+                    filepath: format!(
+                        "{}/tracks/{}/{}/{}-{}-{}-{}",
+                        s3_config.bucket,
+                        room_name,
+                        "{publisher_identity}",
+                        "{track_type}",
+                        "{track_source}",
+                        "{track_id}",
+                        "{time}"
+                    ),
+                    output: Some(livekit_protocol::direct_file_output::Output::S3(S3Upload {
+                        bucket: s3_config.bucket.clone(),
+                        region: s3_config.region.clone(),
+                        access_key: s3_config.access_key.clone(),
+                        secret: s3_config.secret_key.clone(),
+                        endpoint: s3_config.endpoint.clone(),
+                        tagging: "".to_string(),
+                        force_path_style: false,
+                        content_disposition: "".to_string(),
+                        metadata: HashMap::new(),
+                    })),
+                    disable_manifest: false,
+                }));
+                self.client
+                    .start_track_egress(room_name, output, track_sid)
+                    .await
+            }
+        }
+    }
 
-        self.client
-            .start_track_egress(room_name, output, track_sid)
-            .await
+    pub async fn stop_egress(&self, egress_id: &str) -> ServiceResult<EgressInfo> {
+        self.client.stop_egress(egress_id).await
     }
 }
 
@@ -69,6 +113,7 @@ impl Clone for EgressService {
             server_url: self.server_url.clone(),
             api_key: self.api_key.clone(),
             api_secret: self.api_secret.clone(),
+            storage_config: self.storage_config.clone(),
         }
     }
 }
