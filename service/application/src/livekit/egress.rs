@@ -1,10 +1,10 @@
-use diesel::insertable::DefaultableColumnInsertValue::Default;
+
 use livekit_api::services::egress::{
-    EgressClient, EgressListFilter, EgressListOptions, EgressOutput, TrackEgressOutput,
+    EgressClient, EgressListFilter, EgressListOptions, TrackEgressOutput,
 };
-use livekit_api::services::{ServiceError, ServiceResult};
-use livekit_protocol::track_egress_request::Output;
-use livekit_protocol::{DirectFileOutput, EgressInfo, S3Upload, TrackEgressRequest};
+use livekit_api::services::{ServiceResult};
+
+use livekit_protocol::{DirectFileOutput, EgressInfo, S3Upload};
 use shared::deployment_config::StorageConfig;
 use std::collections::HashMap;
 
