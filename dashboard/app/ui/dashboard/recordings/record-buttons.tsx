@@ -7,12 +7,13 @@ import {
   stopEgress,
   stopTracksEgress,
 } from '@/app/lib/actions';
-import { EgressStatus } from 'livekit-server-sdk/dist/proto/livekit_egress';
+import { EgressInfo, EgressStatus } from '@livekit/protocol';
 import { Button } from '@/app/ui/button';
 import { Modal } from 'flowbite-react';
 import { lusitana } from '@/app/ui/fonts';
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
+import { EgressDetails } from '@/app/lib/egress-details';
 
 type TrackInfo = {
   participant: string;
@@ -23,32 +24,28 @@ type TrackInfo = {
 };
 
 export function TrackRecordButton({ trackInfo }: { trackInfo: TrackInfo }) {
-  console.log(trackInfo, '>>>>>>');
   const { trackId, roomName } = trackInfo;
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [isRecording, setIsRecording] = useState(!!trackInfo.egressId);
   const [bindedEgressId, setBindedEgressId] = useState(trackInfo.egressId);
-  console.log(trackInfo.egressId, '***', bindedEgressId, isRecording);
   return (
     <Button
       className="flex bg-transparent hover:bg-gray-900"
       onClick={async () => {
         setIsBtnDisabled(true);
         if (!isRecording) {
-          const egressInfo = await beginTrackEgress(roomName, trackId);
-          setIsRecording(
-            [EgressStatus.EGRESS_ACTIVE, EgressStatus.EGRESS_STARTING].includes(
-              egressInfo.status!,
-            ),
+          const egressInfo = EgressDetails.fromJson(
+            await beginTrackEgress(roomName, trackId),
           );
-          [EgressStatus.EGRESS_ACTIVE, EgressStatus.EGRESS_STARTING].includes(
-            egressInfo.status!,
-          )
+          setIsRecording(egressInfo.isEgressActive());
+          egressInfo.isEgressActive()
             ? setBindedEgressId(egressInfo.egressId)
             : null;
         } else {
-          const egressInfo = await stopEgress(roomName, bindedEgressId!);
-          setIsRecording(egressInfo.status === EgressStatus.EGRESS_COMPLETE);
+          const egressInfo = EgressDetails.fromJson(
+            await stopEgress(roomName, bindedEgressId!),
+          );
+          setIsRecording(egressInfo.isEgressCompleted());
           setBindedEgressId(undefined);
         }
         setIsBtnDisabled(false);

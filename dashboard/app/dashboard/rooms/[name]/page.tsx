@@ -1,8 +1,7 @@
 import Room from '@/app/ui/dashboard/rooms/room';
 import { auth } from '@/auth';
 import { isAdmin } from '@/app/lib/utils';
-import { mmlaClient } from '@/app/lib/mmlaClient';
-import { TrackSource } from 'livekit-server-sdk';
+import { mmlaClient } from '@/app/lib/mmla-client';
 
 export default async function Page({ params }: { params: { name: string } }) {
   const roomName = params.name;
@@ -17,12 +16,7 @@ export default async function Page({ params }: { params: { name: string } }) {
         room: roomName,
         canPublish: true,
         canSubscribe: isAdminUser,
-        canPublishSources: [
-          TrackSource.MICROPHONE,
-          TrackSource.CAMERA,
-          TrackSource.SCREEN_SHARE,
-          TrackSource.SCREEN_SHARE_AUDIO,
-        ],
+        canPublishSources: [],
         canPublishData: true,
         canUpdateOwnMetadata: isAdminUser,
         hidden: false,

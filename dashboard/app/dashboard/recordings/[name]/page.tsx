@@ -1,6 +1,6 @@
 import { lusitana } from '@/app/ui/fonts';
 import ActiveRecordings from '@/app/ui/dashboard/recordings/active-recordings';
-import { mmlaClient } from '@/app/lib/mmlaClient';
+import { mmlaClient } from '@/app/lib/mmla-client';
 export default async function Page({ params }: { params: { name: string } }) {
   const roomName = params.name;
 

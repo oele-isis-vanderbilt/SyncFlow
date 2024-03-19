@@ -88,7 +88,7 @@ impl EgressService {
                         secret: s3_config.secret_key.clone(),
                         endpoint: s3_config.endpoint.clone(),
                         tagging: "".to_string(),
-                        force_path_style: false,
+                        force_path_style: true,
                         content_disposition: "".to_string(),
                         metadata: HashMap::new(),
                     })),

@@ -4,10 +4,12 @@ import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { signIn } from '@/auth';
-import { mmlaClient } from '@/app/lib/mmlaClient';
+import { mmlaClient } from '@/app/lib/mmla-client';
 
 import type { CreateRoomRequest } from '@/types/mmla';
 import { AuthError } from 'next-auth';
+import { EgressInfo } from '@livekit/protocol';
+import { JsonValue } from '@bufbuild/protobuf';
 
 const APP_NAME = 'LiveKitELP';
 const USER_NAME = 'admin';
@@ -81,7 +83,7 @@ export async function redirectToRoomRecording(roomName: string) {
 export async function beginTrackEgress(roomName: string, trackId: string) {
   const egressResult = await mmlaClient.recordTrack(roomName, trackId);
   if (egressResult.ok()) {
-    return egressResult.unwrap();
+    return egressResult.unwrap().toJson() as JsonValue;
   } else {
     revalidatePath(`/dashboard/recordings/${roomName}`);
     redirect(`/dashboard/recordings/${roomName}`);
@@ -91,7 +93,7 @@ export async function beginTrackEgress(roomName: string, trackId: string) {
 export async function stopEgress(roomName: string, egressId: string) {
   let egressResult = await mmlaClient.stopEgress(roomName, egressId);
   if (egressResult.ok()) {
-    return egressResult.unwrap();
+    return egressResult.unwrap().toJson() as JsonValue;
   } else {
     revalidatePath(`/dashboard/recordings/${roomName}`);
     redirect(`/dashboard/recordings/${roomName}`);

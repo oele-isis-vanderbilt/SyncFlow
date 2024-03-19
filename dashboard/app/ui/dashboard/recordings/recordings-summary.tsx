@@ -1,4 +1,4 @@
-import { mmlaClient } from '@/app/lib/mmlaClient';
+import { mmlaClient } from '@/app/lib/mmla-client';
 
 export default async function RecordingsSummary() {
   const roomsResult = await mmlaClient.listRooms();

@@ -1,12 +1,12 @@
 import type { TrackInfo } from 'livekit-server-sdk';
-import { TrackSource } from 'livekit-server-sdk/dist/proto/livekit_models';
+import { TrackSource } from '@livekit/protocol';
 import { lusitana } from '@/app/ui/fonts';
 import {
   AllTracksRecordButton,
   TrackRecordButton,
 } from '@/app/ui/dashboard/recordings/record-buttons';
-import { EgressStatus } from 'livekit-server-sdk/dist/proto/livekit_egress';
-import { mmlaClient } from '@/app/lib/mmlaClient';
+import { mmlaClient } from '@/app/lib/mmla-client';
+import { EgressDetails } from '@/app/lib/egress-details';
 
 export default async function ActiveRecordings({
   roomName,
@@ -16,7 +16,7 @@ export default async function ActiveRecordings({
   const participantInfoResult = await mmlaClient.listParticipants(roomName);
   const participantsInfo = participantInfoResult.unwrap();
   const egressesResult = await mmlaClient.listEgresses(roomName);
-  let egresses = egressesResult.unwrap();
+  let egresses = egressesResult.unwrap().map((e) => new EgressDetails(e));
 
   const getTrackKind = (track: TrackInfo) => {
     switch (track.source) {
@@ -44,14 +44,8 @@ export default async function ActiveRecordings({
           kind: getTrackKind(track),
           roomName: roomName,
           egressId:
-            egresses.find(
-              (e) =>
-                e.track?.trackId === track.sid &&
-                [
-                  EgressStatus.EGRESS_ACTIVE,
-                  EgressStatus.EGRESS_STARTING,
-                ].includes(e.status!),
-            )?.egressId || undefined,
+            egresses.find((e) => e.trackSid === track.sid && e.isEgressActive())
+              ?.egressId || undefined,
         };
       });
     })

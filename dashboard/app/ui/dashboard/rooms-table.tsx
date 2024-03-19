@@ -1,5 +1,5 @@
 import type { Room } from 'livekit-server-sdk';
-import { mmlaClient } from '@/app/lib/mmlaClient';
+import { mmlaClient } from '@/app/lib/mmla-client';
 import RoomActions from '@/app/ui/dashboard/room-actions';
 import Link from 'next/link';
 import { auth } from '@/auth';

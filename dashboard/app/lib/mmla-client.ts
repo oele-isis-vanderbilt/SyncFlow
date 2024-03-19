@@ -2,12 +2,9 @@ import { auth } from '@/auth';
 import deploymentConfig from '@/deployment-config';
 import { Ok, Err } from 'ts-monads';
 import type { Result } from 'ts-monads/lib/Result';
-import {
-  EgressInfo,
-  ParticipantInfo,
-  Room,
-  VideoGrant,
-} from 'livekit-server-sdk';
+import { EgressInfo, ParticipantInfo, Room } from '@livekit/protocol';
+
+import { VideoGrant } from 'livekit-server-sdk';
 import { CreateRoomRequest, TokenResponse } from '@/types/mmla';
 
 interface MMLAClientError {
@@ -173,7 +170,7 @@ export class MMLAClient {
       PREFIXES.LIST_PARTICIPANTS + '/' + roomName,
     );
     let parsed = response.map((data) =>
-      data.map((p: any) => ParticipantInfo.fromJSON(p)),
+      data.map((p: any) => ParticipantInfo.fromJson(p)),
     );
     return parsed;
   }
@@ -184,7 +181,7 @@ export class MMLAClient {
     );
 
     let parsed = response.map((data) =>
-      data.map((p: any) => EgressInfo.fromJSON(p)),
+      data.map((p: any) => EgressInfo.fromJson(p)),
     );
 
     return parsed;
@@ -196,7 +193,7 @@ export class MMLAClient {
       {},
     );
 
-    let egressInfo = responseResult.map((data) => EgressInfo.fromJSON(data));
+    let egressInfo = responseResult.map((data) => EgressInfo.fromJson(data));
 
     return egressInfo;
   }
@@ -207,7 +204,7 @@ export class MMLAClient {
       {},
     );
 
-    let egressInfo = responseResult.map((data) => EgressInfo.fromJSON(data));
+    let egressInfo = responseResult.map((data) => EgressInfo.fromJson(data));
 
     return egressInfo;
   }
