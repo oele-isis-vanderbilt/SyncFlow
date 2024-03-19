@@ -252,6 +252,37 @@ pub async fn list_egresses(
     }
 }
 
+#[utoipa::path(
+    post,
+    path = "/livekit/record-room/{room_name}",
+    responses(
+        (status = 200, description = "Room recording started"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("room_name", description = "The name of the room to start recording")
+    )
+)]
+#[post("/record-room/{room_name}")]
+pub async fn record_room(
+    mmla_service: web::Data<MMLAService>,
+    room_name: web::Path<String>,
+    token_data: Option<ReqData<UserTokenType>>,
+) -> HttpResponse {
+    match token_data {
+        Some(token) => {
+            let token_inner = token.into_inner();
+            let record_room_result = mmla_service
+                .record_room(token_inner.claims.user_id, &room_name)
+                .await;
+
+            HttpResponse::Ok().json(record_room_result.0)
+        }
+        None => {
+            return HttpResponse::Unauthorized().body("Unauthorized");
+        }
+    }
+}
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     let livekit_scope = web::scope("/livekit")

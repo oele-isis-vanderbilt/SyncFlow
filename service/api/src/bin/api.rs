@@ -3,6 +3,7 @@ use api::apidoc::init_api_doc;
 use api::auth_middleware;
 use api::livekit_handlers::init_routes as lk_init_routes;
 use api::login_handlers::init_routes as login_init_routes;
+use application::livekit::egress::EgressService;
 use application::livekit::room::RoomService;
 use application::mmla::mmla_service::MMLAService;
 use application::mmla::user_actions::UserActions;
@@ -14,7 +15,6 @@ use shared::response_models::Response;
 use shared::utils::load_env;
 use std::env;
 use std::sync::Arc;
-use application::livekit::egress::EgressService;
 
 pub async fn not_found() -> actix_web::Result<HttpResponse> {
     let response = Response {
@@ -28,7 +28,10 @@ pub async fn not_found() -> actix_web::Result<HttpResponse> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     load_env();
-    env::set_var("RUST_LOG", "actix_web=debug,api=debug,application=debug,infrastructure=debug,shared=debug");
+    env::set_var(
+        "RUST_LOG",
+        "actix_web=debug,api=debug,application=debug,infrastructure=debug,shared=debug",
+    );
     env_logger::init();
     let config = DeploymentConfig::load();
 
@@ -49,6 +52,7 @@ async fn main() -> std::io::Result<()> {
         config.livekit_server_url.clone(),
         config.livekit_api_key.clone(),
         config.livekit_api_secret.clone(),
+        config.storage_config.clone(),
     );
     let user_actions = UserActions::new(pool.clone());
     let mmla_service = MMLAService::new(room_service, egress_service, user_actions);

@@ -1,12 +1,12 @@
 use crate::users::user::LoginSessionInfo;
 use diesel::PgConnection;
+use domain::models::Role;
 use jsonwebtoken::errors as jwt_errors;
 use jsonwebtoken::{
     decode, encode, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
 };
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
-use domain::models::Role;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]

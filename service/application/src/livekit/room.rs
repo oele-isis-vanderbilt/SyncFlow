@@ -45,8 +45,18 @@ impl RoomService {
         self.client.list_rooms(room_names).await
     }
 
-    pub async fn list_participants(&self, room_name: &str) -> ServiceResult<Vec<proto::ParticipantInfo>> {
+    pub async fn list_participants(
+        &self,
+        room_name: &str,
+    ) -> ServiceResult<Vec<proto::ParticipantInfo>> {
         self.client.list_participants(room_name).await
+    }
+
+    pub async fn list_tracks(&self, room_name: &str) -> ServiceResult<Vec<proto::TrackInfo>> {
+        self.client
+            .list_participants(room_name)
+            .await
+            .map(|participants| participants.iter().flat_map(|p| p.tracks.clone()).collect())
     }
 }
 

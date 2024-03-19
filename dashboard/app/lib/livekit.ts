@@ -101,7 +101,11 @@ class LiveKitService {
     trackId: string,
   ) {
     noStore();
-    let result = await this.egressService.startTrackEgress(roomName, output, trackId);
+    let result = await this.egressService.startTrackEgress(
+      roomName,
+      output,
+      trackId,
+    );
     console.log('Egress started>>>', JSON.stringify(result));
     return result;
   }

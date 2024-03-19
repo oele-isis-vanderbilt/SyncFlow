@@ -7,7 +7,7 @@ import {
   TrackRecordButton,
 } from '@/app/ui/dashboard/recordings/record-buttons';
 import { EgressStatus } from 'livekit-server-sdk/dist/proto/livekit_egress';
-import {mmlaClient} from "@/app/lib/mmlaClient";
+import { mmlaClient } from '@/app/lib/mmlaClient';
 
 export default async function ActiveRecordings({
   roomName,

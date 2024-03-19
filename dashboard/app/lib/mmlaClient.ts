@@ -2,7 +2,12 @@ import { auth } from '@/auth';
 import deploymentConfig from '@/deployment-config';
 import { Ok, Err } from 'ts-monads';
 import type { Result } from 'ts-monads/lib/Result';
-import {EgressInfo, ParticipantInfo, Room, VideoGrant} from 'livekit-server-sdk';
+import {
+  EgressInfo,
+  ParticipantInfo,
+  Room,
+  VideoGrant,
+} from 'livekit-server-sdk';
 import { CreateRoomRequest, TokenResponse } from '@/types/mmla';
 
 interface MMLAClientError {
@@ -17,6 +22,7 @@ const PREFIXES = {
   DELETE_ROOM: '/livekit/delete-room',
   LIST_PARTICIPANTS: '/livekit/list-participants',
   LIST_EGRESSES: '/livekit/list-egresses',
+  RECORD_ROOM: '/livekit/record-room',
 };
 
 export class MMLAClient {
@@ -161,8 +167,12 @@ export class MMLAClient {
   }
 
   async listParticipants(roomName: string) {
-    let response = await this.authenticatedGet<any[]>(PREFIXES.LIST_PARTICIPANTS + '/' + roomName);
-    let parsed = response.map((data) => data.map((p: any) => ParticipantInfo.fromJSON(p)));
+    let response = await this.authenticatedGet<any[]>(
+      PREFIXES.LIST_PARTICIPANTS + '/' + roomName,
+    );
+    let parsed = response.map((data) =>
+      data.map((p: any) => ParticipantInfo.fromJSON(p)),
+    );
     return parsed;
   }
 
@@ -171,9 +181,18 @@ export class MMLAClient {
       PREFIXES.LIST_EGRESSES + '/' + roomName,
     );
 
-    let parsed = response.map((data) => data.map((p: any) => EgressInfo.fromJSON(p)));
+    let parsed = response.map((data) =>
+      data.map((p: any) => EgressInfo.fromJSON(p)),
+    );
 
     return parsed;
+  }
+
+  async recordRoom(roomName: string) {
+    let response = await this.authenticatedPost(
+      PREFIXES.RECORD_ROOM + '/' + roomName,
+      {},
+    );
   }
 }
 

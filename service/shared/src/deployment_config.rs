@@ -40,7 +40,6 @@ pub struct LocalConfig {
     pub recording_root_path: String,
 }
 
-
 impl DeploymentConfig {
     pub fn load() -> Self {
         load_env();
