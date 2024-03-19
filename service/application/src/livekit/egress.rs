@@ -1,8 +1,7 @@
-
 use livekit_api::services::egress::{
     EgressClient, EgressListFilter, EgressListOptions, TrackEgressOutput,
 };
-use livekit_api::services::{ServiceResult};
+use livekit_api::services::ServiceResult;
 
 use livekit_protocol::{DirectFileOutput, EgressInfo, S3Upload};
 use shared::deployment_config::StorageConfig;
@@ -53,7 +52,7 @@ impl EgressService {
             StorageConfig::Local(ref local_config) => {
                 let output = TrackEgressOutput::File(Box::new(DirectFileOutput {
                     filepath: format!(
-                        "{}/tracks/{}/{}/{}-{}-{}-{}",
+                        "{}/{}/tracks/{}/{}-{}-{}-{}",
                         local_config.recording_root_path,
                         room_name,
                         "{publisher_identity}",
@@ -72,8 +71,7 @@ impl EgressService {
             StorageConfig::S3(s3_config) => {
                 let output = TrackEgressOutput::File(Box::new(DirectFileOutput {
                     filepath: format!(
-                        "{}/tracks/{}/{}/{}-{}-{}-{}",
-                        s3_config.bucket,
+                        "{}/tracks/{}/{}-{}-{}-{}",
                         room_name,
                         "{publisher_identity}",
                         "{track_type}",
