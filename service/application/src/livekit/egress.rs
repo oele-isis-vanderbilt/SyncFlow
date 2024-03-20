@@ -102,6 +102,13 @@ impl EgressService {
     pub async fn stop_egress(&self, egress_id: &str) -> ServiceResult<EgressInfo> {
         self.client.stop_egress(egress_id).await
     }
+
+    pub fn get_egress_root(&self) -> String {
+        match &self.storage_config {
+            StorageConfig::Local(ref local_config) => local_config.recording_root_path.clone(),
+            StorageConfig::S3(s3_config) => s3_config.bucket.clone(),
+        }
+    }
 }
 
 impl Clone for EgressService {

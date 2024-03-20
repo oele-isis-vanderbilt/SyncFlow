@@ -2,8 +2,10 @@ use crate::livekit::egress::EgressService;
 use crate::livekit::room::RoomService;
 use crate::livekit::token::create_token;
 use crate::mmla::user_actions::UserActions;
+use crate::mmla::utils::{get_track_egress_destination, get_track_egress_destination_path};
 use domain::models::{
-    NewCreateRoomAction, NewDeleteRoomAction, NewGenerateTokenAction, NewListRoomsAction,
+    EgressType, NewCreateRoomAction, NewDeleteRoomAction, NewGenerateTokenAction,
+    NewListRoomsAction, NewUserEgressAction,
 };
 use livekit_protocol::{EgressInfo, ParticipantInfo};
 use shared::livekit_models::{CreateRoomRequest, LivekitRoom, TokenRequest, TokenResponse};
@@ -282,10 +284,34 @@ impl MMLAService {
         track_id: &str,
     ) -> Result<EgressInfo, ServiceError> {
         if self.is_user_created_room(user_id, room_name) {
-            self.egress_service
+            let result = self
+                .egress_service
                 .start_local_track_egress(room_name, track_id)
                 .await
-                .map_err(|e| ServiceError::EgressError(e.to_string()))
+                .map_err(|e| ServiceError::EgressError(e.to_string()));
+
+            match result {
+                Ok(egress_info) => {
+                    let egress_destination =
+                        get_track_egress_destination(egress_info.request.clone());
+                    let filepath = get_track_egress_destination_path(egress_info.result.clone());
+                    if filepath.is_some() && egress_destination.is_some() {
+                        let new_user_egress_action = NewUserEgressAction {
+                            user_id,
+                            room_name: room_name.to_string(),
+                            egress_id: egress_info.egress_id.clone(),
+                            egress_type: EgressType::Track,
+                            egress_destination_root: self.egress_service.get_egress_root(),
+                            egress_destination: egress_destination.unwrap(),
+                            egress_destination_path: filepath.unwrap(),
+                            success: false,
+                        };
+                        let _ = self.user_actions.register_egress(new_user_egress_action);
+                    }
+                    Ok(egress_info)
+                }
+                Err(e) => Err(e),
+            }
         } else {
             Err(ServiceError::PermissionError(
                 "Permission denied".to_string(),

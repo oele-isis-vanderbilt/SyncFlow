@@ -2,6 +2,14 @@
 
 pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "EgressDestination"))]
+    pub struct EgressDestination;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "EgressType"))]
+    pub struct EgressType;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "role"))]
     pub struct Role;
 }
@@ -21,6 +29,26 @@ diesel::table! {
         room_name -> Text,
         user_id -> Int4,
         deleted_at -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::EgressDestination;
+    use super::sql_types::EgressType;
+
+    egress_actions (id) {
+        id -> Int4,
+        user_id -> Int4,
+        egress_id -> Text,
+        room_name -> Text,
+        egress_destination -> EgressDestination,
+        egress_type -> EgressType,
+        egress_destination_path -> Text,
+        egress_destination_root -> Text,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        success -> Bool,
     }
 }
 
@@ -69,6 +97,7 @@ diesel::table! {
 
 diesel::joinable!(create_room_actions -> users (user_id));
 diesel::joinable!(delete_room_actions -> users (user_id));
+diesel::joinable!(egress_actions -> users (user_id));
 diesel::joinable!(generate_token_actions -> users (user_id));
 diesel::joinable!(list_rooms_actions -> users (user_id));
 diesel::joinable!(login_sessions -> users (user_id));
@@ -76,6 +105,7 @@ diesel::joinable!(login_sessions -> users (user_id));
 diesel::allow_tables_to_appear_in_same_query!(
     create_room_actions,
     delete_room_actions,
+    egress_actions,
     generate_token_actions,
     list_rooms_actions,
     login_sessions,

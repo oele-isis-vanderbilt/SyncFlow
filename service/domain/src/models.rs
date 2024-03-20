@@ -1,6 +1,6 @@
 use crate::schema::{
-    create_room_actions, delete_room_actions, generate_token_actions, list_rooms_actions,
-    login_sessions, users,
+    create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
+    list_rooms_actions, login_sessions, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
@@ -119,4 +119,52 @@ pub struct NewGenerateTokenAction {
     pub user_id: i32,
     pub token_identity: String,
     pub token_room: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
+#[ExistingTypePath = "crate::schema::sql_types::EgressDestination"]
+#[DbValueStyle = "camelCase"]
+pub enum EgressDestination {
+    S3,
+    LocalFile,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
+#[ExistingTypePath = "crate::schema::sql_types::EgressType"]
+#[DbValueStyle = "camelCase"]
+pub enum EgressType {
+    RoomComposite,
+    TrackComposite,
+    Participant,
+    Track,
+    Web,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = egress_actions)]
+pub struct UserEgressAction {
+    pub id: i32,
+    pub user_id: i32,
+    pub egress_id: String,
+    pub room_name: String,
+    pub egress_type: EgressType,
+    pub egress_destination: EgressDestination,
+    pub created_at: Option<chrono::NaiveDateTime>,
+    pub updated_at: Option<chrono::NaiveDateTime>,
+    pub success: bool,
+    pub egress_destination_path: String,
+    pub egress_destination_root: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[diesel(table_name = egress_actions)]
+pub struct NewUserEgressAction {
+    pub user_id: i32,
+    pub egress_destination: EgressDestination,
+    pub egress_id: String,
+    pub room_name: String,
+    pub egress_type: EgressType,
+    pub egress_destination_path: String,
+    pub egress_destination_root: String,
+    pub success: bool,
 }

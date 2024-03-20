@@ -1,7 +1,8 @@
 use diesel::prelude::*;
 use domain::models::{
     CreateRoomAction, DeleteRoomAction, GenerateTokenAction, ListRoomsAction, NewCreateRoomAction,
-    NewDeleteRoomAction, NewGenerateTokenAction, NewListRoomsAction,
+    NewDeleteRoomAction, NewGenerateTokenAction, NewListRoomsAction, NewUserEgressAction,
+    UserEgressAction,
 };
 use infrastructure::DbPool;
 use log::{error, info};
@@ -104,6 +105,23 @@ impl UserActions {
             .get_result::<GenerateTokenAction>(&mut conn)
             .map_err(|e| {
                 error!("Error registering generate token action: {}", e.to_string());
+                UserActionError::DatabaseError(e.to_string())
+            });
+        action
+    }
+
+    pub fn register_egress(
+        &self,
+        new_egress_action: NewUserEgressAction,
+    ) -> Result<UserEgressAction, UserActionError> {
+        use domain::schema::egress_actions::dsl::*;
+        let mut conn = self.pool.get().unwrap();
+
+        let action = diesel::insert_into(egress_actions)
+            .values(&new_egress_action)
+            .get_result::<UserEgressAction>(&mut conn)
+            .map_err(|e| {
+                error!("Error registering egress action: {}", e.to_string());
                 UserActionError::DatabaseError(e.to_string())
             });
         action
