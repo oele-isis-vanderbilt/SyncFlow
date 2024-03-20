@@ -126,4 +126,21 @@ impl UserActions {
             });
         action
     }
+
+    pub fn update_egress(
+        &self,
+        action: NewUserEgressAction,
+    ) -> Result<UserEgressAction, UserActionError> {
+        use domain::schema::egress_actions::dsl::*;
+        let mut conn = self.pool.get().unwrap();
+
+        let action = diesel::update(egress_actions.filter(egress_id.eq(&action.egress_id)))
+            .set(&action)
+            .get_result::<UserEgressAction>(&mut conn)
+            .map_err(|e| {
+                error!("Error updating egress action: {}", e.to_string());
+                UserActionError::DatabaseError(e.to_string())
+            });
+        action
+    }
 }

@@ -9,7 +9,7 @@ use std::fmt::Display;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum, PartialEq)]
 #[ExistingTypePath = "crate::schema::sql_types::Role"]
 #[DbValueStyle = "UPPERCASE"]
 pub enum Role {
@@ -123,7 +123,7 @@ pub struct NewGenerateTokenAction {
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
 #[ExistingTypePath = "crate::schema::sql_types::EgressDestination"]
-#[DbValueStyle = "camelCase"]
+#[DbValueStyle = "PascalCase"]
 pub enum EgressDestination {
     S3,
     LocalFile,
@@ -131,7 +131,7 @@ pub enum EgressDestination {
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
 #[ExistingTypePath = "crate::schema::sql_types::EgressType"]
-#[DbValueStyle = "camelCase"]
+#[DbValueStyle = "PascalCase"]
 pub enum EgressType {
     RoomComposite,
     TrackComposite,
@@ -140,7 +140,7 @@ pub enum EgressType {
     Web,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = egress_actions)]
 pub struct UserEgressAction {
     pub id: i32,
@@ -154,18 +154,18 @@ pub struct UserEgressAction {
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,
     pub success: bool,
-
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = egress_actions)]
 pub struct NewUserEgressAction {
     pub user_id: i32,
-    pub egress_destination: EgressDestination,
     pub egress_id: String,
     pub room_name: String,
+    pub egress_destination: EgressDestination,
     pub egress_type: EgressType,
     pub egress_destination_path: String,
     pub egress_destination_root: String,
     pub success: bool,
+    pub updated_at: Option<chrono::NaiveDateTime>,
 }

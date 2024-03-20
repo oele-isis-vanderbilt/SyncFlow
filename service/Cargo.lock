@@ -746,6 +746,7 @@ dependencies = [
  "chrono",
  "diesel",
  "diesel-derive-enum",
+ "infrastructure",
  "serde",
  "utoipa",
  "uuid",

@@ -16,7 +16,7 @@ pub fn get_track_egress_destination(request: Option<Request>) -> Option<EgressDe
                         match destination {
                             Some(d) => {
                                 match d {
-                                    DirectFileOutputOptions::S3(s3) => Some(EgressDestination::S3),
+                                    DirectFileOutputOptions::S3(_) => Some(EgressDestination::S3),
                                     // FixMe: Other Options not supported yet by the deployment
                                     _ => None,
                                 }
@@ -37,6 +37,7 @@ pub fn get_track_egress_destination(request: Option<Request>) -> Option<EgressDe
 pub fn get_track_egress_destination_path(
     result: Option<livekit_protocol::egress_info::Result>,
 ) -> Option<String> {
+    println!("JSON: {:?}", result.clone());
     if let Some(result) = result {
         if let livekit_protocol::egress_info::Result::File(f) = result {
             let filename = f.filename;
