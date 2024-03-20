@@ -2,7 +2,9 @@ import { auth } from '@/auth';
 import deploymentConfig from '@/deployment-config';
 import { Ok, Err } from 'ts-monads';
 import type { Result } from 'ts-monads/lib/Result';
-import { Room, VideoGrant } from 'livekit-server-sdk';
+import { EgressInfo, ParticipantInfo, Room } from '@livekit/protocol';
+
+import { VideoGrant } from 'livekit-server-sdk';
 import { CreateRoomRequest, TokenResponse } from '@/types/mmla';
 
 interface MMLAClientError {
@@ -15,6 +17,10 @@ const PREFIXES = {
   GENERATE_TOKEN: '/livekit/token',
   CREATE_ROOM: '/livekit/create-room',
   DELETE_ROOM: '/livekit/delete-room',
+  LIST_PARTICIPANTS: '/livekit/list-participants',
+  LIST_EGRESSES: '/livekit/list-egresses',
+  BEGIN_TRACK_EGRESS: '/livekit/begin-track-egress',
+  STOP_EGRESS: '/livekit/stop-recording',
 };
 
 export class MMLAClient {
@@ -25,6 +31,7 @@ export class MMLAClient {
   }
 
   private async getAuthToken(): Promise<string | null> {
+    // @ts-ignore
     return (await auth())?.jwt;
   }
 
@@ -156,6 +163,50 @@ export class MMLAClient {
       TokenResponse,
       { identity: string; videoGrants: VideoGrant }
     >(PREFIXES.GENERATE_TOKEN, req);
+  }
+
+  async listParticipants(roomName: string) {
+    let response = await this.authenticatedGet<any[]>(
+      PREFIXES.LIST_PARTICIPANTS + '/' + roomName,
+    );
+    let parsed = response.map((data) =>
+      data.map((p: any) => ParticipantInfo.fromJson(p)),
+    );
+    return parsed;
+  }
+
+  async listEgresses(roomName: string) {
+    let response = await this.authenticatedGet<any[]>(
+      PREFIXES.LIST_EGRESSES + '/' + roomName,
+    );
+
+    let parsed = response.map((data) =>
+      data.map((p: any) => EgressInfo.fromJson(p)),
+    );
+
+    return parsed;
+  }
+
+  async recordTrack(roomName: string, trackSid: string) {
+    let responseResult = await this.authenticatedPost<any, {}>(
+      PREFIXES.BEGIN_TRACK_EGRESS + '/' + roomName + '/' + trackSid,
+      {},
+    );
+
+    let egressInfo = responseResult.map((data) => EgressInfo.fromJson(data));
+
+    return egressInfo;
+  }
+
+  async stopEgress(roomName: string, egressId: string) {
+    let responseResult = await this.authenticatedPost<any, {}>(
+      PREFIXES.STOP_EGRESS + '/' + roomName + '/' + egressId,
+      {},
+    );
+
+    let egressInfo = responseResult.map((data) => EgressInfo.fromJson(data));
+
+    return egressInfo;
   }
 }
 

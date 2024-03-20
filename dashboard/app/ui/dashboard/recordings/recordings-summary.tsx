@@ -1,7 +1,8 @@
-import { liveKitService } from '@/app/lib/livekit';
+import { mmlaClient } from '@/app/lib/mmla-client';
 
 export default async function RecordingsSummary() {
-  const rooms = await liveKitService.listRooms();
+  const roomsResult = await mmlaClient.listRooms();
+  let rooms = roomsResult.unwrap();
 
   return (
     <div className={'flex h-full w-full flex-col'}>

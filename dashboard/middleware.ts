@@ -1,16 +1,11 @@
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import { NextRequest, NextResponse } from 'next/server';
-import apiMiddleware from '@/app/api/api-middleware';
 
 const auth = NextAuth(authConfig).auth;
 
 export default async function middleware(req: NextRequest, res: NextResponse) {
-  if (req.nextUrl.pathname.startsWith('/api')) {
-    return apiMiddleware(req, res);
-  } else {
-    return auth(req, res);
-  }
+  return auth(req, res);
 }
 
 export const config = {

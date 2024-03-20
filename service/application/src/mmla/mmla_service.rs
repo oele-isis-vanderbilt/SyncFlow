@@ -1,9 +1,13 @@
+use crate::livekit::egress::EgressService;
 use crate::livekit::room::RoomService;
 use crate::livekit::token::create_token;
 use crate::mmla::user_actions::UserActions;
+use crate::mmla::utils::{get_track_egress_destination, get_track_egress_destination_path};
 use domain::models::{
-    NewCreateRoomAction, NewDeleteRoomAction, NewGenerateTokenAction, NewListRoomsAction,
+    EgressType, NewCreateRoomAction, NewDeleteRoomAction, NewGenerateTokenAction,
+    NewListRoomsAction, NewUserEgressAction,
 };
+use livekit_protocol::{EgressInfo, EgressStatus, ParticipantInfo};
 use shared::livekit_models::{CreateRoomRequest, LivekitRoom, TokenRequest, TokenResponse};
 use shared::response_models::Response;
 use std::fmt::Display;
@@ -13,6 +17,7 @@ pub enum ServiceError {
     RoomCreationError(String),
     DeleteRoomError(String),
     RoomListError(String),
+    EgressError(String),
     PermissionError(String),
     AccessTokenError(String),
 }
@@ -40,6 +45,10 @@ impl Into<Response> for ServiceError {
                 status: 500,
                 message: e,
             },
+            ServiceError::EgressError(e) => Response {
+                status: 500,
+                message: e,
+            },
         }
     }
 }
@@ -52,6 +61,7 @@ impl Display for ServiceError {
             ServiceError::PermissionError(e) => write!(f, "PermissionError: {}", e),
             ServiceError::RoomListError(e) => write!(f, "RoomListError: {}", e),
             ServiceError::AccessTokenError(e) => write!(f, "AccessTokenError: {}", e),
+            ServiceError::EgressError(e) => write!(f, "EgressListError: {}", e),
         }
     }
 }
@@ -59,14 +69,20 @@ impl Display for ServiceError {
 #[derive(Debug, Clone)]
 pub struct MMLAService {
     room_service: RoomService,
+    egress_service: EgressService,
     user_actions: UserActions,
 }
 
 impl MMLAService {
-    pub fn new(room_service: RoomService, user_actions: UserActions) -> Self {
+    pub fn new(
+        room_service: RoomService,
+        egress_service: EgressService,
+        user_actions: UserActions,
+    ) -> Self {
         MMLAService {
             room_service,
             user_actions,
+            egress_service,
         }
     }
 
@@ -216,6 +232,145 @@ impl MMLAService {
 
                     TokenResponse::new(t, token_request.identity.clone())
                 })
+        }
+    }
+
+    pub async fn list_participants(
+        &self,
+        user_id: i32,
+        room_name: &str,
+    ) -> Result<Vec<ParticipantInfo>, ServiceError> {
+        // self.room_service.list_participants(room_name).await
+        let user_rooms = self.user_actions.list_created_rooms(user_id);
+        if let Ok(rooms) = user_rooms {
+            if rooms.iter().any(|room| room.room_name == room_name) {
+                self.room_service
+                    .list_participants(room_name)
+                    .await
+                    .map_err(|e| ServiceError::EgressError(e.to_string()))
+            } else {
+                Err(ServiceError::PermissionError(
+                    "Permission denied".to_string(),
+                ))
+            }
+        } else {
+            Err(ServiceError::PermissionError(
+                "Permission denied".to_string(),
+            ))
+        }
+    }
+
+    pub async fn list_egresses(
+        &self,
+        user_id: i32,
+        room_name: &str,
+    ) -> Result<Vec<EgressInfo>, ServiceError> {
+        if self.is_user_created_room(user_id, room_name) {
+            self.egress_service
+                .list_egresses(room_name.into())
+                .await
+                .map_err(|e| ServiceError::RoomListError(e.to_string()))
+        } else {
+            Err(ServiceError::PermissionError(
+                "Permission denied".to_string(),
+            ))
+        }
+    }
+
+    pub async fn record_track(
+        &self,
+        user_id: i32,
+        room_name: &str,
+        track_id: &str,
+    ) -> Result<EgressInfo, ServiceError> {
+        if self.is_user_created_room(user_id, room_name) {
+            let result = self
+                .egress_service
+                .start_local_track_egress(room_name, track_id)
+                .await
+                .map_err(|e| ServiceError::EgressError(e.to_string()));
+
+            match result {
+                Ok(egress_info) => {
+                    let egress_destination =
+                        get_track_egress_destination(egress_info.request.clone());
+                    let filepath = get_track_egress_destination_path(egress_info.result.clone());
+                    if filepath.is_some() && egress_destination.is_some() {
+                        let new_user_egress_action = NewUserEgressAction {
+                            user_id,
+                            room_name: room_name.to_string(),
+                            egress_id: egress_info.egress_id.clone(),
+                            egress_type: EgressType::Track,
+                            egress_destination_root: self.egress_service.get_egress_root(),
+                            egress_destination: egress_destination.unwrap(),
+                            egress_destination_path: filepath.unwrap(),
+                            updated_at: None,
+                            success: false,
+                        };
+                        let _ = self.user_actions.register_egress(new_user_egress_action);
+                    }
+                    Ok(egress_info)
+                }
+                Err(e) => Err(e),
+            }
+        } else {
+            Err(ServiceError::PermissionError(
+                "Permission denied".to_string(),
+            ))
+        }
+    }
+
+    pub async fn stop_recording(
+        &self,
+        user_id: i32,
+        room_name: &str,
+        egress_id: &str,
+    ) -> Result<EgressInfo, ServiceError> {
+        if self.is_user_created_room(user_id, room_name) {
+            let egress_result = self
+                .egress_service
+                .stop_egress(egress_id)
+                .await
+                .map_err(|e| ServiceError::EgressError(e.to_string()));
+
+            match egress_result {
+                Ok(egress_info) => {
+                    let egress_destination =
+                        get_track_egress_destination(egress_info.request.clone());
+                    let filepath = get_track_egress_destination_path(egress_info.result.clone());
+
+                    if filepath.is_some() && egress_destination.is_some() {
+                        let new_user_egress_action = NewUserEgressAction {
+                            user_id,
+                            room_name: room_name.to_string(),
+                            egress_id: egress_info.egress_id.clone(),
+                            egress_type: EgressType::Track,
+                            egress_destination_root: self.egress_service.get_egress_root(),
+                            egress_destination: egress_destination.unwrap(),
+                            egress_destination_path: filepath.unwrap(),
+                            updated_at: Some(chrono::Local::now().naive_local()),
+                            success: EgressStatus::EgressComplete as i32 == egress_info.status
+                                || EgressStatus::EgressEnding as i32 == egress_info.status,
+                        };
+                        let _ = self.user_actions.update_egress(new_user_egress_action);
+                    }
+                    Ok(egress_info)
+                }
+                Err(e) => Err(e),
+            }
+        } else {
+            Err(ServiceError::PermissionError(
+                "Permission denied".to_string(),
+            ))
+        }
+    }
+
+    fn is_user_created_room(&self, user_id: i32, room_name: &str) -> bool {
+        let user_rooms = self.user_actions.list_created_rooms(user_id);
+        if let Ok(rooms) = user_rooms {
+            rooms.iter().any(|room| room.room_name == room_name)
+        } else {
+            false
         }
     }
 }

@@ -1,20 +1,22 @@
-import { liveKitService } from '@/app/lib/livekit';
 import type { TrackInfo } from 'livekit-server-sdk';
-import { TrackSource } from 'livekit-server-sdk/dist/proto/livekit_models';
+import { TrackSource } from '@livekit/protocol';
 import { lusitana } from '@/app/ui/fonts';
 import {
   AllTracksRecordButton,
   TrackRecordButton,
 } from '@/app/ui/dashboard/recordings/record-buttons';
-import { EgressStatus } from 'livekit-server-sdk/dist/proto/livekit_egress';
+import { mmlaClient } from '@/app/lib/mmla-client';
+import { EgressDetails } from '@/app/lib/egress-details';
 
 export default async function ActiveRecordings({
   roomName,
 }: {
   roomName: string;
 }) {
-  const participantInfos = await liveKitService.listParticipants(roomName);
-  const egresses = await liveKitService.getRoomEgresses(roomName);
+  const participantInfoResult = await mmlaClient.listParticipants(roomName);
+  const participantsInfo = participantInfoResult.unwrap();
+  const egressesResult = await mmlaClient.listEgresses(roomName);
+  let egresses = egressesResult.unwrap().map((e) => new EgressDetails(e));
 
   const getTrackKind = (track: TrackInfo) => {
     switch (track.source) {
@@ -33,7 +35,7 @@ export default async function ActiveRecordings({
     }
   };
 
-  const tracks = participantInfos
+  const tracks = participantsInfo
     .map((participantInfo) => {
       return participantInfo.tracks.map((track) => {
         return {
@@ -42,14 +44,8 @@ export default async function ActiveRecordings({
           kind: getTrackKind(track),
           roomName: roomName,
           egressId:
-            egresses.find(
-              (e) =>
-                e.track?.trackId === track.sid &&
-                [
-                  EgressStatus.EGRESS_ACTIVE,
-                  EgressStatus.EGRESS_STARTING,
-                ].includes(e.status!),
-            )?.egressId || undefined,
+            egresses.find((e) => e.trackSid === track.sid && e.isEgressActive())
+              ?.egressId || undefined,
         };
       });
     })
@@ -110,7 +106,6 @@ function TracksTable({
         </thead>
         <tbody>
           {tracks.map((track, index: number) => {
-            console.log(track, index);
             return (
               <tr key={index} className="border-5 border-indigo-200 bg-black">
                 <td className="whitespace-nowrap px-6 py-4">

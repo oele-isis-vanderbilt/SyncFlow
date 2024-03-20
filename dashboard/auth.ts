@@ -74,8 +74,8 @@ export const { auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token) {
         session.jwt = token.jwt;
-        session.user? session.user.id = token.id : null;
-        session.user? session.user.role = token.role: null;
+        session.user ? (session.user.id = token.id) : null;
+        session.user ? (session.user.role = token.role) : null;
       }
       return session;
     },

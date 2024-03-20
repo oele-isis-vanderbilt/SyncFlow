@@ -3,6 +3,7 @@ use api::apidoc::init_api_doc;
 use api::auth_middleware;
 use api::livekit_handlers::init_routes as lk_init_routes;
 use api::login_handlers::init_routes as login_init_routes;
+use application::livekit::egress::EgressService;
 use application::livekit::room::RoomService;
 use application::mmla::mmla_service::MMLAService;
 use application::mmla::user_actions::UserActions;
@@ -27,7 +28,10 @@ pub async fn not_found() -> actix_web::Result<HttpResponse> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     load_env();
-    env::set_var("RUST_LOG", "actix_web=debug,api=debug,application=debug,infrastructure=debug,shared=debug");
+    env::set_var(
+        "RUST_LOG",
+        "actix_web=debug,api=debug,application=debug,infrastructure=debug,shared=debug",
+    );
     env_logger::init();
     let config = DeploymentConfig::load();
 
@@ -44,8 +48,14 @@ async fn main() -> std::io::Result<()> {
         config.livekit_api_key.clone(),
         config.livekit_api_secret.clone(),
     );
+    let egress_service = EgressService::new(
+        config.livekit_server_url.clone(),
+        config.livekit_api_key.clone(),
+        config.livekit_api_secret.clone(),
+        config.storage_config.clone(),
+    );
     let user_actions = UserActions::new(pool.clone());
-    let mmla_service = MMLAService::new(room_service, user_actions);
+    let mmla_service = MMLAService::new(room_service, egress_service, user_actions);
 
     HttpServer::new(move || {
         App::new()

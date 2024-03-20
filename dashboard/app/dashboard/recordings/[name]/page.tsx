@@ -1,10 +1,11 @@
-import { liveKitService } from '@/app/lib/livekit';
 import { lusitana } from '@/app/ui/fonts';
 import ActiveRecordings from '@/app/ui/dashboard/recordings/active-recordings';
+import { mmlaClient } from '@/app/lib/mmla-client';
 export default async function Page({ params }: { params: { name: string } }) {
   const roomName = params.name;
 
-  const rooms = await liveKitService.listRooms();
+  const roomsResult = await mmlaClient.listRooms();
+  let rooms = roomsResult.unwrap();
   const room = rooms.find((r) => r.name === roomName);
   if (!room) {
     return (
