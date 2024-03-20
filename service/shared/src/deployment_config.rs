@@ -12,6 +12,7 @@ pub struct DeploymentConfig {
     pub livekit_api_secret: String,
     pub jwt_secret: String,
     pub database_url: String,
+    pub encryption_key: String,
     pub storage_config: StorageConfig,
 
     /// Test configuration

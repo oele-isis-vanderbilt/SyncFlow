@@ -1,6 +1,6 @@
 use crate::schema::{
     create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
-    list_rooms_actions, login_sessions, users,
+    key_secret_pairs, list_rooms_actions, login_sessions, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
@@ -168,4 +168,21 @@ pub struct NewUserEgressAction {
     pub egress_destination_root: String,
     pub success: bool,
     pub updated_at: Option<chrono::NaiveDateTime>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
+#[diesel(table_name = key_secret_pairs)]
+pub struct KeySecretPair {
+    pub api_key: String,
+    pub secret: String,
+    pub created_at: Option<chrono::NaiveDateTime>,
+    pub user_id: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable)]
+#[diesel(table_name = key_secret_pairs)]
+pub struct NewKeySecretPair {
+    pub api_key: String,
+    pub secret: String,
+    pub user_id: i32,
 }

@@ -13,6 +13,7 @@ use std::time::SystemTime;
 pub struct UserToken {
     pub iat: usize,
     pub exp: usize,
+    pub iss: String,
     // Data
     pub user_name: String,
     pub user_id: i32,
@@ -22,15 +23,11 @@ pub struct UserToken {
 
 pub type UserTokenType = TokenData<UserToken>;
 
-pub struct JWTImplementation {
-    pub jwt_secret: String,
-}
+pub struct JWTImplementation {}
 
 impl JWTImplementation {
-    pub fn new(jwt_secret: &str) -> Self {
-        JWTImplementation {
-            jwt_secret: jwt_secret.to_string(),
-        }
+    pub fn new() -> Self {
+        JWTImplementation {}
     }
 
     pub fn generate_jwt_token(
@@ -43,13 +40,14 @@ impl JWTImplementation {
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .unwrap()
                 .as_secs() as usize,
+            iss: login_session_info.api_key.to_owned(),
             user_name: login_session_info.user_name.to_owned(),
             user_id: login_session_info.user_id,
             role: login_session_info.user_role.to_owned(),
             login_session: login_session_info.session_id.to_owned(),
         };
 
-        let secret = self.jwt_secret.clone();
+        let secret = login_session_info.jwt_secret.clone();
 
         encode(
             &Header {
@@ -61,13 +59,30 @@ impl JWTImplementation {
         )
     }
 
-    pub fn decode_token(&self, token: String) -> jwt_errors::Result<TokenData<UserToken>> {
-        let secret = self.jwt_secret.clone();
+    pub fn decode_token(
+        &self,
+        token: String,
+        secret: String,
+    ) -> jwt_errors::Result<TokenData<UserToken>> {
         decode::<UserToken>(
             &token,
             &DecodingKey::from_secret(secret.as_ref()),
             &Validation::default(),
         )
+    }
+
+    pub fn get_api_key_from_token(&self, token: String) -> Option<String> {
+        let key = DecodingKey::from_secret(&[]);
+        let mut validation = Validation::new(Algorithm::HS256);
+        validation.insecure_disable_signature_validation();
+        let token_data = decode::<UserToken>(&token, &key, &validation);
+        match token_data {
+            Ok(token_data) => {
+                let claims = token_data.claims;
+                Some(claims.iss)
+            }
+            Err(_) => None,
+        }
     }
 
     pub fn verify_token(

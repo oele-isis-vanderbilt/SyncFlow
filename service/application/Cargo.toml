@@ -19,3 +19,6 @@ serde = { version = "1.0.197", features = ["derive"] }
 uuid = { version = "1.7.0", features = ["v4"] }
 chrono = { version = "0.4.34", features = ["serde"] }
 log = "0.4.21"
+rand = "0.8.5"
+hex = "0.4.3"
+aes-gcm = "0.10.3"

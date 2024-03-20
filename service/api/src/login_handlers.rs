@@ -63,6 +63,11 @@ pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> H
     }
 }
 
+// #[post("/generate-api-key")]
+// pub async fn generate_api_key() -> HttpResponse {
+//
+// }
+
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     let users_scope = web::scope("/users").service(login).service(logout);
     cfg.service(users_scope);

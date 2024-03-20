@@ -1,7 +1,7 @@
 use bcrypt::verify;
 use diesel::prelude::*;
 use diesel::PgConnection;
-use domain::models::{LoginSession, NewLoginSession, Role, User};
+use domain::models::{KeySecretPair, LoginSession, NewKeySecretPair, NewLoginSession, Role, User};
 
 use serde::{Deserialize, Serialize};
 use shared::response_models::Response;
@@ -14,6 +14,8 @@ pub struct LoginSessionInfo {
     pub user_id: i32,
     pub user_name: String,
     pub user_role: Role,
+    pub jwt_secret: String,
+    pub api_key: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -24,6 +26,7 @@ pub enum UserError {
     TokenExpired(String),
     LoginSessionNotFound(String),
     TokenError(String),
+    EncryptionError(String),
 }
 
 impl Into<Response> for UserError {
@@ -51,6 +54,10 @@ impl Into<Response> for UserError {
             },
             UserError::TokenError(e) => Response {
                 status: 401,
+                message: e,
+            },
+            UserError::EncryptionError(e) => Response {
+                status: 500,
                 message: e,
             },
         }
@@ -148,5 +155,37 @@ pub fn is_valid_login_session(sid: &str, conn: &mut PgConnection) -> bool {
             }
         }
         Err(_) => false,
+    }
+}
+
+pub fn find_user_secret(
+    user_id: &i32,
+    conn: &mut PgConnection,
+) -> Result<KeySecretPair, UserError> {
+    use domain::schema::key_secret_pairs::dsl::*;
+
+    let query_result = key_secret_pairs
+        .filter(user_id.eq(user_id))
+        .first::<KeySecretPair>(conn);
+
+    match query_result {
+        Ok(key_secret) => Ok(key_secret),
+        Err(e) => Err(UserError::DatabaseError(e.to_string())),
+    }
+}
+
+pub fn populate_key_secret_pair(
+    new_key_secret_pair: NewKeySecretPair,
+    conn: &mut PgConnection,
+) -> Result<KeySecretPair, UserError> {
+    use domain::schema::key_secret_pairs::dsl::*;
+
+    let insert_result = diesel::insert_into(key_secret_pairs)
+        .values(&new_key_secret_pair)
+        .get_result::<KeySecretPair>(conn);
+
+    match insert_result {
+        Ok(key_secret) => Ok(key_secret),
+        Err(e) => Err(UserError::DatabaseError(e.to_string())),
     }
 }

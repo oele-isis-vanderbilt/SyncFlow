@@ -63,6 +63,18 @@ diesel::table! {
 }
 
 diesel::table! {
+    key_secret_pairs (api_key) {
+        #[max_length = 255]
+        api_key -> Varchar,
+        #[max_length = 255]
+        secret -> Varchar,
+        created_at -> Nullable<Timestamptz>,
+        user_id -> Int4,
+        comments -> Nullable<Text>,
+    }
+}
+
+diesel::table! {
     list_rooms_actions (id) {
         id -> Int4,
         user_id -> Int4,
@@ -99,6 +111,7 @@ diesel::joinable!(create_room_actions -> users (user_id));
 diesel::joinable!(delete_room_actions -> users (user_id));
 diesel::joinable!(egress_actions -> users (user_id));
 diesel::joinable!(generate_token_actions -> users (user_id));
+diesel::joinable!(key_secret_pairs -> users (user_id));
 diesel::joinable!(list_rooms_actions -> users (user_id));
 diesel::joinable!(login_sessions -> users (user_id));
 
@@ -107,6 +120,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     delete_room_actions,
     egress_actions,
     generate_token_actions,
+    key_secret_pairs,
     list_rooms_actions,
     login_sessions,
     users,
