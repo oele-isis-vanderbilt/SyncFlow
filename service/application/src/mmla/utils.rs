@@ -37,7 +37,6 @@ pub fn get_track_egress_destination(request: Option<Request>) -> Option<EgressDe
 pub fn get_track_egress_destination_path(
     result: Option<livekit_protocol::egress_info::Result>,
 ) -> Option<String> {
-    println!("JSON: {:?}", result.clone());
     if let Some(result) = result {
         if let livekit_protocol::egress_info::Result::File(f) = result {
             let filename = f.filename;
