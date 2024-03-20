@@ -46,8 +46,8 @@ diesel::table! {
         egress_type -> EgressType,
         egress_destination_path -> Text,
         egress_destination_root -> Text,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
         success -> Bool,
     }
 }

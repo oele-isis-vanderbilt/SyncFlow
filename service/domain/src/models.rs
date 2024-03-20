@@ -147,13 +147,14 @@ pub struct UserEgressAction {
     pub user_id: i32,
     pub egress_id: String,
     pub room_name: String,
-    pub egress_type: EgressType,
     pub egress_destination: EgressDestination,
+    pub egress_type: EgressType,
+    pub egress_destination_path: String,
+    pub egress_destination_root: String,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,
     pub success: bool,
-    pub egress_destination_path: String,
-    pub egress_destination_root: String,
+
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
