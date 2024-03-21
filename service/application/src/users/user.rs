@@ -112,7 +112,7 @@ pub fn login(
                 match login_key {
                     Ok(_) => (),
                     Err(_) => {
-                        let _ = generate_api_key(usr.id, encryption_secret, conn)?;
+                        let _ = generate_login_key(usr.id, encryption_secret, conn)?;
                         ()
                     }
                 }
@@ -183,10 +183,35 @@ pub fn is_valid_login_session(sid: &str, conn: &mut PgConnection) -> bool {
     }
 }
 
+pub fn generate_login_key(
+    uid: i32,
+    encryption_key: &str,
+    conn: &mut PgConnection,
+) -> Result<ApiKey, UserError> {
+    generate_api_key(
+        uid,
+        encryption_key,
+        conn,
+        KeyType::Login,
+        Some("Auto-Generated-Login-Key".to_string()),
+    )
+}
+
+pub fn generate_non_login_api_key(
+    uid: i32,
+    encryption_key: &str,
+    key_comments: Option<String>,
+    conn: &mut PgConnection,
+) -> Result<ApiKey, UserError> {
+    generate_api_key(uid, encryption_key, conn, KeyType::Api, key_comments)
+}
+
 pub fn generate_api_key(
     uid: i32,
     encryption_key: &str,
     conn: &mut PgConnection,
+    kt: KeyType,
+    key_comments: Option<String>,
 ) -> Result<ApiKey, UserError> {
     use domain::schema::api_keys::dsl::*;
 
@@ -198,8 +223,8 @@ pub fn generate_api_key(
         user_id: uid,
         key: key_secret_pair.key.to_owned(),
         secret: encrypted_secret_string,
-        key_type: KeyType::Login,
-        comment: Some("Auto-generated-login-keys".to_string()),
+        key_type: kt,
+        comment: key_comments,
         valid: true,
     };
 

@@ -1,9 +1,10 @@
-use actix_web::web::Json;
+use actix_web::web::{Json, ReqData};
 use actix_web::{post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
+use application::users::tokens_manager::UserTokenType;
 use shared::constants;
 use shared::response_models::Response;
-use shared::user_models::{LoginRequest, TokenResponse};
+use shared::user_models::{ApiKeyRequest, ApiKeyResponse, LoginRequest, TokenResponse};
 
 #[utoipa::path(
     post,
@@ -60,6 +61,52 @@ pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> H
             message: constants::MESSAGE_INVALID_TOKEN.to_string(),
         })
         .into(),
+    }
+}
+
+#[post("/api-token")]
+pub async fn api_token(
+    api_token_request: Json<ApiKeyRequest>,
+    token_data: Option<ReqData<UserTokenType>>,
+    user_auth: web::Data<AccountService>,
+) -> HttpResponse {
+    match token_data {
+        Some(token_data) => {
+            let token_inner = token_data.into_inner();
+            let user_id = token_inner.user_id;
+            let api_key =
+                user_auth.generate_api_keys(user_id, Some(api_token_request.comment.clone()));
+            match api_key {
+                Ok(key) => {
+                    let decrypted = user_auth.decrypt_secret(&key.secret);
+                    match decrypted {
+                        Ok(secret) => {
+                            let key_response = ApiKeyResponse {
+                                key: key.key,
+                                secret,
+                                comment: key.comment.unwrap_or_default(),
+                            };
+                            HttpResponse::Ok().json(key_response)
+                        }
+                        Err(e) => {
+                            let response: Response = e.into();
+                            response.into()
+                        }
+                    }
+                }
+                Err(e) => {
+                    let response: Response = e.into();
+                    response.into()
+                }
+            }
+        }
+        None => {
+            let response = Response {
+                status: 401,
+                message: constants::MESSAGE_INVALID_TOKEN.to_string(),
+            };
+            response.into()
+        }
     }
 }
 

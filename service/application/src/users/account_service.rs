@@ -1,11 +1,12 @@
 use crate::users::tokens_manager::UserToken;
 use crate::users::user::UserError;
+use domain::models::ApiKey;
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
 use shared::user_models::LoginRequest;
 use std::sync::Arc;
 
-use super::{tokens_manager, user};
+use super::{secret, tokens_manager, user};
 
 pub struct AccountService {
     pool: Arc<DbPool>,
@@ -88,6 +89,24 @@ impl AccountService {
     ) -> Result<String, UserError> {
         self.tokens_manager
             .generate_login_token(login_session_info, &mut self.pool.get().unwrap())
+    }
+
+    pub fn generate_api_keys(
+        &self,
+        user_id: i32,
+        comments: Option<String>,
+    ) -> Result<ApiKey, UserError> {
+        user::generate_non_login_api_key(
+            user_id,
+            &self.config.encryption_key,
+            comments,
+            &mut self.pool.get().unwrap(),
+        )
+    }
+
+    pub fn decrypt_secret(&self, secret: &str) -> Result<String, UserError> {
+        secret::decrypt_string(secret, &self.config.encryption_key)
+            .map_err(|e| UserError::SecretError(e.to_string()))
     }
 }
 
