@@ -1,5 +1,5 @@
 use crate::schema::{
-    create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
+    api_keys, create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
     list_rooms_actions, login_sessions, users,
 };
 use diesel::prelude::*;
@@ -168,4 +168,36 @@ pub struct NewUserEgressAction {
     pub egress_destination_root: String,
     pub success: bool,
     pub updated_at: Option<chrono::NaiveDateTime>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum, Eq, PartialEq)]
+#[ExistingTypePath = "crate::schema::sql_types::KeyType"]
+#[DbValueStyle = "PascalCase"]
+pub enum KeyType {
+    Login,
+    Api,
+}
+
+#[derive(Queryable, Serialize, Deserialize, Debug, ToSchema)]
+#[diesel(table_name = api_keys)]
+pub struct ApiKey {
+    pub id: i32,
+    pub key_type: KeyType,
+    pub key: String,
+    pub user_id: i32,
+    pub secret: String,
+    pub created_at: Option<chrono::NaiveDateTime>,
+    pub valid: bool,
+    pub comment: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
+#[diesel(table_name = api_keys)]
+pub struct NewApiKey {
+    pub key: String,
+    pub key_type: KeyType,
+    pub user_id: i32,
+    pub secret: String,
+    pub valid: bool,
+    pub comment: Option<String>,
 }

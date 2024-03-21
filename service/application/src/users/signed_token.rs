@@ -1,9 +1,18 @@
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::de::DeserializeOwned;
+use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SignedTokenError {
     JWTError(String),
+}
+
+impl Display for SignedTokenError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SignedTokenError::JWTError(e) => write!(f, "JWT error: {}", e),
+        }
+    }
 }
 
 pub fn generate_and_sign_jwt<T>(claims: &T, secret: &str) -> Result<String, SignedTokenError>
@@ -46,7 +55,7 @@ pub fn decode_jwt_unsafe<T: DeserializeOwned>(token: &str) -> Result<T, SignedTo
 }
 
 mod tests {
-    use super::*;
+    use super::{decode_jwt_unsafe, generate_and_sign_jwt, verify_and_decode_jwt};
     use rand::distributions::Alphanumeric;
     use rand::{thread_rng, Rng};
     use serde::{Deserialize, Serialize};

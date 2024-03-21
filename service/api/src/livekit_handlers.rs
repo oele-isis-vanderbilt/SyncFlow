@@ -1,7 +1,7 @@
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use application::mmla::mmla_service::MMLAService;
-use application::users::token::UserTokenType;
+use application::users::tokens_manager::UserTokenType;
 use shared::deployment_config::DeploymentConfig;
 use shared::livekit_models::{CreateRoomRequest, TokenRequest};
 use shared::response_models::Response;
@@ -46,7 +46,7 @@ pub async fn generate_token(
         Some(token) => {
             let token_result = mmla_service
                 .generate_token(
-                    token.into_inner().claims.user_id,
+                    token.into_inner().user_id,
                     token_request.into_inner(),
                     deployment_config.livekit_api_key.clone(),
                     deployment_config.livekit_api_secret.clone(),
@@ -89,7 +89,7 @@ pub async fn create_room(
             let req_json = room_create_request.into_inner();
             println!("{:?}", req_json);
             let create_room_result = mmla_service
-                .create_room(token_inner.claims.user_id, req_json)
+                .create_room(token_inner.user_id, req_json)
                 .await;
 
             match create_room_result {
@@ -127,7 +127,7 @@ pub async fn delete_room(
         Some(token) => {
             let token_inner = token.into_inner();
             let delete_room_result = mmla_service
-                .delete_room(token_inner.claims.user_id, room_name.to_owned())
+                .delete_room(token_inner.user_id, room_name.to_owned())
                 .await;
 
             match delete_room_result {
@@ -160,7 +160,7 @@ pub async fn list_rooms(
     match token_data {
         Some(token) => {
             let token_inner = token.into_inner();
-            let list_rooms_result = mmla_service.list_rooms(token_inner.claims.user_id).await;
+            let list_rooms_result = mmla_service.list_rooms(token_inner.user_id).await;
 
             match list_rooms_result {
                 Ok(rooms) => HttpResponse::Ok().json(rooms),
@@ -197,7 +197,7 @@ pub async fn list_participants(
         Some(token) => {
             let token_inner = token.into_inner();
             let list_participants_result = mmla_service
-                .list_participants(token_inner.claims.user_id, &room_name)
+                .list_participants(token_inner.user_id, &room_name)
                 .await;
 
             match list_participants_result {
@@ -235,7 +235,7 @@ pub async fn list_egresses(
         Some(token) => {
             let token_inner = token.into_inner();
             let list_egresses_result = mmla_service
-                .list_egresses(token_inner.claims.user_id, &room_name)
+                .list_egresses(token_inner.user_id, &room_name)
                 .await;
 
             match list_egresses_result {
@@ -271,7 +271,7 @@ pub async fn begin_track_egress(
         Some(token) => {
             let token_inner = token.into_inner();
             let begin_egress_result = mmla_service
-                .record_track(token_inner.claims.user_id, &room_name, &track_sid)
+                .record_track(token_inner.user_id, &room_name, &track_sid)
                 .await;
 
             match begin_egress_result {
@@ -307,7 +307,7 @@ pub async fn stop_recording(
         Some(token) => {
             let token_inner = token.into_inner();
             let stop_recording_result = mmla_service
-                .stop_recording(token_inner.claims.user_id, &room_name, &track_sid)
+                .stop_recording(token_inner.user_id, &room_name, &track_sid)
                 .await;
 
             match stop_recording_result {

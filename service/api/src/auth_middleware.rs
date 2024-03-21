@@ -73,15 +73,9 @@ where
                             info!("Parsing Token...");
                             let token = auth_string[6..auth_string.len()].trim();
 
-                            if let Ok(token_data) = account_service.decode_token(token.to_string())
-                            {
-                                info!("Decoding Token...");
-                                if account_service.verify_token(&token_data).is_ok() {
-                                    info!("Valid Token");
-                                    // Insert Token Data into Request Extensions
-                                    req.extensions_mut().insert(token_data);
-                                    auth_success = true;
-                                }
+                            if let Ok(token_data) = account_service.verify_token(token) {
+                                req.extensions_mut().insert(token_data);
+                                auth_success = true;
                             } else {
                                 error!("Invalid Token");
                             }

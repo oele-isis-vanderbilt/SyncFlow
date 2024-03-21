@@ -5,6 +5,7 @@ use aes_gcm::{
 use base64::alphabet;
 use base64::{engine, Engine};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use std::fmt::Display;
 use std::string::String;
 
 #[derive(Debug, Clone)]
@@ -12,6 +13,16 @@ pub enum SecretError {
     Base64DecodeError(String),
     EncryptionError(String),
     DecryptionError(String),
+}
+
+impl Display for SecretError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SecretError::Base64DecodeError(e) => write!(f, "Base64 decode error: {}", e),
+            SecretError::EncryptionError(e) => write!(f, "Encryption error: {}", e),
+            SecretError::DecryptionError(e) => write!(f, "Decryption error: {}", e),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
