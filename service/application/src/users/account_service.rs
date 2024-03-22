@@ -1,9 +1,12 @@
 use crate::users::tokens_manager::UserToken;
 use crate::users::user::UserError;
 use domain::models::ApiKey;
+use domain::models::User;
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
+use shared::user_models::ApiKeyResponseWithoutSecret;
 use shared::user_models::LoginRequest;
+use shared::user_models::ApiKeyResponse;
 use std::sync::Arc;
 
 use super::{secret, tokens_manager, user};
@@ -101,6 +104,21 @@ impl AccountService {
             &self.config.encryption_key,
             comments,
             &mut self.pool.get().unwrap(),
+        )
+    }
+
+    pub fn list_api_keys(&self, user_id: i32) -> Result<Vec<ApiKeyResponseWithoutSecret>, UserError> {
+        let mut conn = self.pool.get().unwrap();
+        user::get_all_api_keys(user_id, &mut conn).map(
+            |keys| {
+                keys.into_iter().map(
+                    |api_key| ApiKeyResponseWithoutSecret {
+                        key: api_key.key.clone(),
+                        comment: api_key.comment.unwrap_or_default(),
+                        created_at: api_key.created_at.map(|c| c.and_utc().timestamp() as usize).unwrap_or_default(),
+                    }
+                ).collect::<Vec<ApiKeyResponseWithoutSecret>>()
+            }
         )
     }
 

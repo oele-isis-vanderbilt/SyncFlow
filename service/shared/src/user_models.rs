@@ -23,6 +23,14 @@ pub struct ApiKeyResponse {
     pub key: String,
     pub secret: String,
     pub comment: String,
+    pub created_at: usize,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ApiKeyResponseWithoutSecret {
+    pub key: String,
+    pub comment: String,
+    pub created_at: usize,
 }
 
 impl TokenResponse {
