@@ -4,7 +4,7 @@ use application::users::account_service::AccountService;
 use application::users::tokens_manager::UserTokenType;
 use shared::constants;
 use shared::response_models::Response;
-use shared::user_models::{ApiKeyRequest, ApiKeyResponse, LoginRequest, TokenResponse, ApiKeyResponseWithoutSecret};
+use shared::user_models::{ApiKeyRequest, ApiKeyResponse, LoginRequest, TokenResponse};
 
 #[utoipa::path(
     post,
@@ -65,7 +65,7 @@ pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> H
 }
 
 #[post("/api-key")]
-pub async fn api_token(
+pub async fn create_api_key(
     api_token_request: Json<ApiKeyRequest>,
     token_data: Option<ReqData<UserTokenType>>,
     user_auth: web::Data<AccountService>,
@@ -84,7 +84,10 @@ pub async fn api_token(
                             let key_response = ApiKeyResponse {
                                 key: key.key,
                                 secret,
-                                created_at: key.created_at.map(|c| c.and_utc().timestamp() as usize).unwrap_or_default(),
+                                created_at: key
+                                    .created_at
+                                    .map(|c| c.and_utc().timestamp() as usize)
+                                    .unwrap_or_default(),
                                 comment: key.comment.unwrap_or_default(),
                             };
                             HttpResponse::Ok().json(key_response)
@@ -110,7 +113,6 @@ pub async fn api_token(
         }
     }
 }
-
 
 #[utoipa::path(
     get,
@@ -150,9 +152,9 @@ pub async fn list_all_api_keys(
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     let users_scope = web::scope("/users")
-                            .service(login)
-                            .service(logout)
-                            .service(api_token)
-                            .service(list_all_api_keys);
+        .service(login)
+        .service(logout)
+        .service(create_api_key)
+        .service(list_all_api_keys);
     cfg.service(users_scope);
 }
