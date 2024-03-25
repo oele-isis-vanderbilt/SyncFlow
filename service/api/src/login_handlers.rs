@@ -1,9 +1,10 @@
-use actix_web::web::Json;
-use actix_web::{post, web, HttpRequest, HttpResponse};
+use actix_web::web::{Json, ReqData};
+use actix_web::{get, post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
+use application::users::tokens_manager::UserInfo;
 use shared::constants;
 use shared::response_models::Response;
-use shared::user_models::{LoginRequest, TokenResponse};
+use shared::user_models::{ApiKeyRequest, ApiKeyResponse, LoginRequest, TokenResponse};
 
 #[utoipa::path(
     post,
@@ -63,7 +64,97 @@ pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> H
     }
 }
 
+#[post("/api-key")]
+pub async fn create_api_key(
+    api_token_request: Json<ApiKeyRequest>,
+    token_data: Option<ReqData<UserInfo>>,
+    user_auth: web::Data<AccountService>,
+) -> HttpResponse {
+    match token_data {
+        Some(token_data) => {
+            let token_inner = token_data.into_inner();
+            let user_id = token_inner.user_id;
+            let api_key =
+                user_auth.generate_api_keys(user_id, Some(api_token_request.comment.clone()));
+            match api_key {
+                Ok(key) => {
+                    let decrypted = user_auth.decrypt_secret(&key.secret);
+                    match decrypted {
+                        Ok(secret) => {
+                            let key_response = ApiKeyResponse {
+                                key: key.key,
+                                secret,
+                                created_at: key
+                                    .created_at
+                                    .map(|c| c.and_utc().timestamp() as usize)
+                                    .unwrap_or_default(),
+                                comment: key.comment.unwrap_or_default(),
+                            };
+                            HttpResponse::Ok().json(key_response)
+                        }
+                        Err(e) => {
+                            let response: Response = e.into();
+                            response.into()
+                        }
+                    }
+                }
+                Err(e) => {
+                    let response: Response = e.into();
+                    response.into()
+                }
+            }
+        }
+        None => {
+            let response = Response {
+                status: 401,
+                message: constants::MESSAGE_INVALID_TOKEN.to_string(),
+            };
+            response.into()
+        }
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api-keys",
+    responses(
+        (status = 200, description = "List of API Keys", body = Vec<ApiKeyResponseWithoutSecret>),
+        (status = 401, description = "Invalid Token")
+    )
+)]
+#[get("/api-keys")]
+pub async fn list_all_api_keys(
+    token_data: Option<ReqData<UserInfo>>,
+    user_auth: web::Data<AccountService>,
+) -> HttpResponse {
+    match token_data {
+        Some(token_data) => {
+            let token_inner = token_data.into_inner();
+            let user_id = token_inner.user_id;
+            let api_keys = user_auth.list_api_keys(user_id);
+            match api_keys {
+                Ok(keys) => HttpResponse::Ok().json(keys),
+                Err(e) => {
+                    let response: Response = e.into();
+                    response.into()
+                }
+            }
+        }
+        None => {
+            let response = Response {
+                status: 401,
+                message: constants::MESSAGE_INVALID_TOKEN.to_string(),
+            };
+            response.into()
+        }
+    }
+}
+
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
-    let users_scope = web::scope("/users").service(login).service(logout);
+    let users_scope = web::scope("/users")
+        .service(login)
+        .service(logout)
+        .service(create_api_key)
+        .service(list_all_api_keys);
     cfg.service(users_scope);
 }

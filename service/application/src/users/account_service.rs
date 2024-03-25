@@ -1,34 +1,42 @@
+use super::{secret, tokens_manager, user};
+use crate::users::tokens_manager::{TokenTypes, UserInfo};
+use crate::users::user::UserError;
+use domain::models::ApiKey;
 use infrastructure::DbPool;
-use jsonwebtoken::errors as jwt_errors;
-use jsonwebtoken::TokenData;
 use shared::deployment_config::DeploymentConfig;
+use shared::user_models::ApiKeyResponseWithoutSecret;
 use shared::user_models::LoginRequest;
 use std::sync::Arc;
-
-use super::{token, user};
 
 pub struct AccountService {
     pool: Arc<DbPool>,
     config: DeploymentConfig,
-    tokens_manager: token::JWTImplementation,
+    tokens_manager: tokens_manager::JWTTokensManager,
 }
 
 impl AccountService {
     pub fn new(pool: Arc<DbPool>, config: DeploymentConfig) -> Self {
-        let secret = config.jwt_secret.clone();
+        let encryption_key = config.encryption_key.clone();
         AccountService {
             pool,
             config,
-            tokens_manager: token::JWTImplementation::new(&secret),
+            tokens_manager: tokens_manager::JWTTokensManager::new(encryption_key),
         }
     }
 
     /// Logs in a user
     pub fn login(&self, request: LoginRequest) -> Result<String, user::UserError> {
-        let session_info_result = user::login(request, &mut self.pool.get().unwrap());
+        let session_info_result = user::login(
+            request,
+            &mut self.pool.get().unwrap(),
+            &self.config.encryption_key,
+        );
         match session_info_result {
             Ok(session_info) => {
-                let token = self.tokens_manager.generate_jwt_token(&session_info);
+                let conn = &mut self.pool.get().unwrap();
+                let token = self
+                    .tokens_manager
+                    .generate_login_token(&session_info, conn);
                 match token {
                     Ok(t) => Ok(t),
                     Err(e) => {
@@ -46,20 +54,19 @@ impl AccountService {
 
     /// Logs out a user
     pub fn logout(&self, token: &str) -> Result<(), user::UserError> {
-        let decoded_token = self.tokens_manager.decode_token(token.to_string());
+        let conn = &mut self.pool.get().unwrap();
+        let decoded_token = self.tokens_manager.verify_token(token, conn);
         match decoded_token {
             Ok(token) => {
-                let session_id = token.claims.login_session;
-                if user::is_valid_login_session(&session_id, &mut self.pool.get().unwrap()) {
-                    user::delete_login_session(&session_id, &mut self.pool.get().unwrap())
-                        .map(|_| ())
+                let session_id = token.login_session;
+                if let Some(session_id) = session_id {
+                    let _ = user::delete_login_session(&session_id, conn);
                 } else {
-                    Err(user::UserError::LoginSessionNotFound(
-                        "Login session not found".to_string(),
-                    ))
+                    return Err(UserError::TokenError("Invalid token".to_string()));
                 }
+                Ok(())
             }
-            Err(e) => Err(user::UserError::TokenError(e.to_string())),
+            Err(e) => Err(e),
         }
     }
 
@@ -67,23 +74,58 @@ impl AccountService {
         self.pool.clone()
     }
 
-    pub fn decode_token(
-        &self,
-        token: String,
-    ) -> Result<TokenData<token::UserToken>, jwt_errors::Error> {
-        self.tokens_manager.decode_token(token)
+    pub fn decode_token(&self, token: String) -> Result<TokenTypes, UserError> {
+        self.tokens_manager.decode_token_unsafe(&token)
     }
 
-    pub fn verify_token(&self, token_data: &TokenData<token::UserToken>) -> Result<String, String> {
+    pub fn verify_token(&self, token_data: &str) -> Result<UserInfo, UserError> {
         self.tokens_manager
             .verify_token(token_data, &mut self.pool.get().unwrap())
     }
 
-    pub fn generate_jwt_token(
+    pub fn generate_login_token(
         &self,
         login_session_info: &user::LoginSessionInfo,
-    ) -> Result<String, jwt_errors::Error> {
-        self.tokens_manager.generate_jwt_token(login_session_info)
+    ) -> Result<String, UserError> {
+        self.tokens_manager
+            .generate_login_token(login_session_info, &mut self.pool.get().unwrap())
+    }
+
+    pub fn generate_api_keys(
+        &self,
+        user_id: i32,
+        comments: Option<String>,
+    ) -> Result<ApiKey, UserError> {
+        user::generate_non_login_api_key(
+            user_id,
+            &self.config.encryption_key,
+            comments,
+            &mut self.pool.get().unwrap(),
+        )
+    }
+
+    pub fn list_api_keys(
+        &self,
+        user_id: i32,
+    ) -> Result<Vec<ApiKeyResponseWithoutSecret>, UserError> {
+        let mut conn = self.pool.get().unwrap();
+        user::get_all_api_keys(user_id, &mut conn).map(|keys| {
+            keys.into_iter()
+                .map(|api_key| ApiKeyResponseWithoutSecret {
+                    key: api_key.key.clone(),
+                    comment: api_key.comment.unwrap_or_default(),
+                    created_at: api_key
+                        .created_at
+                        .map(|c| c.and_utc().timestamp() as usize)
+                        .unwrap_or_default(),
+                })
+                .collect::<Vec<ApiKeyResponseWithoutSecret>>()
+        })
+    }
+
+    pub fn decrypt_secret(&self, secret: &str) -> Result<String, UserError> {
+        secret::decrypt_string(secret, &self.config.encryption_key)
+            .map_err(|e| UserError::SecretError(e.to_string()))
     }
 }
 
@@ -92,7 +134,9 @@ impl Clone for AccountService {
         AccountService {
             pool: self.pool.clone(),
             config: self.config.clone(),
-            tokens_manager: token::JWTImplementation::new(&self.config.jwt_secret),
+            tokens_manager: tokens_manager::JWTTokensManager::new(
+                self.config.encryption_key.clone(),
+            ),
         }
     }
 }

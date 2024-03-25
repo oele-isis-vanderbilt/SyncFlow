@@ -8,9 +8,29 @@ pub struct LoginRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ApiKeyRequest {
+    pub comment: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct TokenResponse {
     pub token: String,
     pub token_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ApiKeyResponse {
+    pub key: String,
+    pub secret: String,
+    pub comment: String,
+    pub created_at: usize,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ApiKeyResponseWithoutSecret {
+    pub key: String,
+    pub comment: String,
+    pub created_at: usize,
 }
 
 impl TokenResponse {

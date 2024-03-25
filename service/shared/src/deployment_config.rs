@@ -13,6 +13,7 @@ pub struct DeploymentConfig {
     pub jwt_secret: String,
     pub database_url: String,
     pub storage_config: StorageConfig,
+    pub encryption_key: String,
 
     /// Test configuration
     pub login_token: Option<String>,

@@ -10,8 +10,30 @@ pub mod sql_types {
     pub struct EgressType;
 
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "KeyType"))]
+    pub struct KeyType;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "role"))]
     pub struct Role;
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::KeyType;
+
+    api_keys (id) {
+        id -> Int4,
+        key_type -> KeyType,
+        #[max_length = 255]
+        key -> Varchar,
+        user_id -> Int4,
+        #[max_length = 255]
+        secret -> Varchar,
+        created_at -> Nullable<Timestamptz>,
+        valid -> Bool,
+        comment -> Nullable<Text>,
+    }
 }
 
 diesel::table! {
@@ -95,6 +117,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(api_keys -> users (user_id));
 diesel::joinable!(create_room_actions -> users (user_id));
 diesel::joinable!(delete_room_actions -> users (user_id));
 diesel::joinable!(egress_actions -> users (user_id));
@@ -103,6 +126,7 @@ diesel::joinable!(list_rooms_actions -> users (user_id));
 diesel::joinable!(login_sessions -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    api_keys,
     create_room_actions,
     delete_room_actions,
     egress_actions,

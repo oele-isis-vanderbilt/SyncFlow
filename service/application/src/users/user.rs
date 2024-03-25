@@ -1,8 +1,10 @@
 use bcrypt::verify;
 use diesel::prelude::*;
 use diesel::PgConnection;
-use domain::models::{LoginSession, NewLoginSession, Role, User};
+use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, Role, User};
+use std::fmt::Display;
 
+use crate::users::secret::{encrypt_string, key_secret_pair};
 use serde::{Deserialize, Serialize};
 use shared::response_models::Response;
 use shared::user_models::LoginRequest;
@@ -24,6 +26,21 @@ pub enum UserError {
     TokenExpired(String),
     LoginSessionNotFound(String),
     TokenError(String),
+    SecretError(String),
+}
+
+impl Display for UserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UserError::UserNotFound(e) => write!(f, "User not found: {}", e),
+            UserError::PasswordMismatch(e) => write!(f, "Password mismatch: {}", e),
+            UserError::DatabaseError(e) => write!(f, "Database error: {}", e),
+            UserError::TokenExpired(e) => write!(f, "Token expired: {}", e),
+            UserError::LoginSessionNotFound(e) => write!(f, "Login session not found: {}", e),
+            UserError::TokenError(e) => write!(f, "Token error: {}", e),
+            UserError::SecretError(e) => write!(f, "Secret error: {}", e),
+        }
+    }
 }
 
 impl Into<Response> for UserError {
@@ -53,6 +70,10 @@ impl Into<Response> for UserError {
                 status: 401,
                 message: e,
             },
+            UserError::SecretError(e) => Response {
+                status: 500,
+                message: e,
+            },
         }
     }
 }
@@ -65,6 +86,7 @@ fn verify_passwd(password: &str, hash: &str) -> bool {
 pub fn login(
     login_request: LoginRequest,
     conn: &mut PgConnection,
+    encryption_secret: &str,
 ) -> Result<LoginSessionInfo, UserError> {
     use domain::schema::login_sessions::dsl::*;
     use domain::schema::users::dsl::*;
@@ -84,6 +106,16 @@ pub fn login(
                 let new_session = diesel::insert_into(login_sessions)
                     .values(&new_login_session)
                     .get_result::<LoginSession>(conn);
+
+                let login_key = fetch_login_key(usr.id, conn);
+
+                match login_key {
+                    Ok(_) => (),
+                    Err(_) => {
+                        let _ = generate_login_key(usr.id, encryption_secret, conn)?;
+                        ()
+                    }
+                }
 
                 match new_session {
                     Ok(session) => {
@@ -149,4 +181,100 @@ pub fn is_valid_login_session(sid: &str, conn: &mut PgConnection) -> bool {
         }
         Err(_) => false,
     }
+}
+
+pub fn generate_login_key(
+    uid: i32,
+    encryption_key: &str,
+    conn: &mut PgConnection,
+) -> Result<ApiKey, UserError> {
+    generate_api_key(
+        uid,
+        encryption_key,
+        conn,
+        KeyType::Login,
+        Some("Auto-Generated-Login-Key".to_string()),
+    )
+}
+
+pub fn generate_non_login_api_key(
+    uid: i32,
+    encryption_key: &str,
+    key_comments: Option<String>,
+    conn: &mut PgConnection,
+) -> Result<ApiKey, UserError> {
+    generate_api_key(uid, encryption_key, conn, KeyType::Api, key_comments)
+}
+
+pub fn generate_api_key(
+    uid: i32,
+    encryption_key: &str,
+    conn: &mut PgConnection,
+    kt: KeyType,
+    key_comments: Option<String>,
+) -> Result<ApiKey, UserError> {
+    use domain::schema::api_keys::dsl::*;
+
+    let key_secret_pair = key_secret_pair();
+    let encrypted_secret_string = encrypt_string(&key_secret_pair.secret, encryption_key)
+        .map_err(|e| UserError::SecretError(e.to_string()))?;
+
+    let new_api_key = NewApiKey {
+        user_id: uid,
+        key: key_secret_pair.key.to_owned(),
+        secret: encrypted_secret_string,
+        key_type: kt,
+        comment: key_comments,
+        valid: true,
+    };
+
+    diesel::insert_into(api_keys)
+        .values(&new_api_key)
+        .get_result::<ApiKey>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn fetch_login_key(uid: i32, conn: &mut PgConnection) -> Result<ApiKey, UserError> {
+    use domain::schema::api_keys::dsl::*;
+
+    api_keys
+        .filter(user_id.eq(uid).and(key_type.eq(KeyType::Login)))
+        .first::<ApiKey>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn fetch_api_key_by_id(key_id: &str, conn: &mut PgConnection) -> Result<ApiKey, UserError> {
+    use domain::schema::api_keys::dsl::*;
+
+    api_keys
+        .filter(key.eq(key_id))
+        .first::<ApiKey>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn fetch_api_key_by_key(key_ref: &str, conn: &mut PgConnection) -> Result<ApiKey, UserError> {
+    use domain::schema::api_keys::dsl::*;
+
+    api_keys
+        .filter(key.eq(key_ref))
+        .first::<ApiKey>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn get_user(uid: i32, conn: &mut PgConnection) -> Result<User, UserError> {
+    use domain::schema::users::dsl::*;
+
+    users
+        .filter(id.eq(uid))
+        .first::<User>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn get_all_api_keys(uid: i32, conn: &mut PgConnection) -> Result<Vec<ApiKey>, UserError> {
+    use domain::schema::api_keys::dsl::*;
+
+    api_keys
+        .filter(user_id.eq(uid).and(key_type.eq(KeyType::Api)))
+        .load::<ApiKey>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
 }
