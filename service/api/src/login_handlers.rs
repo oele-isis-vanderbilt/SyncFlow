@@ -67,13 +67,13 @@ pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> H
 #[post("/api-key")]
 pub async fn create_api_key(
     api_token_request: Json<ApiKeyRequest>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token_data) => {
-            let token_inner = token_data.into_inner();
-            let user_id = token_inner.user_id;
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
+            let user_id = user_info.user_id;
             let api_key =
                 user_auth.generate_api_keys(user_id, Some(api_token_request.comment.clone()));
             match api_key {
@@ -124,13 +124,13 @@ pub async fn create_api_key(
 )]
 #[get("/api-keys")]
 pub async fn list_all_api_keys(
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token_data) => {
-            let token_inner = token_data.into_inner();
-            let user_id = token_inner.user_id;
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
+            let user_id = user_info.user_id;
             let api_keys = user_auth.list_api_keys(user_id);
             match api_keys {
                 Ok(keys) => HttpResponse::Ok().json(keys),
