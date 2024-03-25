@@ -8,17 +8,20 @@ pub struct LoginRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct ApiKeyRequest {
     pub comment: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct TokenResponse {
     pub token: String,
     pub token_type: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct ApiKeyResponse {
     pub key: String,
     pub secret: String,
@@ -27,6 +30,7 @@ pub struct ApiKeyResponse {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct ApiKeyResponseWithoutSecret {
     pub key: String,
     pub comment: String,
