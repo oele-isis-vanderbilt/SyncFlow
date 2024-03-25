@@ -1,7 +1,7 @@
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use application::mmla::mmla_service::MMLAService;
-use application::users::tokens_manager::UserTokenType;
+use application::users::tokens_manager::UserInfo;
 use shared::deployment_config::DeploymentConfig;
 use shared::livekit_models::{CreateRoomRequest, TokenRequest};
 use shared::response_models::Response;
@@ -40,7 +40,7 @@ pub async fn generate_token(
     token_request: Json<TokenRequest>,
     mmla_service: web::Data<MMLAService>,
     deployment_config: web::Data<DeploymentConfig>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     match token_data {
         Some(token) => {
@@ -80,7 +80,7 @@ pub async fn generate_token(
 pub async fn create_room(
     mmla_service: web::Data<MMLAService>,
     room_create_request: Json<CreateRoomRequest>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     match token_data {
         Some(token) => {
@@ -121,7 +121,7 @@ pub async fn create_room(
 pub async fn delete_room(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     match token_data {
         Some(token) => {
@@ -155,7 +155,7 @@ pub async fn delete_room(
 #[get("/list-rooms")]
 pub async fn list_rooms(
     mmla_service: web::Data<MMLAService>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     match token_data {
         Some(token) => {
@@ -191,7 +191,7 @@ pub async fn list_rooms(
 pub async fn list_participants(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     match token_data {
         Some(token) => {
@@ -229,7 +229,7 @@ pub async fn list_participants(
 pub async fn list_egresses(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     match token_data {
         Some(token) => {
@@ -264,7 +264,7 @@ pub async fn list_egresses(
 pub async fn begin_track_egress(
     mmla_service: web::Data<MMLAService>,
     params: web::Path<(String, String)>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     let (room_name, track_sid) = params.into_inner();
     match token_data {
@@ -300,7 +300,7 @@ pub async fn begin_track_egress(
 pub async fn stop_recording(
     mmla_service: web::Data<MMLAService>,
     params: web::Path<(String, String)>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     let (room_name, track_sid) = params.into_inner();
     match token_data {

@@ -1,15 +1,12 @@
-use crate::users::tokens_manager::UserToken;
+use super::{secret, tokens_manager, user};
+use crate::users::tokens_manager::{TokenTypes, UserInfo};
 use crate::users::user::UserError;
 use domain::models::ApiKey;
-use domain::models::User;
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
 use shared::user_models::ApiKeyResponseWithoutSecret;
 use shared::user_models::LoginRequest;
-use shared::user_models::ApiKeyResponse;
 use std::sync::Arc;
-
-use super::{secret, tokens_manager, user};
 
 pub struct AccountService {
     pool: Arc<DbPool>,
@@ -61,13 +58,13 @@ impl AccountService {
         let decoded_token = self.tokens_manager.verify_token(token, conn);
         match decoded_token {
             Ok(token) => {
-                if self.tokens_manager.is_token_valid(&token, conn) {
-                    let session_id = token.login_session;
+                let session_id = token.login_session;
+                if let Some(session_id) = session_id {
                     let _ = user::delete_login_session(&session_id, conn);
-                    Ok(())
                 } else {
-                    Err(UserError::TokenError("Invalid token".to_string()))
+                    return Err(UserError::TokenError("Invalid token".to_string()));
                 }
+                Ok(())
             }
             Err(e) => Err(e),
         }
@@ -77,11 +74,11 @@ impl AccountService {
         self.pool.clone()
     }
 
-    pub fn decode_token(&self, token: String) -> Result<UserToken, UserError> {
+    pub fn decode_token(&self, token: String) -> Result<TokenTypes, UserError> {
         self.tokens_manager.decode_token_unsafe(&token)
     }
 
-    pub fn verify_token(&self, token_data: &str) -> Result<UserToken, UserError> {
+    pub fn verify_token(&self, token_data: &str) -> Result<UserInfo, UserError> {
         self.tokens_manager
             .verify_token(token_data, &mut self.pool.get().unwrap())
     }
@@ -107,19 +104,23 @@ impl AccountService {
         )
     }
 
-    pub fn list_api_keys(&self, user_id: i32) -> Result<Vec<ApiKeyResponseWithoutSecret>, UserError> {
+    pub fn list_api_keys(
+        &self,
+        user_id: i32,
+    ) -> Result<Vec<ApiKeyResponseWithoutSecret>, UserError> {
         let mut conn = self.pool.get().unwrap();
-        user::get_all_api_keys(user_id, &mut conn).map(
-            |keys| {
-                keys.into_iter().map(
-                    |api_key| ApiKeyResponseWithoutSecret {
-                        key: api_key.key.clone(),
-                        comment: api_key.comment.unwrap_or_default(),
-                        created_at: api_key.created_at.map(|c| c.and_utc().timestamp() as usize).unwrap_or_default(),
-                    }
-                ).collect::<Vec<ApiKeyResponseWithoutSecret>>()
-            }
-        )
+        user::get_all_api_keys(user_id, &mut conn).map(|keys| {
+            keys.into_iter()
+                .map(|api_key| ApiKeyResponseWithoutSecret {
+                    key: api_key.key.clone(),
+                    comment: api_key.comment.unwrap_or_default(),
+                    created_at: api_key
+                        .created_at
+                        .map(|c| c.and_utc().timestamp() as usize)
+                        .unwrap_or_default(),
+                })
+                .collect::<Vec<ApiKeyResponseWithoutSecret>>()
+        })
     }
 
     pub fn decrypt_secret(&self, secret: &str) -> Result<String, UserError> {

@@ -2,8 +2,6 @@ use bcrypt::verify;
 use diesel::prelude::*;
 use diesel::PgConnection;
 use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, Role, User};
-use domain::schema::create_room_actions::user_id;
-use domain::schema::users::username;
 use std::fmt::Display;
 
 use crate::users::secret::{encrypt_string, key_secret_pair};
@@ -254,6 +252,24 @@ pub fn fetch_api_key_by_id(key_id: &str, conn: &mut PgConnection) -> Result<ApiK
         .map_err(|e| UserError::DatabaseError(e.to_string()))
 }
 
+pub fn fetch_api_key_by_key(key_ref: &str, conn: &mut PgConnection) -> Result<ApiKey, UserError> {
+    use domain::schema::api_keys::dsl::*;
+
+    api_keys
+        .filter(key.eq(key_ref))
+        .first::<ApiKey>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn get_user(uid: i32, conn: &mut PgConnection) -> Result<User, UserError> {
+    use domain::schema::users::dsl::*;
+
+    users
+        .filter(id.eq(uid))
+        .first::<User>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
 pub fn get_all_api_keys(uid: i32, conn: &mut PgConnection) -> Result<Vec<ApiKey>, UserError> {
     use domain::schema::api_keys::dsl::*;
 
@@ -261,5 +277,4 @@ pub fn get_all_api_keys(uid: i32, conn: &mut PgConnection) -> Result<Vec<ApiKey>
         .filter(user_id.eq(uid).and(key_type.eq(KeyType::Api)))
         .load::<ApiKey>(conn)
         .map_err(|e| UserError::DatabaseError(e.to_string()))
-
 }

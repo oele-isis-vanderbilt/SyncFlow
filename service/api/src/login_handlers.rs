@@ -1,7 +1,7 @@
 use actix_web::web::{Json, ReqData};
 use actix_web::{get, post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
-use application::users::tokens_manager::UserTokenType;
+use application::users::tokens_manager::UserInfo;
 use shared::constants;
 use shared::response_models::Response;
 use shared::user_models::{ApiKeyRequest, ApiKeyResponse, LoginRequest, TokenResponse};
@@ -67,7 +67,7 @@ pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> H
 #[post("/api-key")]
 pub async fn create_api_key(
     api_token_request: Json<ApiKeyRequest>,
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
     match token_data {
@@ -124,7 +124,7 @@ pub async fn create_api_key(
 )]
 #[get("/api-keys")]
 pub async fn list_all_api_keys(
-    token_data: Option<ReqData<UserTokenType>>,
+    token_data: Option<ReqData<UserInfo>>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
     match token_data {
