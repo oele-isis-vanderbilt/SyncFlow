@@ -70,10 +70,12 @@ function CreateAPIKeyModal({
             <input
               type="text"
               id="description"
-              className="m-2 text-black"
+              className="mx-2 text-black"
               name="description"
             />
-            <CreateKeyButton />
+            <div>
+              <CreateKeyButton />
+            </div>
           </div>
           {state?.error && (
             <>
@@ -113,7 +115,7 @@ function CreateKeyButton() {
   return (
     <Button
       type={'submit'}
-      className="mt-4 w-full bg-teal-900"
+      className="w-full bg-teal-900"
       aria-disabled={pending}
     >
       Create key <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />

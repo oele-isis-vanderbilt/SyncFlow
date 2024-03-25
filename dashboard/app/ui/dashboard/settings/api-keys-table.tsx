@@ -1,5 +1,6 @@
 import { apiClient } from '@/app/lib/api-client';
 import { ApiKeyResponseWithoutSecret } from '@/types/api';
+import ApiKeyActions from "@/app/ui/dashboard/settings/api-key-actions";
 
 export default async function ApiKeysTable() {
   let allApiKeys: ApiKeyResponseWithoutSecret[] = [];
@@ -15,7 +16,7 @@ export default async function ApiKeysTable() {
   return (
     <>
       {allApiKeys.length === 0 ? (
-        <p>No active rooms. Create one to get started.</p>
+        <p>No Api Keys</p>
       ) : (
         <table className="w-full text-left text-sm rtl:text-right">
           <thead className="text-gray bg-gray-900 text-xs uppercase">
@@ -28,6 +29,9 @@ export default async function ApiKeysTable() {
               </th>
               <th scope="col" className="px-6 py-3">
                 Created At
+              </th>
+              <th>
+                Actions
               </th>
             </tr>
           </thead>
@@ -49,6 +53,9 @@ export default async function ApiKeysTable() {
                     <div className="text-blue text-sm hover:text-blue-400 hover:underline">
                       {new Date(apiKey.createdAt * 1000).toISOString()}
                     </div>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <ApiKeyActions apiKey={apiKey.key} />
                   </td>
                 </tr>
               );

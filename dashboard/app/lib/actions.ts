@@ -107,6 +107,12 @@ export async function redirectToDashboard() {
   redirect('/dashboard');
 }
 
+export async function deleteApiKey(key: string) {
+  await apiClient.deleteApiKey(key);
+  revalidatePath('/dashboard/settings');
+  redirect('/dashboard/settings');
+}
+
 export async function redirectToSettings() {
   revalidatePath('/dashboard/settings');
   redirect('/dashboard/settings');

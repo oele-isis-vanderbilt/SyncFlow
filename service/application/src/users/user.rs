@@ -278,3 +278,16 @@ pub fn get_all_api_keys(uid: i32, conn: &mut PgConnection) -> Result<Vec<ApiKey>
         .load::<ApiKey>(conn)
         .map_err(|e| UserError::DatabaseError(e.to_string()))
 }
+
+pub fn delete_api_key(
+    uid: i32,
+    key_ref: &str,
+    conn: &mut PgConnection,
+) -> Result<ApiKey, UserError> {
+    use domain::schema::api_keys::dsl::*;
+
+    let delete_result = diesel::delete(api_keys.filter(user_id.eq(uid).and(key.eq(key_ref))))
+        .get_result::<ApiKey>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()));
+    delete_result
+}

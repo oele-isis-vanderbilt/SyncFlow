@@ -22,6 +22,12 @@ class ApiClient extends AuthHttpClient {
     );
   }
 
+  async deleteApiKey(key: string) {
+    return await this.authenticatedDelete<ApiKeyResponseWithoutSecret>(
+      PREFIXES.DELETE_API_KEY + `/${key}`,
+    );
+  }
+
   async createApiKey(req: ApiKeyRequest) {
     return await this.authenticatedPost<ApiKeyResponse, ApiKeyRequest>(
       PREFIXES.CREATE_API_KEY,
