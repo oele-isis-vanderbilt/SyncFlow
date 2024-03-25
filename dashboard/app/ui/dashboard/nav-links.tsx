@@ -21,7 +21,7 @@ const links = [
     icon: HomeIcon,
   },
   {
-    name: 'LiveKit Settings',
+    name: 'Settings',
     href: '/dashboard/settings',
     icon: SettingsIcon,
   },

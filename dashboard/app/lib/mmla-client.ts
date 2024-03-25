@@ -8,7 +8,6 @@ import { VideoGrant } from 'livekit-server-sdk';
 import { CreateRoomRequest, TokenResponse } from '@/types/mmla';
 import { AuthHttpClient } from './auth-http-client';
 
-
 const PREFIXES = {
   LIST_ROOMS: '/livekit/list-rooms',
   GENERATE_TOKEN: '/livekit/token',
@@ -21,11 +20,9 @@ const PREFIXES = {
 };
 
 export class MMLAClient extends AuthHttpClient {
-
   constructor(base_url: string) {
     super(base_url);
   }
-
 
   async createRoom(options: CreateRoomRequest) {
     return await this.authenticatedPost<Room, CreateRoomRequest>(

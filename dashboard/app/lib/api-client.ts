@@ -1,20 +1,33 @@
-import { AuthHttpClient } from "./auth-http-client";
+import { AuthHttpClient } from './auth-http-client';
+import {
+  ApiKeyRequest,
+  ApiKeyResponse,
+  ApiKeyResponseWithoutSecret,
+} from '@/types/api';
+import deploymentConfig from '@/deployment-config';
 const PREFIXES = {
-    CREATE_API_KEYS: '/users/api-key',
-    LIST_API_KEYS: '/users/api-keys',
+  CREATE_API_KEY: '/users/api-key',
+  LIST_API_KEYS: '/users/api-keys',
+  DELETE_API_KEY: '/users/api-key',
 };
 
 class ApiClient extends AuthHttpClient {
-    constructor(base_url: string) {
-        super(base_url);
-    }
+  constructor(base_url: string) {
+    super(base_url);
+  }
 
-    async createApiKey(options) {
-        return await this.authenticatedPost(PREFIXES.CREATE_API_KEYS, options);
-    }
+  async listApiKeys() {
+    return await this.authenticatedGet<ApiKeyResponseWithoutSecret[]>(
+      PREFIXES.LIST_API_KEYS,
+    );
+  }
 
-    async listApiKeys() {
-        return await this.authenticatedGet(PREFIXES.LIST_API_KEYS);
-    }
-  
+  async createApiKey(req: ApiKeyRequest) {
+    return await this.authenticatedPost<ApiKeyResponse, ApiKeyRequest>(
+      PREFIXES.CREATE_API_KEY,
+      req,
+    );
+  }
 }
+
+export const apiClient = new ApiClient(deploymentConfig.mmla_api_url);

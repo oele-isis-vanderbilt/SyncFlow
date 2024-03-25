@@ -1,0 +1,61 @@
+import { apiClient } from '@/app/lib/api-client';
+import { ApiKeyResponseWithoutSecret } from '@/types/api';
+
+export default async function ApiKeysTable() {
+  let allApiKeys: ApiKeyResponseWithoutSecret[] = [];
+  let apiKeysResult = await apiClient.listApiKeys();
+  apiKeysResult
+    .map((apiKeys) => {
+      allApiKeys = apiKeys;
+    })
+    .mapError((error) => {
+      allApiKeys = [];
+    });
+
+  return (
+    <>
+      {allApiKeys.length === 0 ? (
+        <p>No active rooms. Create one to get started.</p>
+      ) : (
+        <table className="w-full text-left text-sm rtl:text-right">
+          <thead className="text-gray bg-gray-900 text-xs uppercase">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Key
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Description
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Created At
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {allApiKeys.map((apiKey, index: number) => {
+              return (
+                <tr key={index} className="border-5 border-indigo-200 bg-black">
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <div className="text-blue text-sm hover:text-blue-400 hover:underline">
+                      {apiKey.key.trim()}
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <div className="text-blue text-sm hover:text-blue-400 hover:underline">
+                      {apiKey.comment.trim()}
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <div className="text-blue text-sm hover:text-blue-400 hover:underline">
+                      {new Date(apiKey.createdAt * 1000).toISOString()}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+    </>
+  );
+}
