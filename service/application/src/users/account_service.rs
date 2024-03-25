@@ -123,6 +123,23 @@ impl AccountService {
         })
     }
 
+    pub fn delete_api_key(
+        &self,
+        user_id: i32,
+        key_id: &str,
+    ) -> Result<ApiKeyResponseWithoutSecret, UserError> {
+        user::delete_api_key(user_id, key_id, &mut self.pool.get().unwrap()).map(|api_key| {
+            ApiKeyResponseWithoutSecret {
+                key: api_key.key.to_owned(),
+                comment: api_key.comment.unwrap_or_default(),
+                created_at: api_key
+                    .created_at
+                    .map(|c| c.and_utc().timestamp() as usize)
+                    .unwrap_or_default(),
+            }
+        })
+    }
+
     pub fn decrypt_secret(&self, secret: &str) -> Result<String, UserError> {
         secret::decrypt_string(secret, &self.config.encryption_key)
             .map_err(|e| UserError::SecretError(e.to_string()))

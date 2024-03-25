@@ -1,5 +1,5 @@
 use actix_web::web::{Json, ReqData};
-use actix_web::{get, post, web, HttpRequest, HttpResponse};
+use actix_web::{delete, get, post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
 use application::users::tokens_manager::UserInfo;
 use shared::constants;
@@ -114,6 +114,36 @@ pub async fn create_api_key(
     }
 }
 
+#[delete("/api-key/{key_id}")]
+pub async fn delete_api_key(
+    account_service: web::Data<AccountService>,
+    key_id: web::Path<String>,
+    user_data: Option<ReqData<UserInfo>>,
+) -> HttpResponse {
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
+            let user_id = user_info.user_id;
+            let key_id = key_id.into_inner();
+            let result = account_service.delete_api_key(user_id, &key_id);
+            match result {
+                Ok(api_key_resp) => HttpResponse::Ok().json(api_key_resp),
+                Err(e) => {
+                    let response: Response = e.into();
+                    response.into()
+                }
+            }
+        }
+        None => {
+            let response = Response {
+                status: 401,
+                message: constants::MESSAGE_INVALID_TOKEN.to_string(),
+            };
+            response.into()
+        }
+    }
+}
+
 #[utoipa::path(
     get,
     path = "/api-keys",
@@ -155,6 +185,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
         .service(login)
         .service(logout)
         .service(create_api_key)
+        .service(delete_api_key)
         .service(list_all_api_keys);
     cfg.service(users_scope);
 }

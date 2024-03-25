@@ -6,11 +6,7 @@ import { EgressInfo, ParticipantInfo, Room } from '@livekit/protocol';
 
 import { VideoGrant } from 'livekit-server-sdk';
 import { CreateRoomRequest, TokenResponse } from '@/types/mmla';
-
-interface MMLAClientError {
-  message: any;
-  code: number;
-}
+import { AuthHttpClient } from './auth-http-client';
 
 const PREFIXES = {
   LIST_ROOMS: '/livekit/list-rooms',
@@ -23,122 +19,9 @@ const PREFIXES = {
   STOP_EGRESS: '/livekit/stop-recording',
 };
 
-export class MMLAClient {
-  private base_url: string;
-
+export class MMLAClient extends AuthHttpClient {
   constructor(base_url: string) {
-    this.base_url = base_url;
-  }
-
-  private async getAuthToken(): Promise<string | null> {
-    // @ts-ignore
-    return (await auth())?.jwt;
-  }
-
-  private async authenticatedGet<T>(
-    url: string,
-  ): Promise<Result<T, MMLAClientError>> {
-    const sessionToken = await this.getAuthToken();
-    if (sessionToken === null) {
-      return new Err({ message: 'Not authenticated', code: 401 });
-    } else {
-      let response = await fetch(this.base_url + url, {
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        let data = await response.json();
-        return new Ok<T>(data);
-      } else {
-        try {
-          let data = await response.json();
-          return new Err<MMLAClientError>({
-            message: data,
-            code: response.status,
-          });
-        } catch (e) {
-          return new Err<MMLAClientError>({
-            message: 'Unknown error',
-            code: response.status,
-          });
-        }
-      }
-    }
-  }
-
-  private async authenticatedPost<T, U>(
-    url: string,
-    body: U,
-  ): Promise<Result<T, MMLAClientError>> {
-    const sessionToken = await this.getAuthToken();
-    if (sessionToken === null) {
-      return new Err({ message: 'Not authenticated', code: 401 });
-    } else {
-      let response = await fetch(this.base_url + url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        let data = await response.json();
-        return new Ok<T>(data);
-      } else {
-        try {
-          let data = await response.json();
-          return new Err<MMLAClientError>({
-            message: data,
-            code: response.status,
-          });
-        } catch (e) {
-          return new Err<MMLAClientError>({
-            message: 'Unknown error',
-            code: response.status,
-          });
-        }
-      }
-    }
-  }
-
-  private async authenticatedDelete<T>(
-    url: string,
-  ): Promise<Result<T, MMLAClientError>> {
-    const sessionToken = await this.getAuthToken();
-    if (sessionToken === null) {
-      return new Err({ message: 'Not authenticated', code: 401 });
-    } else {
-      let response = await fetch(this.base_url + url, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        let data = await response.json();
-        return new Ok<T>(data);
-      } else {
-        try {
-          let data = await response.json();
-          return new Err<MMLAClientError>({
-            message: data,
-            code: response.status,
-          });
-        } catch (e) {
-          return new Err<MMLAClientError>({
-            message: 'Unknown error',
-            code: response.status,
-          });
-        }
-      }
-    }
+    super(base_url);
   }
 
   async createRoom(options: CreateRoomRequest) {

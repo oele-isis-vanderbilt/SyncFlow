@@ -10,6 +10,9 @@ import type { CreateRoomRequest } from '@/types/mmla';
 import { AuthError } from 'next-auth';
 import { EgressInfo } from '@livekit/protocol';
 import { JsonValue } from '@bufbuild/protobuf';
+import { apiClient } from '@/app/lib/api-client';
+import { ApiKeyRequest } from '@/types/api';
+import { unstable_noStore as noStore } from 'next/cache';
 
 const APP_NAME = 'LiveKitELP';
 const USER_NAME = 'admin';
@@ -45,6 +48,35 @@ export async function createRoom() {
   redirect('/dashboard');
 }
 
+export async function createApiKeys(
+  action: string | undefined,
+  payload: { type: 'create' | 'reset'; formData?: FormData },
+) {
+  noStore();
+  if (payload.type === 'reset') {
+    return {};
+  }
+  let formData = payload.formData;
+  if (!formData) {
+    return {};
+  }
+  const apiKeyRequest: ApiKeyRequest = {
+    comment: formData.get('description') as string,
+  };
+  let result = await apiClient.createApiKey(apiKeyRequest);
+  if (result.ok().isSome()) {
+    return {
+      success: result.unwrap(),
+      error: undefined,
+    };
+  } else {
+    return {
+      success: undefined,
+      error: 'An error occurred while creating the API key. Please try again.',
+    };
+  }
+}
+
 export async function deleteRoom(roomName: string) {
   await mmlaClient.deleteRoom(roomName);
   revalidatePath('/dashboard');
@@ -73,6 +105,17 @@ export async function authenticate(
 export async function redirectToDashboard() {
   revalidatePath('/dashboard');
   redirect('/dashboard');
+}
+
+export async function deleteApiKey(key: string) {
+  await apiClient.deleteApiKey(key);
+  revalidatePath('/dashboard/settings');
+  redirect('/dashboard/settings');
+}
+
+export async function redirectToSettings() {
+  revalidatePath('/dashboard/settings');
+  redirect('/dashboard/settings');
 }
 
 export async function redirectToRoomRecording(roomName: string) {
