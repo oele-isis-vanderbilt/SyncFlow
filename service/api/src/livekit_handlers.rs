@@ -40,13 +40,13 @@ pub async fn generate_token(
     token_request: Json<TokenRequest>,
     mmla_service: web::Data<MMLAService>,
     deployment_config: web::Data<DeploymentConfig>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token) => {
+    match user_data {
+        Some(user_info) => {
             let token_result = mmla_service
                 .generate_token(
-                    token.into_inner().user_id,
+                    user_info.into_inner().user_id,
                     token_request.into_inner(),
                     deployment_config.livekit_api_key.clone(),
                     deployment_config.livekit_api_secret.clone(),
@@ -80,16 +80,16 @@ pub async fn generate_token(
 pub async fn create_room(
     mmla_service: web::Data<MMLAService>,
     room_create_request: Json<CreateRoomRequest>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token) => {
-            let token_inner = token.into_inner();
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
 
             let req_json = room_create_request.into_inner();
             println!("{:?}", req_json);
             let create_room_result = mmla_service
-                .create_room(token_inner.user_id, req_json)
+                .create_room(user_info.user_id, req_json)
                 .await;
 
             match create_room_result {
@@ -121,13 +121,13 @@ pub async fn create_room(
 pub async fn delete_room(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token) => {
-            let token_inner = token.into_inner();
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
             let delete_room_result = mmla_service
-                .delete_room(token_inner.user_id, room_name.to_owned())
+                .delete_room(user_info.user_id, room_name.to_owned())
                 .await;
 
             match delete_room_result {
@@ -155,12 +155,12 @@ pub async fn delete_room(
 #[get("/list-rooms")]
 pub async fn list_rooms(
     mmla_service: web::Data<MMLAService>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token) => {
-            let token_inner = token.into_inner();
-            let list_rooms_result = mmla_service.list_rooms(token_inner.user_id).await;
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
+            let list_rooms_result = mmla_service.list_rooms(user_info.user_id).await;
 
             match list_rooms_result {
                 Ok(rooms) => HttpResponse::Ok().json(rooms),
@@ -191,13 +191,13 @@ pub async fn list_rooms(
 pub async fn list_participants(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token) => {
-            let token_inner = token.into_inner();
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
             let list_participants_result = mmla_service
-                .list_participants(token_inner.user_id, &room_name)
+                .list_participants(user_info.user_id, &room_name)
                 .await;
 
             match list_participants_result {
@@ -229,13 +229,13 @@ pub async fn list_participants(
 pub async fn list_egresses(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
-    match token_data {
-        Some(token) => {
-            let token_inner = token.into_inner();
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
             let list_egresses_result = mmla_service
-                .list_egresses(token_inner.user_id, &room_name)
+                .list_egresses(user_info.user_id, &room_name)
                 .await;
 
             match list_egresses_result {
@@ -264,14 +264,14 @@ pub async fn list_egresses(
 pub async fn begin_track_egress(
     mmla_service: web::Data<MMLAService>,
     params: web::Path<(String, String)>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     let (room_name, track_sid) = params.into_inner();
-    match token_data {
-        Some(token) => {
-            let token_inner = token.into_inner();
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
             let begin_egress_result = mmla_service
-                .record_track(token_inner.user_id, &room_name, &track_sid)
+                .record_track(user_info.user_id, &room_name, &track_sid)
                 .await;
 
             match begin_egress_result {
@@ -300,14 +300,14 @@ pub async fn begin_track_egress(
 pub async fn stop_recording(
     mmla_service: web::Data<MMLAService>,
     params: web::Path<(String, String)>,
-    token_data: Option<ReqData<UserInfo>>,
+    user_data: Option<ReqData<UserInfo>>,
 ) -> HttpResponse {
     let (room_name, track_sid) = params.into_inner();
-    match token_data {
-        Some(token) => {
-            let token_inner = token.into_inner();
+    match user_data {
+        Some(user_info) => {
+            let user_info = user_info.into_inner();
             let stop_recording_result = mmla_service
-                .stop_recording(token_inner.user_id, &room_name, &track_sid)
+                .stop_recording(user_info.user_id, &room_name, &track_sid)
                 .await;
 
             match stop_recording_result {
