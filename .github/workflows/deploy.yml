@@ -21,7 +21,6 @@ jobs:
           PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
           HOST: ${{ secrets.EC2_HOST }}
           USERNAME: ${{ secrets.EC2_USERNAME }}
-          DEPLOYMENT_CONFIG: ${{ toJSON(
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
