@@ -32,6 +32,7 @@ jobs:
             git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
             cd LiveKitMMLA
             git checkout -b 46-consolidate-dockerized-deployment origin/46-consolidate-dockerized-deployment
+            echo $DEPLOYMENT_CONFIG
             echo $DEPLOYMENT_CONFIG > deployment_config.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config.json --outfile-name .env.prod
