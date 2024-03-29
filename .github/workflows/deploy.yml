@@ -24,7 +24,8 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
-          cat ${{ secrets.DEPLOYMENT_CONFIG }} > deployment_config_cloud.json
+          echo ${{ secrets.DEPLOYMENT_CONFIG }}
+          echo ${{ secrets.DEPLOYMENT_CONFIG }} > deployment_config_cloud.json
           cat deployment_config_cloud.json
           scp -o StrictHostKeyChecking=no -i private_key ./deployment_config_cloud.json ${USERNAME}@${HOST}:$HOME/deployment_config_cloud.json
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
