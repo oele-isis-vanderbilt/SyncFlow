@@ -1,7 +1,7 @@
 use super::{secret, tokens_manager, user};
 use crate::users::tokens_manager::{TokenTypes, UserInfo};
 use crate::users::user::UserError;
-use domain::models::ApiKey;
+use domain::models::{ApiKey, User};
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
 use shared::user_models::ApiKeyResponseWithoutSecret;
@@ -25,7 +25,7 @@ impl AccountService {
     }
 
     /// Logs in a user
-    pub fn login(&self, request: LoginRequest) -> Result<String, user::UserError> {
+    pub fn login(&self, request: LoginRequest) -> Result<String, UserError> {
         let session_info_result = user::login(
             request,
             &mut self.pool.get().unwrap(),
@@ -138,6 +138,26 @@ impl AccountService {
                     .unwrap_or_default(),
             }
         })
+    }
+
+    pub fn create_user(
+        &self,
+        username: &str,
+        email: &str,
+        password: &str,
+        admin: bool,
+    ) -> Result<User, UserError> {
+        user::create_user(
+            username,
+            email,
+            password,
+            admin,
+            &mut self.pool.get().unwrap(),
+        )
+    }
+
+    pub fn user_exists(&self, username: &str) -> bool {
+        user::user_exists(username, &mut self.pool.get().unwrap())
     }
 
     pub fn decrypt_secret(&self, secret: &str) -> Result<String, UserError> {

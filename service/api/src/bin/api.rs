@@ -10,6 +10,7 @@ use application::mmla::user_actions::UserActions;
 use application::users::account_service::AccountService;
 use env_logger;
 use infrastructure::establish_connection_pool;
+use log::info;
 use shared::deployment_config::DeploymentConfig;
 use shared::response_models::Response;
 use shared::utils::load_env;
@@ -43,6 +44,18 @@ async fn main() -> std::io::Result<()> {
     let database_url = config.database_url.clone();
     let pool = Arc::new(establish_connection_pool(&database_url));
     let auth_service = AccountService::new(pool.clone(), config.clone());
+    if config.root_user.is_some() && !auth_service.user_exists(config.root_user.as_ref().unwrap().username.as_str()) {
+        let root_user = config.root_user.as_ref().unwrap();
+        let user = auth_service
+            .create_user(
+                &root_user.username,
+                &root_user.email,
+                &root_user.password,
+                true,
+            )
+            .unwrap_or_else(|e| panic!("Failed to create root user: {}", e));
+        info!("Root user created: {:?}", user);
+    }
     let room_service = RoomService::new(
         config.livekit_server_url.clone(),
         config.livekit_api_key.clone(),

@@ -15,10 +15,19 @@ pub struct DeploymentConfig {
     pub storage_config: StorageConfig,
     pub encryption_key: String,
 
+    pub root_user: Option<RootUser>,
+
     /// Test configuration
     pub login_token: Option<String>,
     pub test_user: Option<String>,
     pub test_password: Option<String>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct RootUser {
+    pub username: String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Deserialize, Debug, Clone)]

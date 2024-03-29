@@ -24,31 +24,19 @@ jobs:
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
-            export DATABASE_URL='${{ secrets.DATABASE_URL }}'
-            export APP_HOST='${{ secrets.APP_HOST }}'
-            export APP_PORT='${{ secrets.APP_PORT }}'
-            export NUM_ACTIX_WORKERS='${{ secrets.NUM_ACTIX_WORKERS }}'
-            export JWT_SECRET='${{ secrets.JWT_SECRET }}'
-            export LIVEKIT_API_KEY='${{ secrets.LIVEKIT_API_KEY }}'
-            export LIVEKIT_API_SECRET='${{ secrets.LIVEKIT_API_SECRET }}'
-            export LIVEKIT_SERVER_URL='${{ secrets.LIVEKIT_SERVER_URL }}'
-            export POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
-            export POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
-            export POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
-            export PGADMIN_DEFAULT_EMAIL='${{ secrets.PGADMIN_DEFAULT_EMAIL }}'
-            export PGADMIN_DEFAULT_PASSWORD='${{ secrets.PGADMIN_DEFAULT_PASSWORD }}'
-            export PGADMIN_LISTEN_PORT='${{ secrets.PGADMIN_LISTEN_PORT }}'
+            export DEPLOYMENT_CONFIG='${{ secrets.DEPLOYMENT_CONFIG }}'
             rm -rf LivekitMMLADeployment
             mkdir LivekitMMLADeployment
             cd LivekitMMLADeployment
             git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
             cd LiveKitMMLA
-            cd service
+            git checkout -b 46-consolidate-dockerized-deployment origin/46-consolidate-dockerized-deployment
+            echo $DEPLOYMENT_CONFIG > deployment_config.json
             chmod +x docker/generate-prod-config
-            ./docker/generate-prod-config .env.prod
+            ./docker/generate-prod-config --config-file deployment_config.json --outfile-name .env.prod
             sudo chmod 666 /var/run/docker.sock
-            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod
-            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod
+            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod livekit-mmla-dashboard-prod
+            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod livekit-mmla-dashboard-prod
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
           '
 

@@ -1,7 +1,9 @@
 use bcrypt::verify;
 use diesel::prelude::*;
 use diesel::PgConnection;
-use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, Role, User};
+use domain::models::{
+    ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, Role, User,
+};
 use std::fmt::Display;
 
 use crate::users::secret::{encrypt_string, key_secret_pair};
@@ -27,6 +29,7 @@ pub enum UserError {
     LoginSessionNotFound(String),
     TokenError(String),
     SecretError(String),
+    HashError(String),
 }
 
 impl Display for UserError {
@@ -39,6 +42,7 @@ impl Display for UserError {
             UserError::LoginSessionNotFound(e) => write!(f, "Login session not found: {}", e),
             UserError::TokenError(e) => write!(f, "Token error: {}", e),
             UserError::SecretError(e) => write!(f, "Secret error: {}", e),
+            UserError::HashError(e) => write!(f, "Hash error: {}", e),
         }
     }
 }
@@ -74,6 +78,10 @@ impl Into<Response> for UserError {
                 status: 500,
                 message: e,
             },
+            UserError::HashError(e) => Response {
+                status: 500,
+                message: e,
+            },
         }
     }
 }
@@ -81,6 +89,10 @@ impl Into<Response> for UserError {
 fn verify_passwd(password: &str, hash: &str) -> bool {
     let password_match = verify(password, hash);
     password_match.unwrap_or(false)
+}
+
+fn generate_hash(password: &str) -> Result<String, bcrypt::BcryptError> {
+    bcrypt::hash(password, bcrypt::DEFAULT_COST)
 }
 
 pub fn login(
@@ -179,6 +191,38 @@ pub fn is_valid_login_session(sid: &str, conn: &mut PgConnection) -> bool {
                 Err(_) => false,
             }
         }
+        Err(_) => false,
+    }
+}
+
+pub fn create_user(
+    username: &str,
+    email: &str,
+    password: &str,
+    is_admin: bool,
+    conn: &mut PgConnection,
+) -> Result<User, UserError> {
+    let hashed_password =
+        generate_hash(password).map_err(|e| UserError::HashError(e.to_string()))?;
+    let new_user = NewUser {
+        username: username.to_owned(),
+        email: email.to_owned(),
+        password: hashed_password,
+        role: if is_admin { Role::ADMIN } else { Role::USER },
+    };
+
+    diesel::insert_into(domain::schema::users::table)
+        .values(&new_user)
+        .get_result::<User>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn user_exists(uname: &str, conn: &mut PgConnection) -> bool {
+    use domain::schema::users::dsl::*;
+
+    let user_result = users.filter(username.eq(uname)).first::<User>(conn);
+    match user_result {
+        Ok(_) => true,
         Err(_) => false,
     }
 }

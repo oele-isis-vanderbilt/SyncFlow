@@ -86,7 +86,7 @@ function CreateAPIKeyModal({
           {state?.success && (
             <>
               <p className="text-xs text-green-500">
-                API key created successfully (copy it now, it won't be shown
+                API key created successfully (copy it now, it will not be shown
                 again)
               </p>
               <pre className={'text-black'}>
