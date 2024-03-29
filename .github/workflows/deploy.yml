@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
-          ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} ' bash -c "
+          ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             export DEPLOYMENT_CONFIG='${{ secrets.DEPLOYMENT_CONFIG }}'
             rm -rf LivekitMMLADeployment
             mkdir LivekitMMLADeployment
@@ -34,13 +34,13 @@ jobs:
             git checkout -b 46-consolidate-dockerized-deployment origin/46-consolidate-dockerized-deployment
             echo $DEPLOYMENT_CONFIG
             echo $DEPLOYMENT_CONFIG > deployment_config.json
-            chmod +x docker/generate-prod-config
-            ./docker/generate-prod-config --config-file deployment_config.json --outfile-name .env.prod
-            sudo chmod 666 /var/run/docker.sock
-            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod livekit-mmla-dashboard-prod
-            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod livekit-mmla-dashboard-prod
-            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
-          "'
+#            chmod +x docker/generate-prod-config
+#            ./docker/generate-prod-config --config-file deployment_config.json --outfile-name .env.prod
+#            sudo chmod 666 /var/run/docker.sock
+#            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod livekit-mmla-dashboard-prod
+#            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod livekit-mmla-dashboard-prod
+#            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
+          '
 
       - name: Docker Cleanup on EC2
         if: github.event_name == 'schedule'
