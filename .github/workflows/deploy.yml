@@ -26,6 +26,7 @@ jobs:
           openssl rsa -in private_key -check
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             echo "Pulling latest changes from GitHub"
+            pwd
           '
 
       - name: Docker Cleanup on EC2
