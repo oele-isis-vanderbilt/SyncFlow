@@ -8,39 +8,50 @@ services:
       - "15433:5432"
     volumes:
       - postgres-data-prod:/var/lib/postgresql/data
-    env_file: ../.env.prod
+    env_file: ../service/.env.prod.pgadmin
 
   pgadmin-prod:
     image: dpage/pgadmin4
     container_name: pgadmin-livekit-mmla-prod
     ports:
       - "5051:81"
-    env_file: ../.env.prod
+    env_file: ../service/.env.prod.pgadmin
     depends_on:
       - postgres-livekit-mmla-prod
 
   migrations-prod:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.migrations
+      context: ../service
+      dockerfile: ../docker/Dockerfile.migrations
     image: livekit-mmla-migrations:latest
     container_name: livekit-mmla-migrations-prod
     volumes:
-      - ../.env.prod:/migrations/.env
+      - ../service/.env.prod.migration:/migrations/.env
     depends_on:
       - postgres-livekit-mmla-prod
 
   api-livekit-mmla-prod:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: ../service
+      dockerfile: ../docker/Dockerfile.api
     image: livekit-mmla-api:latest
     container_name: livekit-mmla-api-prod
     ports:
       - "8082:8082"
-    env_file: ../.env.prod
+    env_file: ../service/.env.prod
     depends_on:
       - migrations-prod
+
+  livekit-mmla-dashboard-prod:
+    build:
+      context: ../dashboard
+      dockerfile: ../docker/Dockerfile.next
+    image: livekit-mmla-dashboard:latest
+    container_name: livekit-mmla-dashboard-prod
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-livekit-mmla-prod
 
 volumes:
   postgres-data-prod:

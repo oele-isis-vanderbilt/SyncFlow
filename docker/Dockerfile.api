@@ -17,7 +17,7 @@ ENV TZ=Etc/UTC \
 
 RUN groupadd $APP_USER && useradd -g $APP_USER $APP_USER
 
-RUN apt-get update && apt-get install tzdata libpq-dev -y && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install tzdata libpq-dev ca-certificates -y && rm -rf /var/cache/apk/* && update-ca-certificates
 
 WORKDIR $APP
 

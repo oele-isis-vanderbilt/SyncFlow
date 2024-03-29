@@ -1,0 +1,281 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import os
+import json
+
+from argparse import ArgumentParser
+from typing import Any, Dict, Optional
+
+from dataclasses import dataclass, asdict
+
+
+def dump_string(s: str, path: str):
+    with open(path, "w") as f:
+        f.write(s)
+
+
+@dataclass
+class Config:
+    def as_env(self, prefix: str = "") -> str:
+        env = []
+        for field, value in asdict(self).items():
+            env.append(f'{prefix.upper()}{field.upper()}="{value}"')
+        return "\n".join(env)
+
+
+@dataclass
+class DashboardConfig(Config):
+    mmla_api_url: str
+    next_public_mmla_api_url: str
+    next_public_livekit_server_url: str
+    auth_secret: str
+    nextauth_url: str
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "DashboardConfig":
+        return DashboardConfig(
+            mmla_api_url=json_dict["mmla_api_url"],
+            next_public_mmla_api_url=json_dict["next_public_mmla_api_url"],
+            next_public_livekit_server_url=json_dict["next_public_livekit_server_url"],
+            auth_secret=json_dict["auth_secret"],
+            nextauth_url=json_dict["nextauth_url"]
+        )
+
+
+@dataclass
+class ExampleAppConfig(Config):
+    livekit_mmla_api_key: str
+    livekit_mmla_api_secret: str
+    livekit_mmla_api_base_url: str
+    livekit_server_url: str
+    next_public_livekit_server_url: str
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "ExampleAppConfig":
+        return ExampleAppConfig(
+            livekit_mmla_api_key=json_dict["livekit_mmla_api_key"],
+            livekit_mmla_api_secret=json_dict["livekit_mmla_api_secret"],
+            livekit_mmla_api_base_url=json_dict["livekit_mmla_api_base_url"],
+            livekit_server_url=json_dict["livekit_server_url"],
+            next_public_livekit_server_url=json_dict["next_public_livekit_server_url"]
+        )
+
+
+@dataclass
+class DatabasePgAdminConfig(Config):
+    postgres_user: str
+    postgres_password: str
+    postgres_db: str
+    pgadmin_default_email: str
+    pgadmin_default_password: str
+    pgadmin_listen_port: int
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "DatabasePgAdminConfig":
+        return DatabasePgAdminConfig(
+            postgres_user=json_dict["postgres_user"],
+            postgres_password=json_dict["postgres_password"],
+            postgres_db=json_dict["postgres_db"],
+            pgadmin_default_email=json_dict["pgadmin_default_email"],
+            pgadmin_default_password=json_dict["pgadmin_default_password"],
+            pgadmin_listen_port=json_dict["pgadmin_listen_port"]
+        )
+
+
+@dataclass
+class MigrationConfig(Config):
+    database_url: str
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "MigrationConfig":
+        return MigrationConfig(
+            database_url=json_dict["database_url"]
+        )
+
+
+@dataclass
+class StorageConfigS3(Config):
+    access_key: str
+    secret_key: str
+    region: str
+    bucket: str
+    endpoint: str
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "StorageConfigS3":
+        return StorageConfigS3(
+            access_key=json_dict["access_key"],
+            secret_key=json_dict["secret_key"],
+            region=json_dict["region"],
+            bucket=json_dict["bucket"],
+            endpoint=json_dict["endpoint"],
+        )
+
+
+@dataclass
+class StorageConfigLocal(Config):
+    recording_root_path: str
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "StorageConfigLocal":
+        return StorageConfigLocal(
+            recording_root_path=json_dict["recording_root_path"]
+        )
+
+
+@dataclass
+class RootUser(Config):
+    email: str
+    password: str
+    username: str
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "RootUser":
+        return cls(
+            username=json_dict["username"],
+            email=json_dict["email"],
+            password=json_dict["password"],
+        )
+
+
+@dataclass
+class ServiceConfig(Config):
+    app_host: str
+    app_port: int
+    database_url: str
+    num_actix_workers: int
+    livekit_server_url: str
+    livekit_api_key: str
+    livekit_api_secret: str
+    jwt_secret: str
+    encryption_key: str
+    root_user: Optional[RootUser] = None
+    storage_config_local: Optional[StorageConfigLocal] = None
+    storage_config_s3: Optional[StorageConfigS3] = None
+    login_token: Optional[str] = None
+    test_user: Optional[str] = None
+    test_password: Optional[str] = None
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "ServiceConfig":
+        if "storage_config_s3" in json_dict and "storage_config_local" in json_dict:
+            raise ValueError("Both storage_config_s3 and storage_config_local are present in the json")
+
+        if "storage_config_s3" not in json_dict and "storage_config_s3" not in json_dict:
+            raise ValueError("Neither storage_config_local nor storage_config_local is present in the json")
+
+        if "storage_config_s3" in json_dict:
+            storage_config_s3 = StorageConfigS3.from_json(json_dict["storage_config_s3"])
+        else:
+            storage_config_s3 = None
+
+        if "storage_config_local" in json_dict:
+            storage_config_local = StorageConfigLocal.from_json(json_dict["storage_config_local"])
+        else:
+            storage_config_local = None
+
+        if "root_user" in json_dict:
+            root_user = RootUser.from_json(json_dict["root_user"])
+        else:
+            root_user = None
+
+        return cls(
+            app_host=json_dict["app_host"],
+            app_port=json_dict["app_port"],
+            database_url=json_dict["database_url"],
+            num_actix_workers=json_dict["num_actix_workers"],
+            livekit_server_url=json_dict["livekit_server_url"],
+            livekit_api_key=json_dict["livekit_api_key"],
+            livekit_api_secret=json_dict["livekit_api_secret"],
+            jwt_secret=json_dict["jwt_secret"],
+            encryption_key=json_dict["encryption_key"],
+            root_user=root_user,
+            storage_config_local=storage_config_local,
+            storage_config_s3=storage_config_s3,
+            login_token=json_dict.get("login_token"),
+            test_user=json_dict.get("test_user"),
+            test_password=json_dict.get("test_password")
+        )
+
+    def as_env(self, prefix: str = "") -> str:
+        env = []
+        for field, value in asdict(self).items():
+            if field == "root_user" and value is not None:
+                root_user_env = self.root_user.as_env(prefix=f"{prefix.upper()}_ROOT_USER__" if prefix else "ROOT_USER__")
+                env.append(root_user_env)
+            elif field == "storage_config_local" and value is not None:
+                storage_config_local_env = self.storage_config_local.as_env(prefix=f"{prefix.upper()}_STORAGE_CONFIG__LOCAL__" if prefix else "STORAGE_CONFIG__LOCAL__")
+                env.append(storage_config_local_env)
+            elif field == "storage_config_s3" and value is not None:
+                storage_config_s3_env = self.storage_config_s3.as_env(prefix=f"{prefix.upper()}_STORAGE_CONFIG__S3__" if prefix else "STORAGE_CONFIG__S3__")
+                env.append(storage_config_s3_env)
+            elif value is not None:
+                env.append(f'{prefix.upper()}{field.upper()}="{value}"')
+        return "\n".join(env)
+
+
+@dataclass
+class ConsolidatedConfig:
+    dashboard_config: DashboardConfig
+    example_app_config: ExampleAppConfig
+    service_config: ServiceConfig
+    migration_config: MigrationConfig
+    database_pgadmin_config: DatabasePgAdminConfig
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "ConsolidatedConfig":
+        return cls(
+            dashboard_config=DashboardConfig.from_json(json_dict["dashboard"]),
+            example_app_config=ExampleAppConfig.from_json(json_dict["example_app"]),
+            service_config=ServiceConfig.from_json(json_dict["service"]),
+            database_pgadmin_config=DatabasePgAdminConfig.from_json(json_dict["database_pgadmin"]),
+            migration_config=MigrationConfig.from_json(json_dict["migration"])
+        )
+
+    def get_dashboard_env(self, prefix: str = "") -> str:
+        return self.dashboard_config.as_env(prefix=prefix)
+
+    def get_example_app_env(self, prefix: str = "") -> str:
+        return self.example_app_config.as_env(prefix=prefix)
+
+    def get_service_env(self, prefix: str = "") -> str:
+        return self.service_config.as_env(prefix=prefix)
+
+    def get_database_pgadmin_env(self, prefix: str = "") -> str:
+        return self.database_pgadmin_config.as_env(prefix=prefix)
+
+    def get_migration_env(self, prefix: str = "") -> str:
+        return self.migration_config.as_env(prefix=prefix)
+
+
+def main(config_file: str, outfile_name: str):
+    with open(config_file, "r") as f:
+        config = ConsolidatedConfig.from_json(json.loads(f.read()))
+
+    dashboard_env = config.get_dashboard_env() + "\n"
+    dump_string(dashboard_env, f"dashboard/{outfile_name}")
+
+    example_app_env = config.get_example_app_env() + "\n"
+
+    dump_string(example_app_env, f"examples/livekit-mmla-demo-client/{outfile_name}")
+
+    service_env = config.get_service_env() + "\n"
+    dump_string(service_env, f"service/{outfile_name}")
+
+    database_pgadmin_env = config.get_database_pgadmin_env() + "\n"
+    dump_string(database_pgadmin_env, f"service/{outfile_name}.pgadmin")
+
+    migration_env = config.get_migration_env() + "\n"
+    dump_string(migration_env, f"service/infrastructure/{outfile_name}")
+    dump_string(migration_env, f"service/{outfile_name}.migration")
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser("Generate production config files from a json file.")
+    parser.add_argument("--config-file", type=str, required=True)
+    parser.add_argument("--outfile-name", type=str, default=".env")
+    args = parser.parse_args()
+
+    main(args.config_file, args.outfile_name)
+

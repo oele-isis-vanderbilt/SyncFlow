@@ -28,7 +28,7 @@ JWT_SECRET="JWT_SECRET" # The jwt secret
 The environment variables should be self-explanatory. For using the compose files in this directory, you can create an `.env.prod`(in the [`service`](../../service) directory) and set the environment variables there.  
 
 ## Images used for Deployment
-Postgres and pgAdmin are used for the database and database management respectively. The service is built and run using the [`Dockerfile`](./Dockerfile). The database migrations are run using the [`Dockerfile.migrations`](./Dockerfile.migrations) file.
+Postgres and pgAdmin are used for the database and database management respectively. The service is built and run using the [`Dockerfile`](./Dockerfile.api). The database migrations are run using the [`Dockerfile.migrations`](./Dockerfile.migrations) file.
 
 
 ## Deployment Commands

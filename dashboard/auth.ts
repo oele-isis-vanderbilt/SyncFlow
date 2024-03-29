@@ -58,6 +58,7 @@ async function apiSignOut(token: string) {
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  trustHost: true,
   session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user }) {

@@ -163,18 +163,13 @@ impl MMLAService {
 
         if let Ok(rooms) = user_rooms {
             let room_names = rooms.iter().map(|room| room.room_name.clone()).collect();
-            let livekit_rooms = self.room_service.list_rooms(Some(room_names)).await;
+            let livekit_rooms = self.room_service.list_rooms(Some(room_names)).await.map_err(
+                |e| ServiceError::RoomListError(format!("Error listing rooms: {}", e.to_string())),
+            )?;
+            let new_list_rooms_action = NewListRoomsAction { user_id };
+            let _ = self.user_actions.register_list_rooms(new_list_rooms_action);
 
-            if let Ok(rooms) = livekit_rooms {
-                let new_list_rooms_action = NewListRoomsAction { user_id };
-                let _ = self.user_actions.register_list_rooms(new_list_rooms_action);
-
-                Ok(rooms.into_iter().map(LivekitRoom::from).collect())
-            } else {
-                Err(ServiceError::RoomListError(
-                    "Error listing rooms".to_string(),
-                ))
-            }
+            Ok(livekit_rooms.into_iter().map(LivekitRoom::from).collect())
         } else {
             Err(ServiceError::PermissionError(
                 "Permission denied".to_string(),
