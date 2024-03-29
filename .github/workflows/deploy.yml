@@ -24,13 +24,15 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
-          export DEPLOYMENT_CONFIG = ${{ secrets.DEPLOYMENT_CONFIG }}
+          echo ${{ secrets.DEPLOYMENT_CONFIG }} > deployment_config_cloud.json
+          scp -o StrictHostKeyChecking=no -i private_key deployment_config_cloud.json ${USERNAME}@${HOST}:$HOME/deployment_config_cloud.json
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             echo "Pulling latest changes from GitHub"
             rm -rf $HOME/LivekitMMLADeployment && cd $HOME
             mkdir LivekitMMLADeployment && cd LivekitMMLADeployment
             git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
-            echo $DEPLOYMENT_CONFIG > deployment_config_cloud.json
+            cd LiveKitMMLA
+            mv $HOME/deployment_config.json > deployment_config_cloud.json
           '
 
       - name: Docker Cleanup on EC2
