@@ -33,8 +33,8 @@ jobs:
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_prod_cloud.json --outfile-name .env.prod
             sudo chmod 666 /var/run/docker.sock
-            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod livekit-mmla-dashboard-prod
-            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod livekit-mmla-dashboard-prod
+            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod livekit-mmla-dashboard-prod livekit-mmla-example-app-prod
+            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod livekit-mmla-dashboard-prod livekit-mmla-example-app-prod
             docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
           '
 
