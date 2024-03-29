@@ -1,4 +1,4 @@
-import { JWTClient } from '@/app/lib/jwt-client';
+import { JWTClient } from './jwt-client';
 
 const apiKey = process.env.LIVEKIT_MMLA_API_KEY!;
 const secret = process.env.LIVEKIT_MMLA_API_SECRET!;

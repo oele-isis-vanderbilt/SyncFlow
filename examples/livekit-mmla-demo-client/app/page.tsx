@@ -1,5 +1,5 @@
-import { jwtClient } from '@/app/lib/services';
-import RoomJoinForm from '@/app/room-join-form';
+import { jwtClient } from './lib/services';
+import RoomJoinForm from './room-join-form';
 import '@livekit/components-styles';
 export default async function Home() {
   let rooms = await jwtClient.listRooms();
