@@ -28,8 +28,6 @@ jobs:
             export DEPLOYMENT_CONFIG='${{ secrets.DEPLOYMENT_CONFIG }}'
             rm -rf LivekitMMLADeployment
             mkdir LivekitMMLADeployment
-            cd LivekitMMLADeployment
-            git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
           '
 
       - name: Docker Cleanup on EC2
