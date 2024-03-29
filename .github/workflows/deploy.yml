@@ -25,9 +25,7 @@ jobs:
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
-            export DEPLOYMENT_CONFIG='${{ secrets.DEPLOYMENT_CONFIG }}'
-            rm -rf LivekitMMLADeployment
-            mkdir LivekitMMLADeployment
+            echo "Pulling latest changes from GitHub"
           '
 
       - name: Docker Cleanup on EC2
