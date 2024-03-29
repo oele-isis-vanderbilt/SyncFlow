@@ -34,12 +34,6 @@ jobs:
             git checkout -b 46-consolidate-dockerized-deployment origin/46-consolidate-dockerized-deployment
             echo $DEPLOYMENT_CONFIG
             echo $DEPLOYMENT_CONFIG > deployment_config.json
-#            chmod +x docker/generate-prod-config
-#            ./docker/generate-prod-config --config-file deployment_config.json --outfile-name .env.prod
-#            sudo chmod 666 /var/run/docker.sock
-#            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml down api-livekit-mmla-prod livekit-mmla-dashboard-prod
-#            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml build api-livekit-mmla-prod migrations-prod livekit-mmla-dashboard-prod
-#            docker compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d
           '
 
       - name: Docker Cleanup on EC2
