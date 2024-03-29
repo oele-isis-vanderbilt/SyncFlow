@@ -26,7 +26,9 @@ jobs:
           openssl rsa -in private_key -check
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             echo "Pulling latest changes from GitHub"
-            pwd
+            rm -rf $HOME/LivekitMMLADeployment && cd $HOME
+            mkdir LivekitMMLADeployment && cd LivekitMMLADeployment
+            git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
           '
 
       - name: Docker Cleanup on EC2
