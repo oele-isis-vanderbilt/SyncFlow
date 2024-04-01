@@ -53,5 +53,16 @@ services:
     depends_on:
       - api-livekit-mmla-prod
 
+  livekit-mmla-example-app-prod:
+    build:
+      context: ../examples/livekit-mmla-demo-client
+      dockerfile: ../../docker/Dockerfile.next
+    image: livekit-mmla-example-app:latest
+    container_name: livekit-mmla-example-app-prod
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api-livekit-mmla-prod
+
 volumes:
   postgres-data-prod:

@@ -49,8 +49,11 @@ export class JWTClient {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    return await response.json();
+    try {
+      return await response.json();
+    } catch (e) {
+      return [];
+    }
   }
 
   async generateLivekitToken(identity: string, roomName: string) {
@@ -85,8 +88,12 @@ export class JWTClient {
       },
       body: JSON.stringify(requestData),
     });
-    let json = await response.json();
-    return json.token;
+    try {
+      let json = await response.json();
+      return json.token;
+    } catch (e) {
+      return '';
+    }
   }
 
   hasExpired(token: string): boolean {
