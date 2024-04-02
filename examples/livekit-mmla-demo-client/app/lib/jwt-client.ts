@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import {unstable_noStore as noStore} from 'next/cache';
 
 export interface Claims {
   iat: number;
@@ -39,6 +40,7 @@ export class JWTClient {
   }
 
   async listRooms() {
+    noStore();
     const url = `${this.baseUrl}/livekit/list-rooms`;
     const token = await this.getAccessToken();
 
@@ -57,6 +59,7 @@ export class JWTClient {
   }
 
   async generateLivekitToken(identity: string, roomName: string) {
+    noStore();
     let baseUrl = `${this.baseUrl}/livekit/token`;
     let token = await this.getAccessToken();
 
