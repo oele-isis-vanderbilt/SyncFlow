@@ -2,6 +2,10 @@ import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 
 export function getHelpText(track: TrackReferenceOrPlaceholder) {
+  if (track.publication?.trackName) {
+    return track.publication.trackName;
+  }
+
   if (track.publication?.source === Track.Source.Camera) {
     return track.participant.identity + "'s Video";
   }
