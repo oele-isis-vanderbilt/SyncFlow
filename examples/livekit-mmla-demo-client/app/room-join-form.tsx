@@ -1,56 +1,191 @@
 /* eslint-disable */
 'use client';
-import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { LocalUserChoices } from '@livekit/components-core';
 import { useRouter } from 'next/navigation';
+import Select from 'react-select';
+import { customSelectStyles } from '@/app/utils';
+import { videoCodecs, VideoPresets, AudioPresets } from 'livekit-client';
 
-const PreJoinNoSSR = dynamic(
-  async () => {
-    return (await import('@livekit/components-react')).PreJoin;
-  },
-  { ssr: false },
-);
 export default function RoomJoinForm({ roomNames }: { roomNames: string[] }) {
   if (roomNames.length === 0) {
     return (
-      <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
-        <p>No rooms available</p>
+      <div className={'p-2'}>
+        <p>
+          No rooms available. Refresh this page to see if new rooms are
+          available
+        </p>
       </div>
     );
   }
 
   const router = useRouter();
+  const [selectedRoom, setSelectedRoom] = useState(roomNames[0]);
+  const [identity, setIdentity] = useState('');
 
-  let [activeRoomIndex, setActiveRoomIndex] = useState<number>(0);
+  let roomNameOptions = roomNames.map((name) => {
+    return { value: name, label: name };
+  });
 
-  function handlePreJoinSubmit(values: LocalUserChoices) {
-    localStorage.setItem('preJoinChoices', JSON.stringify(values));
-    router.push(`/room?name=${roomNames[activeRoomIndex]}`);
-  }
+  let videoCodecOptions = videoCodecs.map((codec) => {
+    return { label: codec.toUpperCase(), value: codec };
+  });
+
+  let [selectedVideoCodec, setSelectedVideoCodec] = useState('h264');
+
+  let videoPresetOptions = Object.keys(VideoPresets).map((preset) => {
+    return { label: preset.toUpperCase(), value: preset };
+  });
+
+  let [selectedVideoPreset, setSelectedVideoPreset] = useState('h1080');
+
+  let audioPresetOptions = Object.keys(AudioPresets).map((preset) => {
+    return { label: preset.toUpperCase(), value: preset };
+  });
+
+  let [selectedAudioPreset, setSelectedAudioPreset] = useState('speech');
 
   return (
-    <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
-      <div className="mb-4 text-lg">Select a room</div>
-      <select className="mb-4 block h-8 w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-        {roomNames.map((roomName, index) => {
-          return (
-            <option key={index} id={`room-${index}`} role="option">
-              {roomName}
-            </option>
-          );
-        })}
-      </select>
+    <div className={'w-1/2 text-center'}>
+      <hr className={'my-5'} />
+      <div className={'p-2'}>
+        <h2 className={'text-xl font-bold'}>Select room to join</h2>
+      </div>
+      <div className={'items-center p-2 text-center'}>
+        <SingleSelect
+          options={roomNameOptions}
+          value={selectedRoom}
+          onChange={(value) => {
+            // @ts-ignore
+            setSelectedRoom(value);
+          }}
+          placeholder="select a room"
+        />
+      </div>
+      <hr className={'my-5'} />
 
-      <PreJoinNoSSR
-        onError={(err) => console.log('error while setting up prejoin', err)}
-        defaults={{
-          username: '',
-          videoEnabled: true,
-          audioEnabled: true,
-        }}
-        onSubmit={handlePreJoinSubmit}
-      ></PreJoinNoSSR>
+      <div className={'p-2'}>
+        <h2 className={'text-xl font-bold'}>Room Options</h2>
+        <div
+          className={
+            'flex h-full w-full flex-row items-center justify-center p-2'
+          }
+        >
+          <h3 className={'m-2 w-1/3 text-lg'}>
+            Default Video Codec
+            <InformationLink
+              href={'https://docs.livekit.io/guides/video-codecs/'}
+            />
+            :
+          </h3>
+          <div className={'flex-1'}>
+            <SingleSelect
+              options={videoCodecOptions}
+              value={selectedVideoCodec}
+              onChange={setSelectedVideoCodec}
+              placeholder="Select default Video Codec"
+            />
+          </div>
+        </div>
+
+        <div className={'flex flex-row items-center justify-center p-2'}>
+          <h3 className={'m-2 w-1/3 text-lg'}>
+            Default Video Preset
+            <InformationLink
+              href={
+                'https://docs.livekit.io/client-sdk-js/variables/VideoPresets.html'
+              }
+            />
+            :
+          </h3>
+          <div className={'flex-1'}>
+            <SingleSelect
+              options={videoPresetOptions}
+              value={selectedVideoPreset}
+              onChange={setSelectedVideoPreset}
+              placeholder="Select default Video Preset"
+            />
+          </div>
+        </div>
+
+        <div className={'flex flex-row items-center justify-center p-2'}>
+          <h3 className={'m-2 w-1/3 text-lg'}>
+            Default Audio Preset
+            <InformationLink
+              href={
+                'https://docs.livekit.io/client-sdk-js/modules/AudioPresets.html'
+              }
+            />
+            :
+          </h3>
+          <div className={'flex-1'}>
+            <SingleSelect
+              options={audioPresetOptions}
+              value={selectedAudioPreset}
+              onChange={setSelectedAudioPreset}
+              placeholder="Select default Video Preset"
+            />
+          </div>
+        </div>
+      </div>
+      <hr className={'my-5'} />
+      <div className={'p-2'}>
+        <label htmlFor="identity">Enter your identity</label>
+      </div>
+      <div className={'p-2'}>
+        <input
+          id="identity"
+          type="text"
+          value={identity}
+          onChange={(e) => setIdentity(e.target.value)}
+          className={'p-2 text-black'}
+        />
+      </div>
+      {selectedRoom && identity && (
+        <button
+          className={'bg-blue-500 p-2 text-white'}
+          onClick={() => {
+            router.push(
+              `/room?name=${selectedRoom}&identity=${identity}&videoCodec=${selectedVideoCodec}&videoPreset=${selectedVideoPreset}&audioPreset=${selectedAudioPreset}`,
+            );
+          }}
+        >
+          Join Room
+        </button>
+      )}
     </div>
+  );
+}
+
+function SingleSelect({
+  options,
+  value,
+  onChange,
+  placeholder,
+}: {
+  options: { value: string; label: string }[];
+  value?: string | undefined;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <Select
+      styles={customSelectStyles}
+      options={options}
+      value={options.find((option) => option.value === value)}
+      onChange={(option) => {
+        // @ts-ignore
+        onChange(option?.value);
+      }}
+      placeholder={placeholder}
+    />
+  );
+}
+
+function InformationLink({ href }: { href: string }) {
+  return (
+    <a className={'text-red-900'} href={href} target={'_blank'}>
+      {' '}
+      &#8505;{' '}
+    </a>
   );
 }
