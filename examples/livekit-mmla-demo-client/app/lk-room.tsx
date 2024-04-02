@@ -114,7 +114,6 @@ function VideoTracksPublisher({
   preset: keyof typeof VideoPresets;
 }) {
   const localVideoDevices = useMediaDevices({ kind: 'videoinput' });
-  console.log(localVideoDevices);
   let videoDeviceOptions = localVideoDevices.map((device) => {
     return {
       label: device.label,
