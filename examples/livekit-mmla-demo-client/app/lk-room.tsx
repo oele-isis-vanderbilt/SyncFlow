@@ -13,10 +13,11 @@ import {
   AudioPresets,
   createLocalAudioTrack,
   createLocalVideoTrack,
+  LocalAudioTrack,
   LocalTrackPublication,
+  RemoteAudioTrack,
   Track,
   videoCodecs,
-  VideoPreset,
   VideoPresets,
 } from 'livekit-client';
 import Select from 'react-select';
@@ -290,7 +291,6 @@ function SingleAudioTrackPreviewAndPublish({
   deviceName?: string;
 }) {
   const audioPreset = AudioPresets[preset as keyof typeof AudioPresets];
-  let audioEl = useRef(null);
   const participantInfo = useLocalParticipant();
   const [audioTrack, setAudioTrack] = useState<LocalTrackPublication | null>(
     null,
@@ -314,9 +314,6 @@ function SingleAudioTrackPreviewAndPublish({
           name: deviceName || deviceId,
         });
       setAudioTrack(localTrackPublication);
-      if (audioEl.current) {
-        audioTrack.attach(audioEl.current);
-      }
     };
 
     publishAudioTrack();
@@ -330,12 +327,68 @@ function SingleAudioTrackPreviewAndPublish({
           .unpublishTrack(audioTrack.track)
           .then(() => setAudioTrack(null))
           .catch((error) => console.error('Error unpublishing track:', error));
-        audioTrack.track.detach();
       }
     };
   }, [deviceId, deviceName, participantInfo.localParticipant]);
 
   return audioTrack && audioTrack.track ? (
-    <audio ref={audioEl} controls muted={true} />
+    <div className={'flex flex-col items-center'}>
+      <AudioRenderer
+        track={audioTrack.audioTrack}
+        className={'p-2'}
+        shouldMute={true}
+      />
+      <p>
+        {deviceName}-{deviceId.slice(1, 5)}
+      </p>
+      <p>
+        TrackId: {audioTrack.track.sid}.
+        <button
+          className={'text-red-700 hover:text-red-700'}
+          onClick={() => {}}
+        >
+          {' '}
+          &#8505;{' '}
+        </button>
+      </p>
+    </div>
   ) : null;
 }
+
+const AudioRenderer = ({
+  track,
+  shouldMute,
+  className,
+}: {
+  track: LocalAudioTrack | RemoteAudioTrack | undefined;
+  shouldMute: boolean;
+  className: string;
+}) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      track?.attach(audioRef.current);
+      audioRef.current.muted = shouldMute;
+    }
+    return () => {
+      track?.detach();
+    };
+  }, [track, shouldMute]);
+
+  if (
+    !(track instanceof LocalAudioTrack) &&
+    !(track instanceof RemoteAudioTrack)
+  ) {
+    return null;
+  }
+
+  return (
+    <audio
+      ref={audioRef}
+      muted={shouldMute}
+      controls={true}
+      className={className}
+    />
+  );
+};

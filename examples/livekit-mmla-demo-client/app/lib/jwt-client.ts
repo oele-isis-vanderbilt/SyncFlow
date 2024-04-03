@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import {unstable_noStore as noStore} from 'next/cache';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export interface Claims {
   iat: number;
