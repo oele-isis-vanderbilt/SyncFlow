@@ -52,10 +52,11 @@ impl EgressService {
             StorageConfig::Local(ref local_config) => {
                 let output = TrackEgressOutput::File(Box::new(DirectFileOutput {
                     filepath: format!(
-                        "{}/{}/tracks/{}/{}-{}-{}-{}",
+                        "{}/{}/tracks/{}/{}/{}-{}-{}-{}",
                         local_config.recording_root_path,
                         room_name,
                         "{publisher_identity}",
+                        "{time}",
                         "{track_type}",
                         "{track_source}",
                         "{track_id}",
@@ -71,9 +72,10 @@ impl EgressService {
             StorageConfig::S3(s3_config) => {
                 let output = TrackEgressOutput::File(Box::new(DirectFileOutput {
                     filepath: format!(
-                        "{}/tracks/{}/{}-{}-{}-{}",
+                        "{}/tracks/{}/{}/{}-{}-{}-{}",
                         room_name,
                         "{publisher_identity}",
+                        "{time}",
                         "{track_type}",
                         "{track_source}",
                         "{track_id}",
