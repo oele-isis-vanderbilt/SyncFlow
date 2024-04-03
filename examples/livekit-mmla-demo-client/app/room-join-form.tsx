@@ -45,114 +45,119 @@ export default function RoomJoinForm({ roomNames }: { roomNames: string[] }) {
   let [selectedAudioPreset, setSelectedAudioPreset] = useState('speech');
 
   return (
-    <div className={'w-1/2 text-center'}>
-      <hr className={'my-5'} />
-      <div className={'p-2'}>
-        <h2 className={'text-xl font-bold'}>Select room to join</h2>
-      </div>
-      <div className={'items-center p-2 text-center'}>
-        <SingleSelect
-          options={roomNameOptions}
-          value={selectedRoom}
-          onChange={(value) => {
-            // @ts-ignore
-            setSelectedRoom(value);
-          }}
-          placeholder="select a room"
-        />
-      </div>
-      <hr className={'my-5'} />
+    <>
+      <div className={'hidden w-1/2 text-center md:block'}>
+        <hr className={'my-5'} />
+        <div className={'p-2'}>
+          <h2 className={'text-xl font-bold'}>Select room to join</h2>
+        </div>
+        <div className={'items-center p-2 text-center'}>
+          <SingleSelect
+            options={roomNameOptions}
+            value={selectedRoom}
+            onChange={(value) => {
+              // @ts-ignore
+              setSelectedRoom(value);
+            }}
+            placeholder="select a room"
+          />
+        </div>
+        <hr className={'my-5'} />
 
-      <div className={'p-2'}>
-        <h2 className={'text-xl font-bold'}>Room Options</h2>
-        <div
-          className={
-            'flex h-full w-full flex-row items-center justify-center p-2'
-          }
-        >
-          <h3 className={'m-2 w-1/3 text-lg'}>
-            Default Video Codec
-            <InformationLink
-              href={'https://docs.livekit.io/guides/video-codecs/'}
-            />
-            :
-          </h3>
-          <div className={'flex-1'}>
-            <SingleSelect
-              options={videoCodecOptions}
-              value={selectedVideoCodec}
-              onChange={setSelectedVideoCodec}
-              placeholder="Select default Video Codec"
-            />
+        <div className={'p-2'}>
+          <h2 className={'text-xl font-bold'}>Room Options</h2>
+          <div
+            className={
+              'flex h-full w-full flex-row items-center justify-center p-2'
+            }
+          >
+            <h3 className={'m-2 w-1/3 text-lg'}>
+              Default Video Codec
+              <InformationLink
+                href={'https://docs.livekit.io/guides/video-codecs/'}
+              />
+              :
+            </h3>
+            <div className={'flex-1'}>
+              <SingleSelect
+                options={videoCodecOptions}
+                value={selectedVideoCodec}
+                onChange={setSelectedVideoCodec}
+                placeholder="Select default Video Codec"
+              />
+            </div>
+          </div>
+
+          <div className={'flex flex-row items-center justify-center p-2'}>
+            <h3 className={'m-2 w-1/3 text-lg'}>
+              Default Video Preset
+              <InformationLink
+                href={
+                  'https://docs.livekit.io/client-sdk-js/variables/VideoPresets.html'
+                }
+              />
+              :
+            </h3>
+            <div className={'flex-1'}>
+              <SingleSelect
+                options={videoPresetOptions}
+                value={selectedVideoPreset}
+                onChange={setSelectedVideoPreset}
+                placeholder="Select default Video Preset"
+              />
+            </div>
+          </div>
+
+          <div className={'flex flex-row items-center justify-center p-2'}>
+            <h3 className={'m-2 w-1/3 text-lg'}>
+              Default Audio Preset
+              <InformationLink
+                href={
+                  'https://docs.livekit.io/client-sdk-js/modules/AudioPresets.html'
+                }
+              />
+              :
+            </h3>
+            <div className={'flex-1'}>
+              <SingleSelect
+                options={audioPresetOptions}
+                value={selectedAudioPreset}
+                onChange={setSelectedAudioPreset}
+                placeholder="Select default Video Preset"
+              />
+            </div>
           </div>
         </div>
-
-        <div className={'flex flex-row items-center justify-center p-2'}>
-          <h3 className={'m-2 w-1/3 text-lg'}>
-            Default Video Preset
-            <InformationLink
-              href={
-                'https://docs.livekit.io/client-sdk-js/variables/VideoPresets.html'
-              }
-            />
-            :
-          </h3>
-          <div className={'flex-1'}>
-            <SingleSelect
-              options={videoPresetOptions}
-              value={selectedVideoPreset}
-              onChange={setSelectedVideoPreset}
-              placeholder="Select default Video Preset"
-            />
-          </div>
+        <hr className={'my-5'} />
+        <div className={'p-2'}>
+          <label htmlFor="identity">Enter your identity</label>
         </div>
-
-        <div className={'flex flex-row items-center justify-center p-2'}>
-          <h3 className={'m-2 w-1/3 text-lg'}>
-            Default Audio Preset
-            <InformationLink
-              href={
-                'https://docs.livekit.io/client-sdk-js/modules/AudioPresets.html'
-              }
-            />
-            :
-          </h3>
-          <div className={'flex-1'}>
-            <SingleSelect
-              options={audioPresetOptions}
-              value={selectedAudioPreset}
-              onChange={setSelectedAudioPreset}
-              placeholder="Select default Video Preset"
-            />
-          </div>
+        <div className={'p-2'}>
+          <input
+            id="identity"
+            type="text"
+            value={identity}
+            onChange={(e) => setIdentity(e.target.value)}
+            className={'p-2 text-black'}
+          />
         </div>
+        {selectedRoom && identity && (
+          <button
+            className={'bg-blue-500 p-2 text-white'}
+            onClick={() => {
+              router.push(
+                `/room?name=${selectedRoom}&identity=${identity}&videoCodec=${selectedVideoCodec}&videoPreset=${selectedVideoPreset}&audioPreset=${selectedAudioPreset}`,
+              );
+            }}
+          >
+            Join Room
+          </button>
+        )}
       </div>
-      <hr className={'my-5'} />
-      <div className={'p-2'}>
-        <label htmlFor="identity">Enter your identity</label>
+      <div className={'block text-center italic text-red-500 md:hidden'}>
+        This page is not optimized for mobile. Please use a desktop browser.
       </div>
-      <div className={'p-2'}>
-        <input
-          id="identity"
-          type="text"
-          value={identity}
-          onChange={(e) => setIdentity(e.target.value)}
-          className={'p-2 text-black'}
-        />
-      </div>
-      {selectedRoom && identity && (
-        <button
-          className={'bg-blue-500 p-2 text-white'}
-          onClick={() => {
-            router.push(
-              `/room?name=${selectedRoom}&identity=${identity}&videoCodec=${selectedVideoCodec}&videoPreset=${selectedVideoPreset}&audioPreset=${selectedAudioPreset}`,
-            );
-          }}
-        >
-          Join Room
-        </button>
-      )}
-    </div>
+    </>
   );
 }
 
