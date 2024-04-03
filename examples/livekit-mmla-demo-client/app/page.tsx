@@ -13,7 +13,7 @@ export default async function Home() {
         <p>
           This is a demo app for testing LiveKit MMLA. It lists available rooms
           and allows you to join a room. After you join a room, you will be able
-          to see share different video and audio devices and record them.
+          to see share different video and audio devices and record them with the Livekit MMLA dashboard.
         </p>
       </div>
       <RoomJoinForm roomNames={roomNames} />

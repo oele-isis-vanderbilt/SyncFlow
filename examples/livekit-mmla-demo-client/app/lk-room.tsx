@@ -88,7 +88,9 @@ export default function LkRoom({
             </h1>
             <p>
               Connect Web Cameras and Microphones to your system for streaming
-              to the room.
+              to the room, or go {' '}
+              <a href={"/"} className={"text-red-700 hover:underline"}> back</a> and
+              change the room settings.
             </p>
           </div>
           <div className="flex flex-grow flex-row">
