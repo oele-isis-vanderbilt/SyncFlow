@@ -119,7 +119,7 @@ mod tests {
         let livekit_client = setup_lk_client();
 
         assert!(livekit_client.is_some());
-        assert_eq!(livekit_client.unwrap().healthcheck().is_ok(), true);
+        assert!(livekit_client.unwrap().healthcheck().is_ok());
     }
 
     #[test]
@@ -130,11 +130,11 @@ mod tests {
         let livekit_client = livekit_client.unwrap();
         let room_name = "test-room";
         let create_room_result = livekit_client.create_room(room_name);
-        assert_eq!(create_room_result.is_ok(), true);
+        assert!(create_room_result.is_ok());
         assert_eq!(create_room_result.unwrap().name, room_name);
         let list_rooms_result = livekit_client.list_rooms();
         assert!(list_rooms_result.is_ok());
-        assert!(list_rooms_result.unwrap().len() > 0);
+        assert!(!list_rooms_result.unwrap().is_empty());
 
         let delete_room_result = livekit_client.delete_room(room_name);
         assert!(delete_room_result.is_ok());

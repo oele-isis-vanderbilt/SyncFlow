@@ -3,9 +3,7 @@ use livekit_protocol::direct_file_output::Output as DirectFileOutputOptions;
 use livekit_protocol::egress_info::Request;
 use livekit_protocol::track_egress_request::Output;
 pub fn get_track_egress_destination(request: Option<Request>) -> Option<EgressDestination> {
-    if request.is_none() {
-        return None;
-    }
+    request.as_ref()?;
     if let Request::Track(req) = request.unwrap() {
         match req.output {
             Some(output) => {

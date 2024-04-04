@@ -116,7 +116,7 @@ pub struct LiveKit {
 }
 
 impl LiveKit {
-    pub fn execute(&self) -> () {
+    pub fn execute(&self) {
         match load_credentials() {
             Ok(creds) => match &self.subcommand {
                 Some(subcmd) => match subcmd {
@@ -194,7 +194,6 @@ impl LiveKit {
             },
             Err(e) => {
                 println!("Error loading credentials: {:?}. Please login again.", e);
-                return;
             }
         }
     }

@@ -8,7 +8,7 @@ use application::livekit::room::RoomService;
 use application::mmla::mmla_service::MMLAService;
 use application::mmla::user_actions::UserActions;
 use application::users::account_service::AccountService;
-use env_logger;
+
 use infrastructure::establish_connection_pool;
 use log::info;
 use shared::deployment_config::DeploymentConfig;
@@ -37,14 +37,16 @@ async fn main() -> std::io::Result<()> {
     let config = DeploymentConfig::load();
 
     let app_host = config.app_host.clone();
-    let app_port = config.app_port.clone();
-    let num_workers = config.num_actix_workers.clone();
+    let app_port = config.app_port;
+    let num_workers = config.num_actix_workers;
 
     let server_addr = format!("{}:{}", app_host, app_port);
     let database_url = config.database_url.clone();
     let pool = Arc::new(establish_connection_pool(&database_url));
     let auth_service = AccountService::new(pool.clone(), config.clone());
-    if config.root_user.is_some() && !auth_service.user_exists(config.root_user.as_ref().unwrap().username.as_str()) {
+    if config.root_user.is_some()
+        && !auth_service.user_exists(config.root_user.as_ref().unwrap().username.as_str())
+    {
         let root_user = config.root_user.as_ref().unwrap();
         let user = auth_service
             .create_user(

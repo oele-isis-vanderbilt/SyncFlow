@@ -55,18 +55,21 @@ pub fn decode_jwt_unsafe<T: DeserializeOwned>(token: &str) -> Result<T, SignedTo
 }
 
 mod tests {
-    use super::{decode_jwt_unsafe, generate_and_sign_jwt, verify_and_decode_jwt};
-    use rand::distributions::Alphanumeric;
-    use rand::{thread_rng, Rng};
+
     use serde::{Deserialize, Serialize};
 
-    #[test]
-    fn random_string() -> String {
-        thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(32)
-            .map(char::from)
-            .collect()
+    #[cfg(test)]
+    mod test_utils {
+        use rand::distributions::Alphanumeric;
+        use rand::{thread_rng, Rng};
+
+        pub fn random_string() -> String {
+            thread_rng()
+                .sample_iter(&Alphanumeric)
+                .take(32)
+                .map(char::from)
+                .collect()
+        }
     }
 
     #[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
@@ -87,15 +90,15 @@ mod tests {
             company: "test".to_string(),
             api_key: "test".to_string(),
         };
-        let secret = random_string();
-        let token = generate_and_sign_jwt::<TestClaims>(&claims, &secret);
+        let secret = test_utils::random_string();
+        let token = super::generate_and_sign_jwt::<TestClaims>(&claims, &secret);
         assert!(token.is_ok());
         let token_str = token.unwrap();
-        let decoded = verify_and_decode_jwt::<TestClaims>(&token_str, &secret);
+        let decoded = super::verify_and_decode_jwt::<TestClaims>(&token_str, &secret);
         assert!(decoded.is_ok());
         let decoded_claims = decoded.unwrap();
         assert_eq!(decoded_claims, claims);
-        let decoded_unsafe = decode_jwt_unsafe::<TestClaims>(&token_str);
+        let decoded_unsafe = super::decode_jwt_unsafe::<TestClaims>(&token_str);
         assert!(decoded_unsafe.is_ok());
         let decoded_unsafe_claims = decoded_unsafe.unwrap();
         assert_eq!(decoded_unsafe_claims, claims);

@@ -81,13 +81,13 @@ pub fn decrypt_string(encrypted: &str, encryption_key: &str) -> Result<String, S
 
 pub fn encrypt_aes_256_gcm(input: &[u8], key: &[u8]) -> Result<Vec<u8>, aes_gcm::Error> {
     let key = Key::<Aes256Gcm>::from_slice(key);
-    let cipher = Aes256Gcm::new(&key);
+    let cipher = Aes256Gcm::new(key);
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
-    cipher.encrypt(&nonce, input).and_then(|ciphertext| {
+    cipher.encrypt(&nonce, input).map(|ciphertext| {
         let mut result = Vec::new();
         result.extend_from_slice(nonce.as_ref());
         result.extend_from_slice(ciphertext.as_ref());
-        Ok(result)
+        result
     })
 }
 
@@ -98,8 +98,8 @@ pub fn decrypt_aes_256_gcm(encrypted: &[u8], key: &[u8]) -> Result<Vec<u8>, aes_
     let (nonce_bytes, ciphertext) = encrypted.split_at(12);
     let nonce = Nonce::from_slice(nonce_bytes);
     let key = Key::<Aes256Gcm>::from_slice(key);
-    let cipher = Aes256Gcm::new(&key);
-    cipher.decrypt(&nonce, ciphertext)
+    let cipher = Aes256Gcm::new(key);
+    cipher.decrypt(nonce, ciphertext)
 }
 
 #[cfg(test)]

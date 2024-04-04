@@ -61,7 +61,7 @@ pub struct Auth {
 }
 
 impl Auth {
-    pub fn execute(&self) -> () {
+    pub fn execute(&self) {
         match &self.subcmd {
             Some(subcmd) => match subcmd {
                 AuthSubCommand::Login(login) => {

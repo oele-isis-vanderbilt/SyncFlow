@@ -62,7 +62,7 @@ pub async fn generate_token(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -88,9 +88,7 @@ pub async fn create_room(
 
             let req_json = room_create_request.into_inner();
             println!("{:?}", req_json);
-            let create_room_result = mmla_service
-                .create_room(user_info.user_id, req_json)
-                .await;
+            let create_room_result = mmla_service.create_room(user_info.user_id, req_json).await;
 
             match create_room_result {
                 Ok(room) => HttpResponse::Ok().json(room),
@@ -101,7 +99,7 @@ pub async fn create_room(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -139,7 +137,7 @@ pub async fn delete_room(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -171,7 +169,7 @@ pub async fn list_rooms(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -209,7 +207,7 @@ pub async fn list_participants(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -247,7 +245,7 @@ pub async fn list_egresses(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -283,7 +281,7 @@ pub async fn begin_track_egress(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -319,7 +317,7 @@ pub async fn stop_recording(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }

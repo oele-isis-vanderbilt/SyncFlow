@@ -28,7 +28,7 @@ impl LoginClient {
         };
         let response = self
             .client
-            .post(&url)
+            .post(url)
             .header("Content-Type", "application/json")
             .json(&login_request)
             .send();
@@ -42,7 +42,7 @@ impl LoginClient {
                     }));
                 }
                 let token_response = r.json::<TokenResponse>();
-                token_response.map_err(|e| ClientError::from(e))
+                token_response.map_err(ClientError::from)
             }
             Err(e) => Err(ClientError::from(e)),
         }
@@ -52,20 +52,20 @@ impl LoginClient {
         let url = format!("{}/users/logout", self.base_url);
         let response = self
             .client
-            .post(&url)
+            .post(url)
             .header("Authorization", format!("Bearer {}", token))
             .send();
 
         match response {
             Ok(r) => {
                 if !r.status().is_success() {
-                    return Err(ClientError::from(Response {
+                    Err(ClientError::from(Response {
                         status: r.status().as_u16(),
                         message: r.text().unwrap(),
-                    }));
+                    }))
                 } else {
                     let logout_response = r.json::<Response>();
-                    logout_response.map_err(|e| ClientError::from(e))
+                    logout_response.map_err(ClientError::from)
                 }
             }
             Err(e) => Err(ClientError::from(e)),
@@ -79,7 +79,7 @@ impl LoginClient {
         };
         let response = self
             .client
-            .post(&url)
+            .post(url)
             .header("Authorization", format!("Bearer {}", token))
             .header("Content-Type", "application/json")
             .json(&api_key_request)
@@ -88,13 +88,13 @@ impl LoginClient {
         match response {
             Ok(r) => {
                 if !r.status().is_success() {
-                    return Err(ClientError::from(Response {
+                    Err(ClientError::from(Response {
                         status: r.status().as_u16(),
                         message: r.text().unwrap(),
-                    }));
+                    }))
                 } else {
                     let api_key_response = r.json::<ApiKeyResponse>();
-                    api_key_response.map_err(|e| ClientError::from(e))
+                    api_key_response.map_err(ClientError::from)
                 }
             }
             Err(e) => Err(ClientError::from(e)),
@@ -105,20 +105,20 @@ impl LoginClient {
         let url = format!("{}/users/api-keys", self.base_url);
         let response = self
             .client
-            .get(&url)
+            .get(url)
             .header("Authorization", format!("Bearer {}", token))
             .send();
 
         match response {
             Ok(r) => {
                 if !r.status().is_success() {
-                    return Err(ClientError::from(Response {
+                    Err(ClientError::from(Response {
                         status: r.status().as_u16(),
                         message: r.text().unwrap(),
-                    }));
+                    }))
                 } else {
                     let api_key_response = r.json::<Vec<ApiKeyResponseWithoutSecret>>();
-                    api_key_response.map_err(|e| ClientError::from(e))
+                    api_key_response.map_err(ClientError::from)
                 }
             }
             Err(e) => Err(ClientError::from(e)),
