@@ -88,9 +88,7 @@ pub async fn create_room(
 
             let req_json = room_create_request.into_inner();
             println!("{:?}", req_json);
-            let create_room_result = mmla_service
-                .create_room(user_info.user_id, req_json)
-                .await;
+            let create_room_result = mmla_service.create_room(user_info.user_id, req_json).await;
 
             match create_room_result {
                 Ok(room) => HttpResponse::Ok().json(room),

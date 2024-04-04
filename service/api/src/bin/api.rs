@@ -44,7 +44,9 @@ async fn main() -> std::io::Result<()> {
     let database_url = config.database_url.clone();
     let pool = Arc::new(establish_connection_pool(&database_url));
     let auth_service = AccountService::new(pool.clone(), config.clone());
-    if config.root_user.is_some() && !auth_service.user_exists(config.root_user.as_ref().unwrap().username.as_str()) {
+    if config.root_user.is_some()
+        && !auth_service.user_exists(config.root_user.as_ref().unwrap().username.as_str())
+    {
         let root_user = config.root_user.as_ref().unwrap();
         let user = auth_service
             .create_user(
