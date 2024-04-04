@@ -47,9 +47,9 @@ impl Display for UserError {
     }
 }
 
-impl Into<Response> for UserError {
-    fn into(self) -> Response {
-        match self {
+impl From<UserError> for Response {
+    fn from(val: UserError) -> Self {
+        match val {
             UserError::UserNotFound(e) => Response {
                 status: 404,
                 message: e,
@@ -125,7 +125,7 @@ pub fn login(
                     Ok(_) => (),
                     Err(_) => {
                         let _ = generate_login_key(usr.id, encryption_secret, conn)?;
-                        ()
+                        
                     }
                 }
 
@@ -221,10 +221,7 @@ pub fn user_exists(uname: &str, conn: &mut PgConnection) -> bool {
     use domain::schema::users::dsl::*;
 
     let user_result = users.filter(username.eq(uname)).first::<User>(conn);
-    match user_result {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+    user_result.is_ok()
 }
 
 pub fn generate_login_key(
@@ -330,8 +327,8 @@ pub fn delete_api_key(
 ) -> Result<ApiKey, UserError> {
     use domain::schema::api_keys::dsl::*;
 
-    let delete_result = diesel::delete(api_keys.filter(user_id.eq(uid).and(key.eq(key_ref))))
+    
+    diesel::delete(api_keys.filter(user_id.eq(uid).and(key.eq(key_ref))))
         .get_result::<ApiKey>(conn)
-        .map_err(|e| UserError::DatabaseError(e.to_string()));
-    delete_result
+        .map_err(|e| UserError::DatabaseError(e.to_string()))
 }

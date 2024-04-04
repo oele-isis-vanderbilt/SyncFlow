@@ -11,7 +11,7 @@ mod tests {
     fn test_establish_connection_pool() {
         let env_var = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let pool = establish_connection_pool(&env_var);
-        let conn = pool.get().expect("Failed to get connection");
+        let _conn = pool.get().expect("Failed to get connection");
     }
 
     #[test]

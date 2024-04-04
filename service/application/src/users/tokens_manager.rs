@@ -86,7 +86,7 @@ impl JWTTokensManager {
 
     pub fn decode_token_unsafe(&self, token: &str) -> Result<TokenTypes, UserError> {
         if let Ok(token_data) = decode_jwt_unsafe::<LoginToken>(token) {
-            return Ok(TokenTypes::LoginToken(token_data));
+            Ok(TokenTypes::LoginToken(token_data))
         } else if let Ok(token_data) = decode_jwt_unsafe::<ApiToken>(token) {
             return Ok(TokenTypes::ApiToken(token_data));
         } else {

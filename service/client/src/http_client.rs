@@ -32,7 +32,7 @@ pub struct HTTPAuthTokenClient {
 impl HTTPAuthTokenClient {
     pub fn new(base_url: &str, token: &str) -> Self {
         let client = Client::new();
-        let base_url = format!("{}", base_url);
+        let base_url = base_url.to_string();
         HTTPAuthTokenClient {
             base_url,
             token: token.to_string(),
@@ -42,49 +42,49 @@ impl HTTPAuthTokenClient {
 
     pub fn get(&self, path: &str) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        let response = self
+        
+        self
             .client
-            .get(&url)
+            .get(url)
             .header("Authorization", format!("Bearer {}", self.token))
-            .send();
-        response
+            .send()
     }
 
     pub fn post<T: Serialize>(&self, path: &str, body: T) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        let response = self
+        
+        self
             .client
-            .post(&url)
+            .post(url)
             .header("Authorization", format!("Bearer {}", self.token))
             .header("Content-Type", "application/json")
             .json(&body)
-            .send();
-        response
+            .send()
     }
 
     pub fn delete(&self, path: &str) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        let response = self
-            .client
-            .delete(&url)
-            .header("Authorization", format!("Bearer {}", self.token))
-            .send();
+        
 
-        response
+        self
+            .client
+            .delete(url)
+            .header("Authorization", format!("Bearer {}", self.token))
+            .send()
     }
 
     // Allow dead code
     #[allow(dead_code)]
     pub fn put<T: Serialize>(&self, path: &str, body: T) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        let response = self
+        
+        self
             .client
-            .put(&url)
+            .put(url)
             .header("Authorization", format!("Bearer {}", self.token))
             .header("Content-Type", "application/json")
             .json(&body)
-            .send();
-        response
+            .send()
     }
 
     pub fn map_response<T>(&self, response: reqwest::Result<Response>) -> JSONResult<T>
@@ -94,7 +94,7 @@ impl HTTPAuthTokenClient {
         match response {
             Ok(response) => {
                 let parsed = response.json::<T>();
-                parsed.map_err(|e| ClientError::from(e))
+                parsed.map_err(ClientError::from)
             }
             Err(e) => Err(ClientError::from(e)),
         }

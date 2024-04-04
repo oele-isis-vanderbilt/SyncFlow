@@ -70,7 +70,7 @@ pub fn save_credentials(creds: &Credentials) -> Result<(), String> {
 
             // write the json data to a file
             let file_path = dir_path.join("credentials.json");
-            let res = std::fs::write(&file_path, json_data.clone());
+            let res = std::fs::write(file_path, json_data.clone());
             match res {
                 Ok(_) => Ok(()),
                 Err(e) => Err(e.to_string()),

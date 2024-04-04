@@ -22,9 +22,9 @@ pub enum ServiceError {
     AccessTokenError(String),
 }
 
-impl Into<Response> for ServiceError {
-    fn into(self) -> Response {
-        match self {
+impl From<ServiceError> for Response {
+    fn from(val: ServiceError) -> Self {
+        match val {
             ServiceError::RoomCreationError(e) => Response {
                 status: 500,
                 message: e,
@@ -168,7 +168,7 @@ impl MMLAService {
                 .list_rooms(Some(room_names))
                 .await
                 .map_err(|e| {
-                    ServiceError::RoomListError(format!("Error listing rooms: {}", e.to_string()))
+                    ServiceError::RoomListError(format!("Error listing rooms: {}", e))
                 })?;
             let new_list_rooms_action = NewListRoomsAction { user_id };
             let _ = self.user_actions.register_list_rooms(new_list_rooms_action);
@@ -266,7 +266,7 @@ impl MMLAService {
     ) -> Result<Vec<EgressInfo>, ServiceError> {
         if self.is_user_created_room(user_id, room_name) {
             self.egress_service
-                .list_egresses(room_name.into())
+                .list_egresses(room_name)
                 .await
                 .map_err(|e| ServiceError::RoomListError(e.to_string()))
         } else {

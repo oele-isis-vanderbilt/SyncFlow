@@ -62,7 +62,7 @@ pub async fn generate_token(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -99,7 +99,7 @@ pub async fn create_room(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -137,7 +137,7 @@ pub async fn delete_room(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -169,7 +169,7 @@ pub async fn list_rooms(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -207,7 +207,7 @@ pub async fn list_participants(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -245,7 +245,7 @@ pub async fn list_egresses(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -281,7 +281,7 @@ pub async fn begin_track_egress(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }
@@ -317,7 +317,7 @@ pub async fn stop_recording(
             }
         }
         None => {
-            return HttpResponse::Unauthorized().body("Unauthorized");
+            HttpResponse::Unauthorized().body("Unauthorized")
         }
     }
 }

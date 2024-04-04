@@ -44,7 +44,7 @@ pub async fn login(
 pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> HttpResponse {
     match req.headers().get(constants::AUTHORIZATION_HEADER) {
         Some(header) => {
-            let token = header.to_str().unwrap().split(" ").collect::<Vec<&str>>()[1];
+            let token = header.to_str().unwrap().split(' ').collect::<Vec<&str>>()[1];
             match user_auth.logout(token) {
                 Ok(_) => HttpResponse::Ok().json(Response {
                     status: 200,
