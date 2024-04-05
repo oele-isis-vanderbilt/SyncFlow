@@ -1,17 +1,6 @@
 import { lusitana } from '@/app/ui/fonts';
-import {
-  useTracks,
-  TrackLoop,
-  ParticipantTile,
-  TrackReference,
-  ParticipantAudioTile,
-} from '@livekit/components-react';
-import {
-  Track,
-  AudioTrack,
-  LocalAudioTrack,
-  RemoteAudioTrack,
-} from 'livekit-client';
+import { useTracks } from '@livekit/components-react';
+import { Track, LocalAudioTrack, RemoteAudioTrack } from 'livekit-client';
 import '@livekit/components-styles';
 import { useEffect, useRef } from 'react';
 

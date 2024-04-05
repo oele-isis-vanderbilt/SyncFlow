@@ -1,6 +1,6 @@
 import { apiClient } from '@/app/lib/api-client';
 import { ApiKeyResponseWithoutSecret } from '@/types/api';
-import ApiKeyActions from "@/app/ui/dashboard/settings/api-key-actions";
+import ApiKeyActions from '@/app/ui/dashboard/settings/api-key-actions';
 
 export default async function ApiKeysTable() {
   let allApiKeys: ApiKeyResponseWithoutSecret[] = [];
@@ -30,9 +30,7 @@ export default async function ApiKeysTable() {
               <th scope="col" className="px-6 py-3">
                 Created At
               </th>
-              <th>
-                Actions
-              </th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>

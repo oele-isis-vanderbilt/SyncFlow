@@ -7,6 +7,8 @@ import {
   ControlBar,
   useRoomContext,
   useTracks,
+  Chat,
+  LayoutContextProvider,
 } from '@livekit/components-react';
 
 import { Tooltip } from 'flowbite-react';
@@ -19,6 +21,7 @@ import { redirectToDashboard } from '@/app/lib/actions';
 import { BsRecordBtn } from 'react-icons/bs';
 import type { SessionUser } from '@/types/next-auth';
 import { isAdmin } from '@/app/lib/utils';
+import TopicalMessages from '@/app/ui/dashboard/rooms/topical-messages';
 
 export default function Room({
   token,
@@ -49,7 +52,9 @@ export default function Room({
               <div className="h-1/2 w-full bg-white">
                 <AudioStreams title={'Audio Streams'} />
               </div>
-              <div className="h-1/2 w-full">Remaining content</div>
+              <div className="h-1/2 w-full">
+                <TopicalMessages title={'Topical Messages'} />
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ChatEntry,
   LiveKitRoom,
   useLocalParticipant,
   useMediaDevices,
@@ -22,6 +23,13 @@ import {
 } from 'livekit-client';
 import Select from 'react-select';
 import { customSelectStyles } from '@/app/utils';
+import 'react-virtualized/styles.css';
+import {
+  List,
+  AutoSizer,
+  CellMeasurer,
+  CellMeasurerCache,
+} from 'react-virtualized';
 
 export interface RoomJoinOptions {
   videoPreset: keyof typeof VideoPresets;
@@ -60,7 +68,6 @@ export default function LkRoom({
   return (
     <div data-lk-theme="default">
       <LiveKitRoom
-        className={'h-screen w-screen'}
         serverUrl={lkUrl}
         token={token}
         video={false}
@@ -81,7 +88,7 @@ export default function LkRoom({
           },
         }}
       >
-        <div className="flex h-screen w-screen flex-col p-10">
+        <div className="flex h-screen w-screen flex-col overflow-x-hidden p-2">
           <div className="mb-10 w-full text-center">
             <h1 className="text-2xl font-bold">
               Welcome to room {roomName}, {participantId}!{' '}
@@ -95,6 +102,9 @@ export default function LkRoom({
               </a>{' '}
               and change the room settings.
             </p>
+          </div>
+          <div className={'mb-10 w-full'}>
+            <DataSender />
           </div>
           <div className="flex flex-grow flex-row">
             <div className="h-full w-1/2">
@@ -360,7 +370,7 @@ function SingleAudioTrackPreviewAndPublish({
   ) : null;
 }
 
-const AudioRenderer = ({
+function AudioRenderer({
   track,
   shouldMute,
   className,
@@ -368,7 +378,7 @@ const AudioRenderer = ({
   track: LocalAudioTrack | RemoteAudioTrack | undefined;
   shouldMute: boolean;
   className: string;
-}) => {
+}) {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -396,4 +406,142 @@ const AudioRenderer = ({
       className={className}
     />
   );
-};
+}
+
+function DataSender() {
+  const cache = new CellMeasurerCache({
+    fixedWidth: true,
+    defaultHeight: 100, // A default height estimation
+  });
+
+  const participantInfo = useLocalParticipant();
+  const encoder = new TextEncoder();
+  const [data, setData] = useState<string>('');
+  const [chatMessages, setChatMessages] = useState<
+    {
+      message: string;
+      timestamp: number;
+    }[]
+  >([]);
+  const [topic, setTopic] = useState<string>('chat');
+  const topics = ['chat', 'log'].map((topic) => {
+    return {
+      label: topic,
+      value: topic,
+    };
+  });
+
+  const send = () => {
+    if (data) {
+      const dataArray = encoder.encode(data);
+      participantInfo.localParticipant
+        .publishData(dataArray, {
+          reliable: true,
+          topic: topic || 'chat',
+        })
+        .then(() => {
+          setData('');
+          const newChatMessages = [
+            {
+              message: data,
+              timestamp: Date.now(),
+            },
+            ...chatMessages,
+          ];
+          setChatMessages(newChatMessages);
+        });
+    }
+  };
+
+  const ChatMessageFormatter = (message: string) => {
+    return <span>{message}</span>;
+  };
+
+  const renderItem = ({ key, index, style, parent }) => {
+    const chatMessage = chatMessages[index];
+    return (
+      <CellMeasurer
+        key={key}
+        cache={cache}
+        parent={parent}
+        columnIndex={0}
+        rowIndex={index}
+      >
+        {({ measure, registerChild }) => (
+          <div ref={registerChild} key={key} style={style} onLoad={measure}>
+            <ChatEntry
+              entry={{
+                id: index.toString(),
+                from: participantInfo.localParticipant,
+                message: chatMessage.message,
+                timestamp: chatMessage.timestamp,
+              }}
+              hideName={false}
+              hideTimestamp={true}
+              messageFormatter={ChatMessageFormatter}
+            />
+          </div>
+        )}
+      </CellMeasurer>
+    );
+  };
+
+  return (
+    <div className={'flex flex-row gap-5'}>
+      <div className={'flex w-1/2 flex-col'}>
+        <div className={'flex items-center justify-between'}>
+          <h2 className={'text-xl'}>Send a message</h2>
+
+          <div className={'w-1/4'}>
+            <div>Select Topic</div>
+            <Select
+              styles={customSelectStyles}
+              placeholder={'select a topic'}
+              options={topics}
+              defaultValue={topics[0]}
+              onChange={(selected) => {
+                // @ts-ignore
+                setTopic(selected.value || 'chat');
+              }}
+            />
+          </div>
+        </div>
+        <div className="flex-grow">
+          <textarea
+            value={data}
+            onChange={(e) => setData(e.target.value)}
+            placeholder={'Type your message'}
+            className={'mb-2 min-h-64 w-full bg-[#111] p-2'}
+          />
+        </div>
+        <button
+          onClick={send}
+          className={
+            'w-96 max-w-96 self-center rounded-md bg-blue-500 p-2 text-white'
+          }
+        >
+          Send
+        </button>
+      </div>
+      <div className="flex-grow">
+        <h2 className="text-xl">Sent Messages</h2>
+        <div className="h-full w-full">
+          {' '}
+          <AutoSizer>
+            {({ width, height }) => (
+              <List
+                width={width}
+                height={height}
+                rowCount={chatMessages.length}
+                deferredMeasurementCache={cache}
+                rowHeight={cache.rowHeight}
+                rowRenderer={renderItem}
+                overscanRowCount={3}
+              />
+            )}
+          </AutoSizer>
+        </div>
+      </div>
+    </div>
+  );
+}
