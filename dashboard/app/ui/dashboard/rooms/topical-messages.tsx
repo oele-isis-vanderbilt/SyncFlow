@@ -1,6 +1,6 @@
 'use client';
 import { lusitana } from '@/app/ui/fonts';
-import { HiChat, HiClipboardList } from 'react-icons/hi';
+import { HiArchive, HiChat, HiClipboardList } from 'react-icons/hi';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import { ChatViewerWidget } from '@/app/ui/dashboard/rooms/widgets/chat-widget';
 import { LogViewerWidget } from '@/app/ui/dashboard/rooms/widgets/log-widget';
@@ -20,6 +20,8 @@ export default function TopicalMessages(
     [],
   );
 
+  const [allMessages, setAllMessages] = useState<ReceivedDataMessage[]>([]);
+
   useDataChannel('chat', (msg) => {
     if (chatMessages.length < 1000) {
       setChatMessages((prev) => [msg, ...prev]);
@@ -36,6 +38,14 @@ export default function TopicalMessages(
     }
   });
 
+  useDataChannel((msg) => {
+    if (logMessages.length < 1000) {
+      setAllMessages((prev) => [msg, ...prev]);
+    } else {
+      setAllMessages((prev) => [...prev.slice(1), msg]);
+    }
+  });
+
   return (
     <div className={'flex h-full w-full flex-col'}>
       <div className={'flex items-center justify-between bg-black'}>
@@ -47,6 +57,12 @@ export default function TopicalMessages(
         <div className={'flex h-full w-full flex-row'}>
           <Tabs className={'h-full w-full'}>
             <TabList>
+              <Tab>
+                <div className={'flex items-center text-xl'}>
+                  <HiArchive />
+                  All
+                </div>
+              </Tab>
               <Tab>
                 <div className={'flex items-center text-xl'}>
                   <HiChat />
@@ -61,6 +77,13 @@ export default function TopicalMessages(
               </Tab>
             </TabList>
 
+            <TabPanel
+              selectedClassName={
+                'react-tabs__tab-panel--selected h-full w-full'
+              }
+            >
+              <LogViewerWidget logMessages={allMessages} />
+            </TabPanel>
             <TabPanel
               selectedClassName={
                 'react-tabs__tab-panel--selected h-full w-full'
