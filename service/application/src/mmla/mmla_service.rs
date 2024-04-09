@@ -1,5 +1,6 @@
 use crate::livekit::egress::EgressService;
 use crate::livekit::room::RoomService;
+use crate::livekit::text_egress::TextEgressService;
 use crate::livekit::token::create_token;
 use crate::mmla::user_actions::UserActions;
 use crate::mmla::utils::{get_track_egress_destination, get_track_egress_destination_path};
@@ -8,8 +9,10 @@ use domain::models::{
     NewListRoomsAction, NewUserEgressAction,
 };
 use livekit_protocol::{EgressInfo, EgressStatus, ParticipantInfo};
+use livekit_text_egress_actor::text_egress_actor::{TextEgressInfo, TextEgressRequest};
 use shared::livekit_models::{CreateRoomRequest, LivekitRoom, TokenRequest, TokenResponse};
 use shared::response_models::Response;
+use std::collections::HashMap;
 use std::fmt::Display;
 
 #[derive(Debug)]
@@ -71,6 +74,7 @@ pub struct MMLAService {
     room_service: RoomService,
     egress_service: EgressService,
     user_actions: UserActions,
+    text_egress_service: Option<TextEgressService>,
 }
 
 impl MMLAService {
@@ -78,11 +82,13 @@ impl MMLAService {
         room_service: RoomService,
         egress_service: EgressService,
         user_actions: UserActions,
+        text_egress_service: Option<TextEgressService>,
     ) -> Self {
         MMLAService {
             room_service,
             user_actions,
             egress_service,
+            text_egress_service,
         }
     }
 
@@ -167,9 +173,7 @@ impl MMLAService {
                 .room_service
                 .list_rooms(Some(room_names))
                 .await
-                .map_err(|e| {
-                    ServiceError::RoomListError(format!("Error listing rooms: {}", e))
-                })?;
+                .map_err(|e| ServiceError::RoomListError(format!("Error listing rooms: {}", e)))?;
             let new_list_rooms_action = NewListRoomsAction { user_id };
             let _ = self.user_actions.register_list_rooms(new_list_rooms_action);
 
@@ -360,6 +364,51 @@ impl MMLAService {
         } else {
             Err(ServiceError::PermissionError(
                 "Permission denied".to_string(),
+            ))
+        }
+    }
+
+    pub async fn start_text_egress(
+        &self,
+        room_name: &str,
+        topic: Option<String>,
+    ) -> Result<TextEgressInfo, ServiceError> {
+        if let Some(text_egress_service) = &self.text_egress_service {
+            text_egress_service
+                .create_egress(room_name, topic)
+                .await
+                .map_err(|e| ServiceError::EgressError(e.to_string()))
+        } else {
+            Err(ServiceError::EgressError(
+                "Text egress service not available".to_string(),
+            ))
+        }
+    }
+
+    pub async fn get_text_egress(&self, egress_id: &str) -> Result<TextEgressInfo, ServiceError> {
+        if let Some(text_egress_service) = &self.text_egress_service {
+            text_egress_service
+                .get_egress(egress_id)
+                .await
+                .map_err(|e| ServiceError::EgressError(e.to_string()))
+        } else {
+            Err(ServiceError::EgressError(
+                "Text egress service not available".to_string(),
+            ))
+        }
+    }
+
+    pub async fn list_text_egresses(
+        &self,
+    ) -> Result<HashMap<String, TextEgressInfo>, ServiceError> {
+        if let Some(text_egress_service) = &self.text_egress_service {
+            text_egress_service
+                .list_egresses()
+                .await
+                .map_err(|e| ServiceError::EgressError(e.to_string()))
+        } else {
+            Err(ServiceError::EgressError(
+                "Text egress service not available".to_string(),
             ))
         }
     }

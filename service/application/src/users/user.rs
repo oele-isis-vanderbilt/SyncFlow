@@ -125,7 +125,6 @@ pub fn login(
                     Ok(_) => (),
                     Err(_) => {
                         let _ = generate_login_key(usr.id, encryption_secret, conn)?;
-                        
                     }
                 }
 
@@ -327,7 +326,6 @@ pub fn delete_api_key(
 ) -> Result<ApiKey, UserError> {
     use domain::schema::api_keys::dsl::*;
 
-    
     diesel::delete(api_keys.filter(user_id.eq(uid).and(key.eq(key_ref))))
         .get_result::<ApiKey>(conn)
         .map_err(|e| UserError::DatabaseError(e.to_string()))

@@ -9,6 +9,7 @@ use application::mmla::mmla_service::MMLAService;
 use application::mmla::user_actions::UserActions;
 use application::users::account_service::AccountService;
 
+use application::livekit::text_egress::TextEgressService;
 use infrastructure::establish_connection_pool;
 use log::info;
 use shared::deployment_config::DeploymentConfig;
@@ -69,8 +70,29 @@ async fn main() -> std::io::Result<()> {
         config.livekit_api_secret.clone(),
         config.storage_config.clone(),
     );
+
+    let mut text_egress_service = None;
+
+    if let Some(text_egress_server_url) = config.text_egress_server_url.clone() {
+        let s3_config = match &config.storage_config {
+            shared::deployment_config::StorageConfig::S3(s3_config) => Some(s3_config),
+            _ => None,
+        };
+        if s3_config.is_some() {
+            text_egress_service = Some(TextEgressService::new(
+                &text_egress_server_url,
+                s3_config.unwrap().clone(),
+            ));
+        }
+    }
+
     let user_actions = UserActions::new(pool.clone());
-    let mmla_service = MMLAService::new(room_service, egress_service, user_actions);
+    let mmla_service = MMLAService::new(
+        room_service,
+        egress_service,
+        user_actions,
+        text_egress_service,
+    );
 
     HttpServer::new(move || {
         App::new()

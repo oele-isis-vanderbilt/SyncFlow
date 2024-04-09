@@ -16,6 +16,7 @@ pub struct DeploymentConfig {
     pub encryption_key: String,
 
     pub root_user: Option<RootUser>,
+    pub text_egress_server_url: Option<String>,
 
     /// Test configuration
     pub login_token: Option<String>,
