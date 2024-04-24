@@ -25,7 +25,7 @@ NUM_ACTIX_WORKERS="NUM_ACTIX_WORKERS" # The number of actix workers
 JWT_SECRET="JWT_SECRET" # The jwt secret
 ```
 
-The environment variables should be self-explanatory. For using the compose files in this directory, you can create an `.env.prod`(in the [`service`](../../service) directory) and set the environment variables there.  
+The environment variables should be self-explanatory. For using the compose files in this directory, you can create an `.env.prod`(in the [`crates`](../../crates) directory) and set the environment variables there.  
 
 ## Images used for Deployment
 Postgres and pgAdmin are used for the database and database management respectively. The service is built and run using the [`Dockerfile`](./Dockerfile.api). The database migrations are run using the [`Dockerfile.migrations`](./Dockerfile.migrations) file.
@@ -36,7 +36,7 @@ To build and run the service using docker compose, run the following commands :
 
 ## Initial Deployment
 > [!IMPORTANT]  
-> Make sure you run these commands from the [`service`](../../service) directory.
+> Make sure you run these commands from the [`crates`](../../crates) directory.
 
 ```shell
 $ docker-compose -p livekit-mmla-prod --file docker/docker-compose.prod.yaml up -d

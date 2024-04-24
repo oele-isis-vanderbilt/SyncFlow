@@ -261,14 +261,14 @@ def main(config_file: str, outfile_name: str):
     dump_string(example_app_env, f"examples/livekit-mmla-demo-client/{outfile_name}")
 
     service_env = config.get_service_env() + "\n"
-    dump_string(service_env, f"service/{outfile_name}")
+    dump_string(service_env, f"crates/{outfile_name}")
 
     database_pgadmin_env = config.get_database_pgadmin_env() + "\n"
-    dump_string(database_pgadmin_env, f"service/{outfile_name}.pgadmin")
+    dump_string(database_pgadmin_env, f"crates/{outfile_name}.pgadmin")
 
     migration_env = config.get_migration_env() + "\n"
-    dump_string(migration_env, f"service/infrastructure/{outfile_name}")
-    dump_string(migration_env, f"service/{outfile_name}.migration")
+    dump_string(migration_env, f"crates/infrastructure/{outfile_name}")
+    dump_string(migration_env, f"crates/{outfile_name}.migration")
 
 
 if __name__ == "__main__":
