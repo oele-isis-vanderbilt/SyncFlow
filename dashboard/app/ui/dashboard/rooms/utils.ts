@@ -1,22 +1,33 @@
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 
-export function getHelpText(track: TrackReferenceOrPlaceholder) {
+export function shortenText(text: string, maxLength: number = 10) {
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  return text.substring(0, maxLength) + '...';
+
+}
+
+export function getHelpText(track: TrackReferenceOrPlaceholder, long=true) {
   if (track.publication?.trackName) {
     return track.publication.trackName;
   }
 
+  let participantText = long ? track.participant.identity:  shortenText(track.participant.identity)
+
   if (track.publication?.source === Track.Source.Camera) {
-    return track.participant.identity + "'s Video";
+    return  participantText + "'s Video";
   }
   if (track.publication?.source === Track.Source.Microphone) {
-    return track.participant.identity + "'s Audio";
+    return participantText + "'s Audio";
   }
   if (track.publication?.source === Track.Source.ScreenShare) {
-    return track.participant.identity + "'s Screen";
+    return participantText + "'s Screen";
   }
   if (track.publication?.source === Track.Source.ScreenShareAudio) {
-    return track.participant.identity + "'s Screen Audio";
+    return participantText + "'s Screen Audio";
   }
   return 'Unknown';
 }

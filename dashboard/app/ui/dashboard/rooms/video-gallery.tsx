@@ -92,7 +92,7 @@ export default function VideoGallery(
                     controls={true}
                   />
                 )}
-                <span className={'text-xl'}>{getHelpText(toRenderTrack)}</span>
+                <span className={'text-xl overflow-ellipsis'}>{getHelpText(toRenderTrack)}</span>
               </>
             ) : (
               <NoTrackMessage />
@@ -217,7 +217,7 @@ function VideoTile({
     <div className={'flex flex-col items-center'} {...props}>
       <PlayCircleIcon className={clsx('h-12 w-12', active)} />
       <p className={'text-sm text-white hover:underline'}>
-        {track ? getHelpText(track) : 'Unknown Track'}
+        {track ? getHelpText(track, false) : 'Unknown Track'}
       </p>
     </div>
   );
