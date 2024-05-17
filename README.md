@@ -1,4 +1,4 @@
-# LiveKit-MMLA
+# SyncFlow
 
 Tyring to implement a server manager for LiveKit, to be used for MMLA applications. This project has two main parts:
 

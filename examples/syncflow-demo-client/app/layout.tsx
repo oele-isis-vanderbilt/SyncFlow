@@ -6,8 +6,8 @@ import '@livekit/components-styles';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'LiveKit MMLA Demo Client',
-  description: 'A demo client for LiveKit MMLA',
+  title: 'SyncFlow Demo Client',
+  description: 'A demo client for SyncFlow',
 };
 
 export default function RootLayout({

@@ -14,7 +14,7 @@ import { apiClient } from '@/app/lib/api-client';
 import { ApiKeyRequest } from '@/types/api';
 import { unstable_noStore as noStore } from 'next/cache';
 
-const APP_NAME = 'LiveKitELP';
+const APP_NAME = 'SyncFlow';
 const USER_NAME = 'admin';
 
 const RoomSchema = z.object({
@@ -40,7 +40,7 @@ export async function createRoom() {
     options: {
       emptyTimeout: 60 * 10,
       maxParticipants: 10,
-      metadata: 'LiveKit ELP Room',
+      metadata: 'SyncFlow Room',
     },
   };
   await mmlaClient.createRoom(options);
