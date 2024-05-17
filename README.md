@@ -1,6 +1,8 @@
 # SyncFlow
 
-Tyring to implement a server manager for LiveKit, to be used for MMLA applications. This project has two main parts:
+![SyncFlow](./dashboard/public/syncflow.png)
+
+Tyring to implement a server manager for LiveKit, named `SyncFlow` to be used for MMLA applications. This project has two main parts:
 
 - A dashboard, which is a Next.js application that will be used to manage the server.
 - A server, which is an actix web application that will be used to control/manage the LiveKit services.

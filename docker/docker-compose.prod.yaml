@@ -57,7 +57,7 @@ services:
     build:
       context: ../examples/syncflow-demo-client
       dockerfile: ../../docker/Dockerfile.next
-    image: livekit-mmla-example-app:latest
+    image: syncflow-example-app:latest
     container_name: syncflow-example-app-prod
     ports:
       - "3001:3000"
