@@ -258,7 +258,7 @@ def main(config_file: str, outfile_name: str):
 
     example_app_env = config.get_example_app_env() + "\n"
 
-    dump_string(example_app_env, f"examples/livekit-mmla-demo-client/{outfile_name}")
+    dump_string(example_app_env, f"examples/syncflow-demo-client/{outfile_name}")
 
     service_env = config.get_service_env() + "\n"
     dump_string(service_env, f"crates/{outfile_name}")
