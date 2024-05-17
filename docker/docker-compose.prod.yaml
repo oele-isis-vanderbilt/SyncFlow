@@ -1,9 +1,9 @@
 version: "3.9"
 
 services:
-  postgres-livekit-mmla-prod:
+  postgres-syncflow-prod:
     image: postgres:14-alpine
-    container_name: postgres-livekit-mmla-prod
+    container_name: postgres-syncflow-prod
     ports:
       - "15433:5432"
     volumes:
@@ -12,57 +12,57 @@ services:
 
   pgadmin-prod:
     image: dpage/pgadmin4
-    container_name: pgadmin-livekit-mmla-prod
+    container_name: pgadmin-syncflow-prod
     ports:
       - "5051:81"
     env_file: ../crates/.env.prod.pgadmin
     depends_on:
-      - postgres-livekit-mmla-prod
+      - postgres-syncflow-prod
 
   migrations-prod:
     build:
       context: ../crates
       dockerfile: ../docker/Dockerfile.migrations
-    image: livekit-mmla-migrations:latest
-    container_name: livekit-mmla-migrations-prod
+    image: syncflow-migrations:latest
+    container_name: syncflow-migrations-prod
     volumes:
       - ../crates/.env.prod.migration:/migrations/.env
     depends_on:
-      - postgres-livekit-mmla-prod
+      - postgres-syncflow-prod
 
-  api-livekit-mmla-prod:
+  api-syncflow-prod:
     build:
       context: ../crates
       dockerfile: ../docker/Dockerfile.api
-    image: livekit-mmla-api:latest
-    container_name: livekit-mmla-api-prod
+    image: syncflow-api:latest
+    container_name: syncflow-api-prod
     ports:
       - "8082:8082"
     env_file: ../crates/.env.prod
     depends_on:
       - migrations-prod
 
-  livekit-mmla-dashboard-prod:
+  syncflow-dashboard-prod:
     build:
       context: ../dashboard
       dockerfile: ../docker/Dockerfile.next
-    image: livekit-mmla-dashboard:latest
-    container_name: livekit-mmla-dashboard-prod
+    image: syncflow-dashboard:latest
+    container_name: syncflow-dashboard-prod
     ports:
       - "3000:3000"
     depends_on:
-      - api-livekit-mmla-prod
+      - api-syncflow-prod
 
-  livekit-mmla-example-app-prod:
+  syncflow-example-app-prod:
     build:
       context: ../examples/syncflow-demo-client
       dockerfile: ../../docker/Dockerfile.next
     image: livekit-mmla-example-app:latest
-    container_name: livekit-mmla-example-app-prod
+    container_name: syncflow-example-app-prod
     ports:
       - "3001:3000"
     depends_on:
-      - api-livekit-mmla-prod
+      - api-syncflow-prod
 
 volumes:
   postgres-data-prod:
