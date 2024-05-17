@@ -26,10 +26,11 @@ jobs:
           openssl rsa -in private_key -check
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             echo "Pulling latest changes from GitHub"
-            rm -rf $HOME/LivekitMMLADeployment && cd $HOME
-            mkdir LivekitMMLADeployment && cd LivekitMMLADeployment
-            git clone git@github.com:oele-isis-vanderbilt/LiveKitMMLA.git
-            cd LiveKitMMLA
+            rm -rf $HOME/SyncFlowDeployment && cd $HOME
+            mkdir SyncFlowDeployment && cd SyncFlowDeployment
+            git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
+            cd SyncFlow
+            git checkout -b 83-rename-project origin/83-rename-project
             cp $HOME/.deployment_config_prod_cloud.json  deployment_config_prod_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_prod_cloud.json --outfile-name .env.prod
