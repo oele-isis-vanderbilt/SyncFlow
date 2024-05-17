@@ -3,8 +3,8 @@ import { UserPermissions } from '@/types/deployment-config-models';
 
 const config = {
   tagLine:
-    '<strong>Welcome to LiveKitELP.</strong> Use the dashboard to manage embodied learning [<code>GEM-STEP</code>] data collection with LiveKit.',
-  logoPath: '/livekit-elp.svg',
+    '<strong>Welcome to SyncFlow.</strong> Use the dashboard to manage multimodal data collection with SyncFlow.',
+  logoPath: '/syncflow.png',
   userPermissions: UserPermissions.publishOnly,
   mmla_api_url:
     process.env.MMLA_API_URL ||

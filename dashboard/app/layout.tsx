@@ -4,10 +4,10 @@ import { inter } from '@/app/ui/fonts';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | LiveKit ELP',
-    default: 'LiveKit ELP',
+    template: '%s | SyncFlow',
+    default: 'SyncFlow',
   },
-  description: 'LiveKit integration with the Embodied Learning Platform',
+  description: 'SyncFlow Dashboard',
 };
 
 export default function RootLayout({
