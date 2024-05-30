@@ -1,3 +1,4 @@
+use actix_web::cookie::Cookie;
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
@@ -23,7 +24,14 @@ pub async fn login(
     login_request: Json<LoginRequest>,
 ) -> HttpResponse {
     match user_auth.login(login_request.into_inner()) {
-        Ok(token_string) => HttpResponse::Ok().json(TokenResponse::bearer(token_string)),
+        Ok((access_token, refresh_token)) => {
+            let refresh_token_cookie = Cookie::build(
+                "refresh-token", refresh_token
+            ).http_only(true).path("/").finish();
+            
+            HttpResponse::Ok().cookie(refresh_token_cookie)
+                .json(TokenResponse::bearer(access_token))
+        },
         Err(e) => {
             let response: Response = e.into();
             response.into()

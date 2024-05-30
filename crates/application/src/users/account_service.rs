@@ -25,7 +25,7 @@ impl AccountService {
     }
 
     /// Logs in a user
-    pub fn login(&self, request: LoginRequest) -> Result<String, UserError> {
+    pub fn login(&self, request: LoginRequest) -> Result<(String, String), UserError> {
         let session_info_result = user::login(
             request,
             &mut self.pool.get().unwrap(),
@@ -36,7 +36,7 @@ impl AccountService {
                 let conn = &mut self.pool.get().unwrap();
                 let token = self
                     .tokens_manager
-                    .generate_login_token(&session_info, conn);
+                    .generate_login_token_pairs(&session_info, conn);
                 match token {
                     Ok(t) => Ok(t),
                     Err(e) => {
