@@ -1,11 +1,12 @@
-use actix_web::cookie::Cookie;
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
 use application::users::tokens_manager::UserInfo;
 use shared::constants;
 use shared::response_models::Response;
-use shared::user_models::{ApiKeyRequest, ApiKeyResponse, LoginRequest, TokenResponse};
+use shared::user_models::{
+    ApiKeyRequest, ApiKeyResponse, LoginRequest, RefreshTokenRequest, TokenResponse,
+};
 
 #[utoipa::path(
     post,
@@ -25,13 +26,34 @@ pub async fn login(
 ) -> HttpResponse {
     match user_auth.login(login_request.into_inner()) {
         Ok((access_token, refresh_token)) => {
-            let refresh_token_cookie = Cookie::build(
-                "refresh-token", refresh_token
-            ).http_only(true).path("/").finish();
-            
-            HttpResponse::Ok().cookie(refresh_token_cookie)
-                .json(TokenResponse::bearer(access_token))
-        },
+            HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token))
+        }
+        Err(e) => {
+            let response: Response = e.into();
+            response.into()
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/users/refresh-token",
+    request_body = RefreshTokenRequest,
+    responses(
+        (status = 200, description = "User logged in successfully", body = bool),
+        (status = 404, description = "User not found"),
+        (status = 500, description = "Internal Server Error/DatabaseError")
+    )
+)]
+#[post("/refresh-token")]
+pub async fn refresh_login_token(
+    user_auth: web::Data<AccountService>,
+    refresh_request: Json<RefreshTokenRequest>,
+) -> HttpResponse {
+    match user_auth.refresh_token(refresh_request.into_inner()) {
+        Ok((access_token, refresh_token)) => {
+            HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token))
+        }
         Err(e) => {
             let response: Response = e.into();
             response.into()
@@ -192,6 +214,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     let users_scope = web::scope("/users")
         .service(login)
         .service(logout)
+        .service(refresh_login_token)
         .service(create_api_key)
         .service(delete_api_key)
         .service(list_all_api_keys);

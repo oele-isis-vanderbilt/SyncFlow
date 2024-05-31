@@ -1,3 +1,5 @@
+use std::cell::Ref;
+
 use crate::users::secret::decrypt_string;
 use crate::users::signed_token::{decode_jwt_unsafe, generate_and_sign_jwt, verify_and_decode_jwt};
 use crate::users::user;
@@ -21,6 +23,7 @@ pub struct UserInfo {
 pub enum TokenTypes {
     LoginToken(LoginToken),
     ApiToken(ApiToken),
+    RefreshToken(RefreshToken),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -131,10 +134,7 @@ impl JWTTokensManager {
         Ok((login_token, refresh_token))
     }
 
-    fn decrypt_user_secret(
-        &self,
-        api_key: &ApiKey,
-    ) -> Result<String, UserError> {
+    fn decrypt_user_secret(&self, api_key: &ApiKey) -> Result<String, UserError> {
         let encrypted_secret = &api_key.secret;
         decrypt_string(encrypted_secret, &self.encryption_key)
             .map_err(|e| UserError::SecretError(e.to_string()))
@@ -145,6 +145,8 @@ impl JWTTokensManager {
             Ok(TokenTypes::LoginToken(token_data))
         } else if let Ok(token_data) = decode_jwt_unsafe::<ApiToken>(token) {
             return Ok(TokenTypes::ApiToken(token_data));
+        } else if let Ok(token_data) = decode_jwt_unsafe::<RefreshToken>(token) {
+            return Ok(TokenTypes::RefreshToken(token_data));
         } else {
             return Err(UserError::TokenError("Invalid token".to_string()));
         }
@@ -181,6 +183,33 @@ impl JWTTokensManager {
                     login_session: Some(token_data.login_session.to_owned()),
                 })
             }
+
+            TokenTypes::RefreshToken(token_data) => {
+                let api_key = user::fetch_api_key_by_id(token_data.iss.as_str(), conn)?;
+                let encrypted_secret = api_key.secret;
+                let decrypted_secret = decrypt_string(&encrypted_secret, &self.encryption_key)
+                    .map_err(|e| UserError::SecretError(e.to_string()))?;
+                let token_data = verify_and_decode_jwt::<LoginToken>(token, &decrypted_secret)
+                    .map_err(|e| UserError::TokenError(e.to_string()))?;
+
+                if token_data.iss != api_key.key {
+                    return Err(UserError::TokenError("Invalid token".to_string()));
+                }
+
+                if !self.is_login_token_valid(&token_data, conn) {
+                    return Err(UserError::TokenError("Invalid token".to_string()));
+                }
+
+                let user = user::get_user(api_key.user_id, conn)?;
+
+                Ok(UserInfo {
+                    user_id: user.id,
+                    user_name: user.username.to_owned(),
+                    user_role: user.role.to_owned(),
+                    login_session: Some(token_data.login_session.to_owned()),
+                })
+            }
+
             TokenTypes::ApiToken(token_data) => {
                 let api_key = user::fetch_api_key_by_key(token_data.iss.as_str(), conn)?;
                 let encrypted_secret = api_key.secret;
@@ -218,6 +247,20 @@ impl JWTTokensManager {
 
         // Verify that the token is not expired
         if token_data.exp < (chrono::Utc::now().timestamp() as usize) {
+            return false;
+        }
+
+        true
+    }
+
+    pub fn is_refresh_token_valid(
+        &self,
+        token_data: &RefreshToken,
+        conn: &mut PgConnection,
+    ) -> bool {
+        let login_session_id = token_data.login_session.as_str();
+
+        if !user::is_valid_login_session(login_session_id, conn) {
             return false;
         }
 

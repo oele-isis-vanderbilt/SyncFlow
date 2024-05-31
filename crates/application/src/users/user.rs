@@ -148,6 +148,22 @@ pub fn login(
     }
 }
 
+pub fn get_login_session_info(
+    uid: i32,
+    sid: &str,
+    conn: &mut PgConnection,
+) -> Result<LoginSessionInfo, UserError> {
+    let user_info = get_user(uid, conn)?;
+    let login_session_info = get_login_session(uid, sid, conn)?;
+
+    Ok(LoginSessionInfo {
+        session_id: login_session_info.session_id.to_string(),
+        user_id: login_session_info.user_id,
+        user_name: user_info.username,
+        user_role: user_info.role,
+    })
+}
+
 pub fn delete_login_session(sid: &str, conn: &mut PgConnection) -> Result<bool, UserError> {
     use domain::schema::login_sessions::dsl::*;
 
@@ -308,6 +324,22 @@ pub fn get_user(uid: i32, conn: &mut PgConnection) -> Result<User, UserError> {
         .filter(id.eq(uid))
         .first::<User>(conn)
         .map_err(|e| UserError::DatabaseError(e.to_string()))
+}
+
+pub fn get_login_session(
+    uid: i32,
+    sid: &str,
+    conn: &mut PgConnection,
+) -> Result<LoginSession, UserError> {
+    use domain::schema::login_sessions::dsl::*;
+    let session_uuid = Uuid::parse_str(sid);
+    match session_uuid {
+        Ok(suuid) => login_sessions
+            .filter(session_id.eq(suuid))
+            .first::<LoginSession>(conn)
+            .map_err(|e| UserError::LoginSessionNotFound(e.to_string())),
+        Err(e) => Err(UserError::LoginSessionNotFound(e.to_string())),
+    }
 }
 
 pub fn get_all_api_keys(uid: i32, conn: &mut PgConnection) -> Result<Vec<ApiKey>, UserError> {
