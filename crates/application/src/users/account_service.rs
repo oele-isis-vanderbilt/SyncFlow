@@ -62,9 +62,10 @@ impl AccountService {
             .verify_token(&request.refresh_token, &mut self.pool.get().unwrap())?;
         let sid = user_info
             .login_session
-            .ok_or(UserError::LoginSessionNotFound(
-                format!("No login session found for the refresh token, {:?}", &request.refresh_token)
-            ))?;
+            .ok_or(UserError::LoginSessionNotFound(format!(
+                "No login session found for the refresh token, {:?}",
+                &request.refresh_token
+            )))?;
         let conn = &mut self.pool.get().unwrap();
         let login_session_info = user::get_login_session_info(user_info.user_id, &sid, conn)?;
         self.tokens_manager
