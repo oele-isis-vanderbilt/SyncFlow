@@ -142,11 +142,11 @@ impl JWTTokensManager {
 
     pub fn decode_token_unsafe(&self, token: &str) -> Result<TokenTypes, UserError> {
         if let Ok(token_data) = decode_jwt_unsafe::<LoginToken>(token) {
-            Ok(TokenTypes::LoginToken(token_data))
-        } else if let Ok(token_data) = decode_jwt_unsafe::<ApiToken>(token) {
-            return Ok(TokenTypes::ApiToken(token_data));
+            return Ok(TokenTypes::LoginToken(token_data));
         } else if let Ok(token_data) = decode_jwt_unsafe::<RefreshToken>(token) {
             return Ok(TokenTypes::RefreshToken(token_data));
+        } else if let Ok(token_data) = decode_jwt_unsafe::<ApiToken>(token) {
+            return Ok(TokenTypes::ApiToken(token_data));
         } else {
             return Err(UserError::TokenError("Invalid token".to_string()));
         }
@@ -189,14 +189,14 @@ impl JWTTokensManager {
                 let encrypted_secret = api_key.secret;
                 let decrypted_secret = decrypt_string(&encrypted_secret, &self.encryption_key)
                     .map_err(|e| UserError::SecretError(e.to_string()))?;
-                let token_data = verify_and_decode_jwt::<LoginToken>(token, &decrypted_secret)
+                let token_data = verify_and_decode_jwt::<RefreshToken>(token, &decrypted_secret)
                     .map_err(|e| UserError::TokenError(e.to_string()))?;
 
                 if token_data.iss != api_key.key {
                     return Err(UserError::TokenError("Invalid token".to_string()));
                 }
 
-                if !self.is_login_token_valid(&token_data, conn) {
+                if !self.is_refresh_token_valid(&token_data, conn) {
                     return Err(UserError::TokenError("Invalid token".to_string()));
                 }
 
