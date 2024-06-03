@@ -16,7 +16,7 @@ export class AuthHttpClient {
 
   private async getAuthToken(): Promise<string | null> {
     // @ts-ignore
-    return (await auth())?.jwt;
+    return (await auth())?.accessToken;
   }
 
   async authenticatedGet<T>(url: string): Promise<Result<T, ClientError>> {

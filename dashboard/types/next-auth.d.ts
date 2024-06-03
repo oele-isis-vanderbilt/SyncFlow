@@ -12,5 +12,7 @@ export type SessionUser = {
   role: Role;
   email: string;
   name: string;
-  apiToken: string;
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpires: number;
 };

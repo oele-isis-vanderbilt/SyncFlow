@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { jwtDecode } from 'jwt-decode';
 import type { SessionUser } from '@/types/next-auth';
 import deploymentConfig from '@/deployment-config';
+import { redirect } from 'next/navigation';
 
 async function apiSignIn(
   id: string,
@@ -26,18 +27,53 @@ async function apiSignIn(
 
   if (response.ok) {
     let data = await response.json();
-    let token = data.token;
+    let token = data.accessToken;
     let decoded_jwt = jwtDecode(token);
     return {
       id: decoded_jwt.userName,
       name: decoded_jwt.userName,
       email: decoded_jwt.userName,
       role: decoded_jwt.role,
-      apiToken: token,
+      accessToken: token,
+      refreshToken: data.refreshToken,
+      accessTokenExpires: decoded_jwt.exp * 1000,
     } as SessionUser;
   }
 
   return null;
+}
+
+async function refreshAccessToken(token) {
+  const serverUrl = deploymentConfig.mmla_api_url;
+
+  const refreshToken = token.refreshToken;
+
+  let response = await fetch(serverUrl + '/users/refresh-token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+
+  if (response.ok) {
+    let data = await response.json();
+    let token = data.accessToken;
+    let decoded_jwt = jwtDecode(token);
+    const refreshedTokens = {
+      ...token,
+      id: decoded_jwt.userName,
+      name: decoded_jwt.userName,
+      email: decoded_jwt.userName,
+      role: decoded_jwt.role,
+      accessToken: token,
+      refreshToken: data.refreshToken,
+      accessTokenExpires: decoded_jwt.exp * 1000,
+    };
+    return refreshedTokens;
+  } else {
+    return null;
+  }
 }
 
 async function apiSignOut(token: string) {
@@ -67,17 +103,31 @@ export const { auth, signIn, signOut } = NextAuth({
           ...token,
           id: user.id,
           role: user.role,
-          jwt: user.apiToken,
+          accessToken: user.accessToken,
+          refreshToken: user.refreshToken,
+          accessTokenExpires: user.accessTokenExpires,
         };
       }
-      return token;
+
+      if (Date.now() < token.accessTokenExpires) {
+        return token;
+      }
+
+      const refreshedTokens = refreshAccessToken(token);
+      if (refreshedTokens === null) {
+        redirect('/login');
+      }
     },
     async session({ session, token }) {
       if (token) {
         session.jwt = token.jwt;
+        session.accessToken = token.accessToken;
+        session.refreshToken = token.refreshToken;
+        session.accessTokenExpires = token.accessTokenExpires;
         session.user ? (session.user.id = token.id) : null;
         session.user ? (session.user.role = token.role) : null;
       }
+
       return session;
     },
   },
