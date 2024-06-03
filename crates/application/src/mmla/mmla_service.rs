@@ -167,9 +167,7 @@ impl MMLAService {
                 .room_service
                 .list_rooms(Some(room_names))
                 .await
-                .map_err(|e| {
-                    ServiceError::RoomListError(format!("Error listing rooms: {}", e))
-                })?;
+                .map_err(|e| ServiceError::RoomListError(format!("Error listing rooms: {}", e)))?;
 
             let new_list_rooms_action = NewListRoomsAction { user_id };
             let _ = self.user_actions.register_list_rooms(new_list_rooms_action);

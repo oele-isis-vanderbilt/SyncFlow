@@ -4,8 +4,9 @@ use crate::users::user::UserError;
 use domain::models::{ApiKey, User};
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
-use shared::user_models::ApiKeyResponseWithoutSecret;
 use shared::user_models::LoginRequest;
+use shared::user_models::{ApiKeyResponseWithoutSecret, RefreshTokenRequest};
+use std::fmt::format;
 use std::sync::Arc;
 
 pub struct AccountService {
@@ -25,7 +26,7 @@ impl AccountService {
     }
 
     /// Logs in a user
-    pub fn login(&self, request: LoginRequest) -> Result<String, UserError> {
+    pub fn login(&self, request: LoginRequest) -> Result<(String, String), UserError> {
         let session_info_result = user::login(
             request,
             &mut self.pool.get().unwrap(),
@@ -36,7 +37,7 @@ impl AccountService {
                 let conn = &mut self.pool.get().unwrap();
                 let token = self
                     .tokens_manager
-                    .generate_login_token(&session_info, conn);
+                    .generate_login_token_pairs(&session_info, conn);
                 match token {
                     Ok(t) => Ok(t),
                     Err(e) => {
@@ -50,6 +51,25 @@ impl AccountService {
             }
             Err(e) => Err(e),
         }
+    }
+
+    pub fn refresh_token(
+        &self,
+        request: RefreshTokenRequest,
+    ) -> Result<(String, String), UserError> {
+        let user_info = self
+            .tokens_manager
+            .verify_token(&request.refresh_token, &mut self.pool.get().unwrap())?;
+        let sid = user_info
+            .login_session
+            .ok_or(UserError::LoginSessionNotFound(format!(
+                "No login session found for the refresh token, {:?}",
+                &request.refresh_token
+            )))?;
+        let conn = &mut self.pool.get().unwrap();
+        let login_session_info = user::get_login_session_info(user_info.user_id, &sid, conn)?;
+        self.tokens_manager
+            .generate_login_token_pairs(&login_session_info, conn)
     }
 
     /// Logs out a user
@@ -81,14 +101,6 @@ impl AccountService {
     pub fn verify_token(&self, token_data: &str) -> Result<UserInfo, UserError> {
         self.tokens_manager
             .verify_token(token_data, &mut self.pool.get().unwrap())
-    }
-
-    pub fn generate_login_token(
-        &self,
-        login_session_info: &user::LoginSessionInfo,
-    ) -> Result<String, UserError> {
-        self.tokens_manager
-            .generate_login_token(login_session_info, &mut self.pool.get().unwrap())
     }
 
     pub fn generate_api_keys(

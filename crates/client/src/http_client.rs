@@ -42,9 +42,8 @@ impl HTTPAuthTokenClient {
 
     pub fn get(&self, path: &str) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        
-        self
-            .client
+
+        self.client
             .get(url)
             .header("Authorization", format!("Bearer {}", self.token))
             .send()
@@ -52,9 +51,8 @@ impl HTTPAuthTokenClient {
 
     pub fn post<T: Serialize>(&self, path: &str, body: T) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        
-        self
-            .client
+
+        self.client
             .post(url)
             .header("Authorization", format!("Bearer {}", self.token))
             .header("Content-Type", "application/json")
@@ -64,10 +62,8 @@ impl HTTPAuthTokenClient {
 
     pub fn delete(&self, path: &str) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        
 
-        self
-            .client
+        self.client
             .delete(url)
             .header("Authorization", format!("Bearer {}", self.token))
             .send()
@@ -77,9 +73,8 @@ impl HTTPAuthTokenClient {
     #[allow(dead_code)]
     pub fn put<T: Serialize>(&self, path: &str, body: T) -> reqwest::Result<Response> {
         let url = format!("{}/{}", self.base_url, path);
-        
-        self
-            .client
+
+        self.client
             .put(url)
             .header("Authorization", format!("Bearer {}", self.token))
             .header("Content-Type", "application/json")

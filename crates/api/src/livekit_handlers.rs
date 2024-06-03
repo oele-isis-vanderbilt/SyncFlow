@@ -61,9 +61,7 @@ pub async fn generate_token(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 
@@ -98,9 +96,7 @@ pub async fn create_room(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 
@@ -136,9 +132,7 @@ pub async fn delete_room(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 
@@ -168,9 +162,7 @@ pub async fn list_rooms(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 
@@ -206,9 +198,7 @@ pub async fn list_participants(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 
@@ -244,9 +234,7 @@ pub async fn list_egresses(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 
@@ -280,9 +268,7 @@ pub async fn begin_track_egress(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 
@@ -316,9 +302,7 @@ pub async fn stop_recording(
                 }
             }
         }
-        None => {
-            HttpResponse::Unauthorized().body("Unauthorized")
-        }
+        None => HttpResponse::Unauthorized().body("Unauthorized"),
     }
 }
 

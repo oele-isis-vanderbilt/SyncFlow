@@ -3,7 +3,7 @@ use shared::livekit_models::{
     CreateRoomRequest, LivekitRoom, RoomOptions, TokenRequest, TokenResponse, VideoGrantsWrapper,
 };
 use shared::response_models::Response;
-use shared::user_models::LoginRequest;
+use shared::user_models::{LoginRequest, RefreshTokenRequest};
 use utoipa::OpenApi;
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
@@ -24,9 +24,10 @@ pub fn init_api_doc(config: &mut ServiceConfig) {
             crate::livekit_handlers::stop_recording,
             crate::login_handlers::login,
             crate::login_handlers::logout,
+            crate::login_handlers::refresh_login_token
         ),
         components(
-            schemas(Response, LoginRequest,
+            schemas(Response, LoginRequest, RefreshTokenRequest,
             TokenRequest, TokenResponse, VideoGrantsWrapper, CreateRoomRequest, RoomOptions, LivekitRoom)
         ),
         tags(
