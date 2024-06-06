@@ -101,10 +101,10 @@ pub async fn create_room(
 }
 
 #[utoipa::path(
-    post,
+    delete,
     path = "/livekit/delete-room/{room_name}",
     responses(
-        (status = 200, description = "Room created successfully", body = Response),
+        (status = 200, description = "Room created successfully", body = RoomCreationResult),
         (status = 500, description = "Internal Server Error")
     ),
     params(
@@ -125,7 +125,7 @@ pub async fn delete_room(
                 .await;
 
             match delete_room_result {
-                Ok(success) => success.into(),
+                Ok(room) => HttpResponse::Ok().json(room),
                 Err(err) => {
                     let response: Response = err.into();
                     response.into()
