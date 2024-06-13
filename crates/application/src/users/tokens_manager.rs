@@ -64,11 +64,21 @@ pub struct ApiToken {
 
 pub struct JWTTokensManager {
     pub encryption_key: String,
+    pub access_token_expiration: usize,
+    pub refresh_token_expiration: usize,
 }
 
 impl JWTTokensManager {
-    pub fn new(encryption_key: String) -> Self {
-        JWTTokensManager { encryption_key }
+    pub fn new(
+        encryption_key: &str,
+        access_token_expiration: usize,
+        refresh_token_expiration: usize,
+    ) -> Self {
+        JWTTokensManager {
+            encryption_key: encryption_key.to_owned(),
+            access_token_expiration,
+            refresh_token_expiration,
+        }
     }
 
     pub fn generate_login_token(
@@ -79,7 +89,7 @@ impl JWTTokensManager {
         let api_key = user::fetch_login_key(login_session_info.user_id, conn)?;
         let decrypted_secret = self.decrypt_user_secret(&api_key)?;
 
-        let exp = chrono::Utc::now().timestamp() as usize + 60 * 60 * 24 * 1; // 1 day
+        let exp = chrono::Utc::now().timestamp() as usize + self.access_token_expiration;
 
         let user_token = LoginToken {
             iat: chrono::Utc::now().timestamp() as usize,
@@ -104,8 +114,9 @@ impl JWTTokensManager {
         let decrypted_secret = self.decrypt_user_secret(&api_key)?;
 
         //ToDo: Make this configurable
-        let login_token_expiry = chrono::Utc::now().timestamp() as usize + 60 * 60 * 24 * 1; // 1 day
-        let refresh_token_expiry = login_token_expiry + 60 * 60 * 24 * 6; // 7 days
+        let login_token_expiry =
+            chrono::Utc::now().timestamp() as usize + self.access_token_expiry as usize; // 1 day
+        let refresh_token_expiry = login_token_expiry + self.refresh_token_expiry as usize; // 7 days
 
         let user_token = LoginToken {
             iat: chrono::Utc::now().timestamp() as usize,

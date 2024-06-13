@@ -14,6 +14,8 @@ pub struct DeploymentConfig {
     pub database_url: String,
     pub storage_config: StorageConfig,
     pub encryption_key: String,
+    pub jwt_expiration: usize,
+    pub jwt_refresh_expiration: usize,
 
     pub root_user: Option<RootUser>,
 

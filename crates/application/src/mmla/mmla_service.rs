@@ -123,9 +123,13 @@ impl MMLAService {
 
         if let Ok(rooms) = user_rooms {
             if rooms.iter().any(|room| room.room_name == room_name) {
-                let active_rooms = self.room_service
+                let active_rooms = self
+                    .room_service
                     .list_rooms(Some(vec![room_name.clone()]))
-                    .await.map_err(|e| ServiceError::DeleteRoomError(format!("Error listing rooms: {}", e)))?;
+                    .await
+                    .map_err(|e| {
+                        ServiceError::DeleteRoomError(format!("Error listing rooms: {}", e))
+                    })?;
                 // Check if room exists
                 if active_rooms.is_empty() {
                     return Err(ServiceError::DeleteRoomError(format!(
