@@ -113,7 +113,7 @@ export const { auth, signIn, signOut } = NextAuth({
         return token;
       }
 
-      const refreshedTokens = refreshAccessToken(token);
+      const refreshedTokens = await refreshAccessToken(token);
       if (refreshedTokens === null) {
         redirect('/login');
       }
@@ -133,7 +133,7 @@ export const { auth, signIn, signOut } = NextAuth({
   },
   events: {
     signOut: async ({ token, session }) => {
-      await apiSignOut(token?.jwt as string);
+      await apiSignOut(token?.accessToken as string);
     },
   },
   providers: [
