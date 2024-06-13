@@ -17,11 +17,17 @@ pub struct AccountService {
 
 impl AccountService {
     pub fn new(pool: Arc<DbPool>, config: DeploymentConfig) -> Self {
-        let encryption_key = config.encryption_key.clone();
+        let encryption_key = &config.encryption_key.clone();
+        let jwt_expiration = config.jwt_expiration;
+        let jwt_refresh_expiration = config.jwt_refresh_expiration;
         AccountService {
             pool,
             config,
-            tokens_manager: tokens_manager::JWTTokensManager::new(encryption_key),
+            tokens_manager: tokens_manager::JWTTokensManager::new(
+                encryption_key,
+                jwt_expiration,
+                jwt_refresh_expiration,
+            ),
         }
     }
 
@@ -184,7 +190,9 @@ impl Clone for AccountService {
             pool: self.pool.clone(),
             config: self.config.clone(),
             tokens_manager: tokens_manager::JWTTokensManager::new(
-                self.config.encryption_key.clone(),
+                &self.config.encryption_key.clone(),
+                self.config.jwt_expiration,
+                self.config.jwt_refresh_expiration,
             ),
         }
     }
