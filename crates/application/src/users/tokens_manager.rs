@@ -115,9 +115,8 @@ impl JWTTokensManager {
 
         //ToDo: Make this configurable
         let login_token_expiry =
-            chrono::Utc::now().timestamp() as usize + self.access_token_expiry as usize; // 1 day
-        let refresh_token_expiry = login_token_expiry + self.refresh_token_expiry as usize; // 7 days
-
+            chrono::Utc::now().timestamp() as usize + self.access_token_expiration as usize;
+        let refresh_token_expiry = login_token_expiry + self.refresh_token_expiration as usize;
         let user_token = LoginToken {
             iat: chrono::Utc::now().timestamp() as usize,
             exp: login_token_expiry,
