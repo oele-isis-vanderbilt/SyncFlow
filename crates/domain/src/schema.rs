@@ -110,10 +110,14 @@ diesel::table! {
         username -> Varchar,
         #[max_length = 255]
         email -> Varchar,
-        password -> Text,
+        password -> Nullable<Text>,
         createdAt -> Nullable<Timestamptz>,
         updatedAt -> Nullable<Timestamptz>,
         role -> Role,
+        #[max_length = 255]
+        oauth_provider -> Nullable<Varchar>,
+        #[max_length = 255]
+        oauth_provider_user_id -> Nullable<Varchar>,
     }
 }
 

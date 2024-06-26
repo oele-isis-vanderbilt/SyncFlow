@@ -32,7 +32,7 @@ pub struct User {
     pub id: i32,
     pub username: String,
     pub email: String,
-    pub password: String,
+    pub password: Option<String>,
 
     #[diesel(column_name = "createdAt")]
     pub created_at: Option<chrono::NaiveDateTime>,
@@ -41,6 +41,9 @@ pub struct User {
     pub updated_at: Option<chrono::NaiveDateTime>,
 
     pub role: Role,
+
+    pub oauth_provider: Option<String>,
+    pub oauth_provider_user_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable)]
@@ -48,8 +51,10 @@ pub struct User {
 pub struct NewUser {
     pub username: String,
     pub email: String,
-    pub password: String,
+    pub password: Option<String>,
     pub role: Role,
+    pub oauth_provider: Option<String>,
+    pub oauth_provider_user_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]

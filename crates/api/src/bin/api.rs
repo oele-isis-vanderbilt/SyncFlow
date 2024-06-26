@@ -3,6 +3,7 @@ use api::apidoc::init_api_doc;
 use api::auth_middleware;
 use api::livekit_handlers::init_routes as lk_init_routes;
 use api::login_handlers::init_routes as login_init_routes;
+use api::oauth_handlers::init_github_oauth_routes;
 use application::livekit::egress::EgressService;
 use application::livekit::room::RoomService;
 use application::mmla::mmla_service::MMLAService;
@@ -73,7 +74,7 @@ async fn main() -> std::io::Result<()> {
     let mmla_service = MMLAService::new(room_service, egress_service, user_actions);
 
     HttpServer::new(move || {
-        App::new()
+        let mut app = App::new()
             .wrap(auth_middleware::Authentication) // Comment this line if you want to integrate with yew-address-book-frontend
             .default_service(web::route().to(not_found))
             .wrap(actix_web::middleware::Logger::default())
@@ -82,7 +83,13 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(config.clone()))
             .configure(lk_init_routes)
             .configure(login_init_routes)
-            .configure(init_api_doc)
+            .configure(init_api_doc);
+
+        if config.github_client_id.is_some() && config.github_client_secret.is_some() {
+            app = app.configure(init_github_oauth_routes);
+        }
+
+        app
     })
     .workers(num_workers)
     .bind(server_addr)?
