@@ -118,11 +118,26 @@ impl MMLAService {
         &self,
         user_id: i32,
         room_name: String,
-    ) -> Result<Response, ServiceError> {
+    ) -> Result<LivekitRoom, ServiceError> {
         let user_rooms = self.user_actions.list_created_rooms(user_id);
 
         if let Ok(rooms) = user_rooms {
             if rooms.iter().any(|room| room.room_name == room_name) {
+                let active_rooms = self
+                    .room_service
+                    .list_rooms(Some(vec![room_name.clone()]))
+                    .await
+                    .map_err(|e| {
+                        ServiceError::DeleteRoomError(format!("Error listing rooms: {}", e))
+                    })?;
+                // Check if room exists
+                if active_rooms.is_empty() {
+                    return Err(ServiceError::DeleteRoomError(format!(
+                        "Room {} not found",
+                        room_name
+                    )));
+                }
+                let room = active_rooms.into_iter().next().unwrap();
                 let delete_room_result = self.room_service.delete_room(&room_name).await;
 
                 if let Ok(_) = delete_room_result {
@@ -135,10 +150,7 @@ impl MMLAService {
                         .user_actions
                         .register_delete_room(new_room_delete_actions);
 
-                    Ok(Response {
-                        message: format!("Room {} deleted successfully", room_name),
-                        status: 200,
-                    })
+                    Ok(LivekitRoom::from(room))
                 } else {
                     Err(ServiceError::DeleteRoomError(format!(
                         "Room {} deleted successfully",
