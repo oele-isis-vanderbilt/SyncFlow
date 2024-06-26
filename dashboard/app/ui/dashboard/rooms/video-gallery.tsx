@@ -92,7 +92,9 @@ export default function VideoGallery(
                     controls={true}
                   />
                 )}
-                <span className={'text-xl overflow-ellipsis'}>{getHelpText(toRenderTrack)}</span>
+                <span className={'overflow-ellipsis text-xl'}>
+                  {getHelpText(toRenderTrack)}
+                </span>
               </>
             ) : (
               <NoTrackMessage />

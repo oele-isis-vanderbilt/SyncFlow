@@ -7,18 +7,19 @@ export function shortenText(text: string, maxLength: number = 10) {
   }
 
   return text.substring(0, maxLength) + '...';
-
 }
 
-export function getHelpText(track: TrackReferenceOrPlaceholder, long=true) {
+export function getHelpText(track: TrackReferenceOrPlaceholder, long = true) {
   if (track.publication?.trackName) {
     return track.publication.trackName;
   }
 
-  let participantText = long ? track.participant.identity:  shortenText(track.participant.identity)
+  let participantText = long
+    ? track.participant.identity
+    : shortenText(track.participant.identity);
 
   if (track.publication?.source === Track.Source.Camera) {
-    return  participantText + "'s Video";
+    return participantText + "'s Video";
   }
   if (track.publication?.source === Track.Source.Microphone) {
     return participantText + "'s Audio";

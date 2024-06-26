@@ -1,6 +1,7 @@
 import SyncFlowLogo from '@/app/ui/app-logo';
 import LoginForm from '@/app/ui/login-form';
 import OAuthForm from '@/app/ui/oauth-form';
+import { signIn } from '@/auth';
 
 export default function LoginPage() {
   return (
@@ -15,10 +16,12 @@ export default function LoginPage() {
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-gray-900 px-2 text-white">OR Continue With</span>
+            <span className="bg-gray-900 px-2 text-white">
+              OR Continue With
+            </span>
           </div>
         </div>
-        <OAuthForm/>
+        <OAuthForm />
       </div>
     </main>
   );
