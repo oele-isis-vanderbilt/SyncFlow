@@ -1,25 +1,26 @@
-name: Deploy to EC2 / Docker Cleanup
+name: Deploy to Jetstream / Docker Cleanup
 
 on:
   push:
     branches:
       - main
+      - 101-access-cloud-deployment
 
   schedule:
     - cron: '0 0 * * *' # Run every day at 00:00 UTC
 
 jobs:
   DeployToEC2:
-    name: Deploy API to EC2
+    name: Deploy API to JetStream2
     runs-on: "ubuntu-latest"
 
     steps:
       - uses: actions/checkout@v4
       - name: Build and Deploy
         env:
-          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USERNAME: ${{ secrets.EC2_USERNAME }}
+          PRIVATE_KEY: ${{ secrets.JETSTREAM2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.JETSTREAM2_HOST }}
+          USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
@@ -29,6 +30,7 @@ jobs:
             mkdir SyncFlowDeployment && cd SyncFlowDeployment
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
+            git checkout -b 101-access-cloud-deployment origin/101-access-cloud-deployment
             cp $HOME/.deployment_config_prod_cloud.json  deployment_config_prod_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_prod_cloud.json --outfile-name .env.prod
@@ -38,12 +40,12 @@ jobs:
             docker compose -p syncflow-prod --file docker/docker-compose.prod.yaml up -d
           '
 
-      - name: Docker Cleanup on EC2
+      - name: Docker Cleanup on JetStream2 VM
         if: github.event_name == 'schedule'
         env:
-          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USERNAME: ${{ secrets.EC2_USERNAME }}
+          PRIVATE_KEY: ${{ secrets.JETSTREAM2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.JETSTREAM2_HOST }}
+          USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
