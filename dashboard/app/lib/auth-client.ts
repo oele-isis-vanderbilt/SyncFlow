@@ -12,7 +12,6 @@ export class AuthClient {
 
   async loginWithGithub(token: JWT, user: User, account: Account) {
     
-    console.log(user, account, token);
     let serverUrl = this.auth_url;
     let githubToken = account.access_token;
 
@@ -35,11 +34,10 @@ export class AuthClient {
         let data = await response.json();
         let token = data.accessToken;
         let decoded_jwt = jwtDecode(token);
-        console.log(decoded_jwt, "?>>");
         return {
             id: decoded_jwt.userName,
             name: decoded_jwt.userName,
-            email: decoded_jwt.userName,
+            email: decoded_jwt.email,
             role: decoded_jwt.role,
             accessToken: token,
             refreshToken: data.refreshToken,
@@ -71,7 +69,7 @@ export class AuthClient {
       return {
         id: decoded_jwt.userName,
         name: decoded_jwt.userName,
-        email: decoded_jwt.userName,
+        email: decoded_jwt.email,
         role: decoded_jwt.role,
         accessToken: token,
         refreshToken: data.refreshToken,

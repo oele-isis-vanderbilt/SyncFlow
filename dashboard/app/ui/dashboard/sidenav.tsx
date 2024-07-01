@@ -19,7 +19,7 @@ export default async function SideNav() {
       </Link>
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
         <div className="hidden p-2 md:block">
-          {session?.user?.name ? `Welcome! ${session.user.name!}` : 'Welcome'}{' '}
+          {session?.user?.name ? `Welcome! ${session.user.id!}` : 'Welcome'}{' '}
         </div>
 
         <NavLinks user={session?.user} />

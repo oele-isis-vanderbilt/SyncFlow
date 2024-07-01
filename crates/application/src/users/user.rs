@@ -13,7 +13,7 @@ use shared::response_models::Response;
 use shared::user_models::LoginRequest;
 use uuid::Uuid;
 
-use super::oauth::github::GithubVerificationResponse;
+use super::oauth::github::GithubUser;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginSessionInfo {
@@ -109,7 +109,6 @@ pub fn login(
     conn: &mut PgConnection,
     encryption_secret: &str,
 ) -> Result<LoginSessionInfo, UserError> {
-    use domain::schema::login_sessions::dsl::*;
     use domain::schema::users::dsl::*;
 
     let (uname, passwd) = (login_request.username_or_email, login_request.password);
@@ -175,7 +174,7 @@ pub fn get_login_session_info(
     conn: &mut PgConnection,
 ) -> Result<LoginSessionInfo, UserError> {
     let user_info = get_user(uid, conn)?;
-    let login_session_info = get_login_session(uid, sid, conn)?;
+    let login_session_info = get_login_session(sid, conn)?;
 
     Ok(LoginSessionInfo {
         session_id: login_session_info.session_id.to_string(),
@@ -263,11 +262,11 @@ pub fn user_exists(uname: &str, conn: &mut PgConnection) -> bool {
 }
 
 pub fn create_or_get_github_user(
-    response: &GithubVerificationResponse,
+    github_user: &GithubUser,
     conn: &mut PgConnection,
 ) -> Result<User, UserError> {
     use domain::schema::users::dsl::*;
-    let user_id = response.user.login.clone();
+    let user_id = github_user.login.clone();
 
     match users
         .filter(
@@ -280,8 +279,8 @@ pub fn create_or_get_github_user(
         Ok(user) => Ok(user),
         Err(DieselError::NotFound) => {
             let new_user = NewUser {
-                username: response.user.login.clone(),
-                email: response.user.email.clone().unwrap_or_default(),
+                username: github_user.login.clone(),
+                email: github_user.email.clone().unwrap_or_default(),
                 password: None,
                 role: Role::ADMIN,
                 oauth_provider: Some("github".to_string()),
@@ -298,11 +297,11 @@ pub fn create_or_get_github_user(
 }
 
 pub fn login_with_github(
-    response: &GithubVerificationResponse,
+    github_user: &GithubUser,
     conn: &mut PgConnection,
     encryption_secret: &str,
 ) -> Result<LoginSessionInfo, UserError> {
-    let user = create_or_get_github_user(response, conn)?;
+    let user = create_or_get_github_user(github_user, conn)?;
 
     let new_session = new_login_session(user.id, conn)?;
 
@@ -410,11 +409,7 @@ pub fn get_user(uid: i32, conn: &mut PgConnection) -> Result<User, UserError> {
         .map_err(|e| UserError::DatabaseError(e.to_string()))
 }
 
-pub fn get_login_session(
-    uid: i32,
-    sid: &str,
-    conn: &mut PgConnection,
-) -> Result<LoginSession, UserError> {
+pub fn get_login_session(sid: &str, conn: &mut PgConnection) -> Result<LoginSession, UserError> {
     use domain::schema::login_sessions::dsl::*;
     let session_uuid = Uuid::parse_str(sid);
     match session_uuid {

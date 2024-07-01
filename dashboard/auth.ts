@@ -24,7 +24,7 @@ export const { handlers, auth, signOut, signIn } = NextAuth({
           user,
           account,
         );
-        console.log(apiUser);
+
         if (apiUser) {
           return {
             ...token,
@@ -65,6 +65,7 @@ export const { handlers, auth, signOut, signIn } = NextAuth({
         session.accessTokenExpires = token.accessTokenExpires;
         session.user ? (session.user.id = token.id) : null;
         session.user ? (session.user.role = token.role) : null;
+        session.user ? (session.user.userName = token.userName) : null;
       }
 
       return session;

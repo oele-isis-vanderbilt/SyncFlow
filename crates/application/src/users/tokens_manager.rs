@@ -1,11 +1,9 @@
-use std::cell::Ref;
-
 use crate::users::secret::decrypt_string;
 use crate::users::signed_token::{decode_jwt_unsafe, generate_and_sign_jwt, verify_and_decode_jwt};
 use crate::users::user;
 use crate::users::user::{LoginSessionInfo, UserError};
 use diesel::PgConnection;
-use domain::models::{ApiKey, Role, User};
+use domain::models::{ApiKey, Role};
 use serde::{Deserialize, Serialize};
 
 pub type UserTokenType = TokenTypes;

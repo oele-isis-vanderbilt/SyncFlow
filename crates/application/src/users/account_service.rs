@@ -1,11 +1,10 @@
 use super::{secret, tokens_manager, user};
-use crate::users::oauth::github::{verify_user_token, GithubUser};
+use crate::users::oauth::github::{fetch_github_user, verify_user_token, GithubUser};
 use crate::users::tokens_manager::{TokenTypes, UserInfo};
 use crate::users::user::UserError;
-use domain::models::{ApiKey, NewUser, User};
+use domain::models::{ApiKey, User};
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
-use shared::livekit_models::TokenResponse;
 use shared::user_models::LoginRequest;
 use shared::user_models::{ApiKeyResponseWithoutSecret, RefreshTokenRequest};
 use std::sync::Arc;
@@ -192,18 +191,17 @@ impl AccountService {
         log::info!("Attempting logging in with Github");
         let (client_id, client_secret) = self.get_github_credentials()?;
         log::debug!("Verifying user token");
-        let user_info = verify_user_token(client_id, client_secret, auth_token, user_to_verify)
+        let _user_info = verify_user_token(client_id, client_secret, auth_token, user_to_verify)
             .await
             .map_err(|e| UserError::OAuthError(e.to_string()))?;
 
-        user_info
-            .user
-            .email
-            .as_ref()
-            .ok_or_else(|| UserError::OAuthError("Email not found".to_string()))?;
+        let github_user = fetch_github_user(&auth_token)
+            .await
+            .map_err(|e| UserError::OAuthError(e.to_string()))?;
 
         let conn = &mut self.pool.get().unwrap();
-        let login_session = user::login_with_github(&user_info, conn, &self.config.encryption_key)?;
+        let login_session =
+            user::login_with_github(&github_user, conn, &self.config.encryption_key)?;
 
         self.tokens_manager
             .generate_login_token_pairs(&login_session, conn)

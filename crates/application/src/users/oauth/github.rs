@@ -2,6 +2,7 @@ use base64::{alphabet, engine, Engine};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use shared::constants::APPLICATION_NAME;
 use std::fmt::Display;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -64,7 +65,7 @@ pub async fn verify_user_token(
         .header("Accept", "application/vnd.github+json")
         .header("X-Github-Api-Version", "2022-11-28")
         .header("Authorization", format!("Basic {}", credentials))
-        .header(reqwest::header::USER_AGENT, "syncflow/0.1.0")
+        .header(reqwest::header::USER_AGENT, APPLICATION_NAME)
         .json(&payload)
         .send()
         .await
@@ -75,21 +76,13 @@ pub async fn verify_user_token(
             .text()
             .await
             .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
-        println!("Response Text: {:?}", response_text);
 
-        // Parse the response text into a serde_json::Value
         let json_value: Value = serde_json::from_str(&response_text)
             .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
 
-        // Print the JSON value to inspect its structure
-        println!("JSON Value: {:?}", json_value);
-
-        // Proceed with deserialization to your struct
         let mut verification_response: GithubVerificationResponse =
             serde_json::from_value(json_value)
                 .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
-
-        println!("Verification Response: {:?}", verification_response);
 
         if &verification_response.app.client_id != client_id {
             let message =
@@ -104,6 +97,35 @@ pub async fn verify_user_token(
         verification_response.user.email = user.email.clone();
 
         return Ok(verification_response);
+    } else {
+        let error_text = response
+            .text()
+            .await
+            .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
+        Err(GithubOAuthError::VerificationError(error_text))
+    }
+}
+
+pub async fn fetch_github_user(token: &str) -> Result<GithubUser, GithubOAuthError> {
+    let client = Client::new();
+    let response = client
+        .get("https://api.github.com/user")
+        .header("Authorization", format!("Bearer {}", token))
+        .header("X-Github-Api-Version", "2022-11-28")
+        .header("Accept", "application/vnd.github+json")
+        .header(reqwest::header::USER_AGENT, APPLICATION_NAME)
+        .send()
+        .await
+        .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
+
+    if response.status().is_success() {
+        let response_text = response
+            .text()
+            .await
+            .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
+        let github_user: GithubUser = serde_json::from_str(&response_text)
+            .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
+        Ok(github_user)
     } else {
         let error_text = response
             .text()
