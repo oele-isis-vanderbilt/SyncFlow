@@ -17,6 +17,11 @@ pub struct DeploymentConfig {
     pub jwt_expiration: usize,
     pub jwt_refresh_expiration: usize,
 
+    pub github_client_id: Option<String>,
+    pub github_client_secret: Option<String>,
+    pub google_client_id: Option<String>,
+    pub google_client_secret: Option<String>,
+
     pub root_user: Option<RootUser>,
 
     /// Test configuration

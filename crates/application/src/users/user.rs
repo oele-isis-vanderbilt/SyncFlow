@@ -1,5 +1,6 @@
 use bcrypt::verify;
 use diesel::prelude::*;
+use diesel::result::Error as DieselError;
 use diesel::PgConnection;
 use domain::models::{
     ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, Role, User,
@@ -11,6 +12,8 @@ use serde::{Deserialize, Serialize};
 use shared::response_models::Response;
 use shared::user_models::LoginRequest;
 use uuid::Uuid;
+
+use super::oauth::github::GithubUser;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginSessionInfo {
@@ -30,6 +33,7 @@ pub enum UserError {
     TokenError(String),
     SecretError(String),
     HashError(String),
+    OAuthError(String),
 }
 
 impl Display for UserError {
@@ -43,6 +47,7 @@ impl Display for UserError {
             UserError::TokenError(e) => write!(f, "Token error: {}", e),
             UserError::SecretError(e) => write!(f, "Secret error: {}", e),
             UserError::HashError(e) => write!(f, "Hash error: {}", e),
+            UserError::OAuthError(e) => write!(f, "OAuth error: {}", e),
         }
     }
 }
@@ -82,6 +87,10 @@ impl From<UserError> for Response {
                 status: 500,
                 message: e,
             },
+            UserError::OAuthError(e) => Response {
+                status: 500,
+                message: e,
+            },
         }
     }
 }
@@ -100,7 +109,6 @@ pub fn login(
     conn: &mut PgConnection,
     encryption_secret: &str,
 ) -> Result<LoginSessionInfo, UserError> {
-    use domain::schema::login_sessions::dsl::*;
     use domain::schema::users::dsl::*;
 
     let (uname, passwd) = (login_request.username_or_email, login_request.password);
@@ -111,13 +119,15 @@ pub fn login(
 
     match user_to_verify {
         Ok(usr) => {
-            let password_match = verify_passwd(&passwd, &usr.password);
-            if password_match {
-                let new_login_session = NewLoginSession { user_id: usr.id };
+            if usr.password.is_none() {
+                return Err(UserError::PasswordMismatch("Password Mismatch".to_string()));
+            }
 
-                let new_session = diesel::insert_into(login_sessions)
-                    .values(&new_login_session)
-                    .get_result::<LoginSession>(conn);
+            let user_db_password = usr.password.as_ref().unwrap();
+
+            let password_match = verify_passwd(&passwd, user_db_password);
+            if password_match {
+                let new_session = new_login_session(usr.id, conn);
 
                 let login_key = fetch_login_key(usr.id, conn);
 
@@ -138,7 +148,7 @@ pub fn login(
                         };
                         Ok(session_info)
                     }
-                    Err(e) => Err(UserError::DatabaseError(e.to_string())),
+                    Err(e) => Err(e),
                 }
             } else {
                 Err(UserError::PasswordMismatch("Password Mismatch".to_string()))
@@ -148,13 +158,23 @@ pub fn login(
     }
 }
 
+pub fn new_login_session(uid: i32, conn: &mut PgConnection) -> Result<LoginSession, UserError> {
+    use domain::schema::login_sessions::dsl::*;
+    let new_login_session = NewLoginSession { user_id: uid };
+
+    diesel::insert_into(login_sessions)
+        .values(&new_login_session)
+        .get_result::<LoginSession>(conn)
+        .map_err(|err| UserError::DatabaseError(err.to_string()))
+}
+
 pub fn get_login_session_info(
     uid: i32,
     sid: &str,
     conn: &mut PgConnection,
 ) -> Result<LoginSessionInfo, UserError> {
     let user_info = get_user(uid, conn)?;
-    let login_session_info = get_login_session(uid, sid, conn)?;
+    let login_session_info = get_login_session(sid, conn)?;
 
     Ok(LoginSessionInfo {
         session_id: login_session_info.session_id.to_string(),
@@ -222,8 +242,10 @@ pub fn create_user(
     let new_user = NewUser {
         username: username.to_owned(),
         email: email.to_owned(),
-        password: hashed_password,
+        password: Some(hashed_password),
         role: if is_admin { Role::ADMIN } else { Role::USER },
+        oauth_provider: None,
+        oauth_provider_user_id: None,
     };
 
     diesel::insert_into(domain::schema::users::table)
@@ -237,6 +259,67 @@ pub fn user_exists(uname: &str, conn: &mut PgConnection) -> bool {
 
     let user_result = users.filter(username.eq(uname)).first::<User>(conn);
     user_result.is_ok()
+}
+
+pub fn create_or_get_github_user(
+    github_user: &GithubUser,
+    conn: &mut PgConnection,
+) -> Result<User, UserError> {
+    use domain::schema::users::dsl::*;
+    let user_id = github_user.login.clone();
+
+    match users
+        .filter(
+            oauth_provider
+                .eq("github")
+                .and(oauth_provider_user_id.eq(user_id.clone())),
+        )
+        .first::<User>(conn)
+    {
+        Ok(user) => Ok(user),
+        Err(DieselError::NotFound) => {
+            let new_user = NewUser {
+                username: github_user.login.clone(),
+                email: github_user.email.clone().unwrap_or_default(),
+                password: None,
+                role: Role::ADMIN,
+                oauth_provider: Some("github".to_string()),
+                oauth_provider_user_id: Some(user_id),
+            };
+
+            diesel::insert_into(users)
+                .values(&new_user)
+                .get_result::<User>(conn)
+                .map_err(|e| UserError::DatabaseError(e.to_string()))
+        }
+        Err(e) => Err(UserError::DatabaseError(e.to_string())),
+    }
+}
+
+pub fn login_with_github(
+    github_user: &GithubUser,
+    conn: &mut PgConnection,
+    encryption_secret: &str,
+) -> Result<LoginSessionInfo, UserError> {
+    let user = create_or_get_github_user(github_user, conn)?;
+
+    let new_session = new_login_session(user.id, conn)?;
+
+    let login_key = fetch_login_key(user.id, conn);
+
+    match login_key {
+        Ok(_) => (),
+        Err(_) => {
+            let _ = generate_login_key(user.id, encryption_secret, conn)?;
+        }
+    }
+
+    Ok(LoginSessionInfo {
+        session_id: new_session.session_id.to_string(),
+        user_id: new_session.user_id,
+        user_name: user.username,
+        user_role: user.role,
+    })
 }
 
 pub fn generate_login_key(
@@ -326,11 +409,7 @@ pub fn get_user(uid: i32, conn: &mut PgConnection) -> Result<User, UserError> {
         .map_err(|e| UserError::DatabaseError(e.to_string()))
 }
 
-pub fn get_login_session(
-    uid: i32,
-    sid: &str,
-    conn: &mut PgConnection,
-) -> Result<LoginSession, UserError> {
+pub fn get_login_session(sid: &str, conn: &mut PgConnection) -> Result<LoginSession, UserError> {
     use domain::schema::login_sessions::dsl::*;
     let session_uuid = Uuid::parse_str(sid);
     match session_uuid {

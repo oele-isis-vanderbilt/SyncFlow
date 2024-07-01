@@ -6,98 +6,37 @@ import { jwtDecode } from 'jwt-decode';
 import type { SessionUser } from '@/types/next-auth';
 import deploymentConfig from '@/deployment-config';
 import { redirect } from 'next/navigation';
+import Github from 'next-auth/providers/github';
+import { AuthClient } from './app/lib/auth-client';
 
-async function apiSignIn(
-  id: string,
-  password: string,
-): Promise<SessionUser | null> {
-  let server_url = deploymentConfig.mmla_api_url;
-  let credentials = {
-    username_or_email: id,
-    password: password,
-  };
 
-  let response = await fetch(server_url + '/users/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials),
-  });
+const authClient = new AuthClient(deploymentConfig.mmla_api_url);
 
-  if (response.ok) {
-    let data = await response.json();
-    let token = data.accessToken;
-    let decoded_jwt = jwtDecode(token);
-    return {
-      id: decoded_jwt.userName,
-      name: decoded_jwt.userName,
-      email: decoded_jwt.userName,
-      role: decoded_jwt.role,
-      accessToken: token,
-      refreshToken: data.refreshToken,
-      accessTokenExpires: decoded_jwt.exp * 1000,
-    } as SessionUser;
-  }
-
-  return null;
-}
-
-async function refreshAccessToken(token) {
-  const serverUrl = deploymentConfig.mmla_api_url;
-
-  const refreshToken = token.refreshToken;
-
-  let response = await fetch(serverUrl + '/users/refresh-token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
-
-  if (response.ok) {
-    let data = await response.json();
-    let token = data.accessToken;
-    let decoded_jwt = jwtDecode(token);
-    const refreshedTokens = {
-      ...token,
-      id: decoded_jwt.userName,
-      name: decoded_jwt.userName,
-      email: decoded_jwt.userName,
-      role: decoded_jwt.role,
-      accessToken: token,
-      refreshToken: data.refreshToken,
-      accessTokenExpires: decoded_jwt.exp * 1000,
-    };
-    return refreshedTokens;
-  } else {
-    return null;
-  }
-}
-
-async function apiSignOut(token: string) {
-  let server_url = deploymentConfig.mmla_api_url;
-  let response = await fetch(server_url + '/users/logout', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (response.ok) {
-    return null;
-  }
-  return null;
-}
-
-export const { auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signOut, signIn } = NextAuth({
   ...authConfig,
   trustHost: true,
   session: { strategy: 'jwt' },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      if (token && user && account && account.provider === 'github') {
+        let apiUser = await authClient.loginWithGithub(
+          token,
+          user,
+          account,
+        );
+
+        if (apiUser) {
+          return {
+            ...token,
+            id: apiUser.id,
+            role: apiUser.role,
+            accessToken: apiUser.accessToken,
+            refreshToken: apiUser.refreshToken,
+            accessTokenExpires: apiUser.accessTokenExpires,
+          };
+        }
+        return null;
+      }
       if (user) {
         return {
           ...token,
@@ -126,6 +65,7 @@ export const { auth, signIn, signOut } = NextAuth({
         session.accessTokenExpires = token.accessTokenExpires;
         session.user ? (session.user.id = token.id) : null;
         session.user ? (session.user.role = token.role) : null;
+        session.user ? (session.user.userName = token.userName) : null;
       }
 
       return session;
@@ -133,7 +73,7 @@ export const { auth, signIn, signOut } = NextAuth({
   },
   events: {
     signOut: async ({ token, session }) => {
-      await apiSignOut(token?.accessToken as string);
+      await authClient.signOut(token?.accessToken as string);
     },
   },
   providers: [
@@ -149,13 +89,26 @@ export const { auth, signIn, signOut } = NextAuth({
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
 
-          let user = await apiSignIn(email, password);
+          let user = await authClient.apiSignIn(email, password);
           if (user) {
             return user;
           }
           return null;
         }
         return null;
+      },
+    }),
+    Github({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          image: profile.avatar_url,
+          login: profile.login,
+        };
       },
     }),
   ],

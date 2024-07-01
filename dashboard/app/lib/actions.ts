@@ -102,6 +102,10 @@ export async function authenticate(
   }
 }
 
+export const providerLogin = async (provider: 'google' | 'github') => {
+  await signIn(provider);
+};
+
 export async function redirectToDashboard() {
   revalidatePath('/dashboard');
   redirect('/dashboard');
@@ -165,4 +169,8 @@ export async function stopTracksEgress(egressIds: string[], roomName: string) {
 
   revalidatePath(`/dashboard/recordings/${roomName}`);
   redirect(`/dashboard/recordings/${roomName}`);
+}
+
+export async function apiSignInWithGithub() {
+  await signIn('github');
 }

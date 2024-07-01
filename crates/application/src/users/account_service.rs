@@ -1,4 +1,5 @@
 use super::{secret, tokens_manager, user};
+use crate::users::oauth::github::{fetch_github_user, verify_user_token, GithubUser};
 use crate::users::tokens_manager::{TokenTypes, UserInfo};
 use crate::users::user::UserError;
 use domain::models::{ApiKey, User};
@@ -6,7 +7,6 @@ use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
 use shared::user_models::LoginRequest;
 use shared::user_models::{ApiKeyResponseWithoutSecret, RefreshTokenRequest};
-use std::fmt::format;
 use std::sync::Arc;
 
 pub struct AccountService {
@@ -181,6 +181,45 @@ impl AccountService {
     pub fn decrypt_secret(&self, secret: &str) -> Result<String, UserError> {
         secret::decrypt_string(secret, &self.config.encryption_key)
             .map_err(|e| UserError::SecretError(e.to_string()))
+    }
+
+    pub async fn login_with_github(
+        &self,
+        auth_token: &str,
+        user_to_verify: &GithubUser,
+    ) -> Result<(String, String), UserError> {
+        log::info!("Attempting logging in with Github");
+        let (client_id, client_secret) = self.get_github_credentials()?;
+        log::debug!("Verifying user token");
+        let _user_info = verify_user_token(client_id, client_secret, auth_token, user_to_verify)
+            .await
+            .map_err(|e| UserError::OAuthError(e.to_string()))?;
+
+        let github_user = fetch_github_user(&auth_token)
+            .await
+            .map_err(|e| UserError::OAuthError(e.to_string()))?;
+
+        let conn = &mut self.pool.get().unwrap();
+        let login_session =
+            user::login_with_github(&github_user, conn, &self.config.encryption_key)?;
+
+        self.tokens_manager
+            .generate_login_token_pairs(&login_session, conn)
+    }
+
+    fn get_github_credentials(&self) -> Result<(&str, &str), UserError> {
+        let client_id = self
+            .config
+            .github_client_id
+            .as_ref()
+            .ok_or_else(|| UserError::OAuthError("Github Client ID not found".to_string()))?;
+
+        let client_secret =
+            self.config.github_client_secret.as_ref().ok_or_else(|| {
+                UserError::OAuthError("Github Client Secret not found".to_string())
+            })?;
+
+        Ok((client_id, client_secret))
     }
 }
 

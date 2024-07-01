@@ -3,7 +3,7 @@ import { useTracks } from '@livekit/components-react';
 import { Track, LocalAudioTrack, RemoteAudioTrack } from 'livekit-client';
 import '@livekit/components-styles';
 import { useEffect, useRef } from 'react';
-import {shortenText} from "@/app/ui/dashboard/rooms/utils";
+import { shortenText } from '@/app/ui/dashboard/rooms/utils';
 
 export default function AudioStreams(
   { title }: { title: string } = { title: 'Audio Streams' },
@@ -44,7 +44,7 @@ export default function AudioStreams(
                     'grid grid-cols-3 items-center gap-4 p-6 text-black'
                   }
                 >
-                  <span className={'text-xl overflow-ellipsis'}>
+                  <span className={'overflow-ellipsis text-xl'}>
                     Publisher &#8594;{' '}
                     {shortenText(track.participant.identity, 10)}
                   </span>
