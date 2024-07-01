@@ -150,12 +150,15 @@ class ServiceConfig(Config):
     livekit_api_secret: str
     jwt_secret: str
     encryption_key: str
+    jwt_expiration: int 
+    jwt_refresh_expiration: int
     root_user: Optional[RootUser] = None
     storage_config_local: Optional[StorageConfigLocal] = None
     storage_config_s3: Optional[StorageConfigS3] = None
     login_token: Optional[str] = None
     test_user: Optional[str] = None
     test_password: Optional[str] = None
+    
 
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "ServiceConfig":
@@ -190,6 +193,8 @@ class ServiceConfig(Config):
             livekit_api_secret=json_dict["livekit_api_secret"],
             jwt_secret=json_dict["jwt_secret"],
             encryption_key=json_dict["encryption_key"],
+            jwt_expiration=json_dict["jwt_expiration"],
+            jwt_refresh_expiration=json_dict["jwt_refresh_expiration"],
             root_user=root_user,
             storage_config_local=storage_config_local,
             storage_config_s3=storage_config_s3,

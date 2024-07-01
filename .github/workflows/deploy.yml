@@ -1,4 +1,4 @@
-name: Deploy to EC2 / Docker Cleanup
+name: Deploy to Jetstream / Docker Cleanup
 
 on:
   push:
@@ -10,16 +10,16 @@ on:
 
 jobs:
   DeployToEC2:
-    name: Deploy API to EC2
+    name: Deploy API to JetStream2
     runs-on: "ubuntu-latest"
 
     steps:
       - uses: actions/checkout@v4
       - name: Build and Deploy
         env:
-          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USERNAME: ${{ secrets.EC2_USERNAME }}
+          PRIVATE_KEY: ${{ secrets.JETSTREAM2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.JETSTREAM2_HOST }}
+          USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
@@ -38,12 +38,12 @@ jobs:
             docker compose -p syncflow-prod --file docker/docker-compose.prod.yaml up -d
           '
 
-      - name: Docker Cleanup on EC2
+      - name: Docker Cleanup on JetStream2 VM
         if: github.event_name == 'schedule'
         env:
-          PRIVATE_KEY: ${{ secrets.EC2_PRIV_KEY_PEM }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USERNAME: ${{ secrets.EC2_USERNAME }}
+          PRIVATE_KEY: ${{ secrets.JETSTREAM2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.JETSTREAM2_HOST }}
+          USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           openssl rsa -in private_key -check
