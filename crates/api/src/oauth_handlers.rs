@@ -41,6 +41,7 @@ async fn login_with_github(
 
 pub fn init_github_oauth_routes(cfg: &mut web::ServiceConfig) {
     // Deployment Config load
+    log::info!("Initializing Github OAuth Routes");
     let livekit_scope = web::scope("/oauth").service(login_with_github);
     cfg.service(livekit_scope);
 }
