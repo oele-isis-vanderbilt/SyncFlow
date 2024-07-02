@@ -32,6 +32,7 @@ class DashboardConfig(Config):
     nextauth_url: str
     github_client_id: str
     github_client_secret: str
+    nextauth_internal_url: str
 
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "DashboardConfig":
@@ -41,8 +42,9 @@ class DashboardConfig(Config):
             next_public_livekit_server_url=json_dict["next_public_livekit_server_url"],
             auth_secret=json_dict["auth_secret"],
             nextauth_url=json_dict["nextauth_url"],
+            nextauth_internal_url=json_dict["nextauth_internal_url"],
             github_client_id=json_dict["github_client_id"],
-            github_client_secret=json_dict["github_client_secret"]
+            github_client_secret=json_dict["github_client_secret"],
         )
 
 
