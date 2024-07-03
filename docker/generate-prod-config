@@ -9,7 +9,6 @@ from typing import Any, Dict, Optional
 
 from dataclasses import dataclass, asdict
 
-
 def dump_string(s: str, path: str):
     with open(path, "w") as f:
         f.write(s)
@@ -31,6 +30,9 @@ class DashboardConfig(Config):
     next_public_livekit_server_url: str
     auth_secret: str
     nextauth_url: str
+    github_client_id: str
+    github_client_secret: str
+    nextauth_internal_url: str
 
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "DashboardConfig":
@@ -39,7 +41,10 @@ class DashboardConfig(Config):
             next_public_mmla_api_url=json_dict["next_public_mmla_api_url"],
             next_public_livekit_server_url=json_dict["next_public_livekit_server_url"],
             auth_secret=json_dict["auth_secret"],
-            nextauth_url=json_dict["nextauth_url"]
+            nextauth_url=json_dict["nextauth_url"],
+            nextauth_internal_url=json_dict["nextauth_internal_url"],
+            github_client_id=json_dict["github_client_id"],
+            github_client_secret=json_dict["github_client_secret"],
         )
 
 
@@ -152,6 +157,8 @@ class ServiceConfig(Config):
     encryption_key: str
     jwt_expiration: int 
     jwt_refresh_expiration: int
+    github_client_id: Optional[str] = None
+    github_client_secret: Optional[str] = None
     root_user: Optional[RootUser] = None
     storage_config_local: Optional[StorageConfigLocal] = None
     storage_config_s3: Optional[StorageConfigS3] = None
@@ -195,6 +202,8 @@ class ServiceConfig(Config):
             encryption_key=json_dict["encryption_key"],
             jwt_expiration=json_dict["jwt_expiration"],
             jwt_refresh_expiration=json_dict["jwt_refresh_expiration"],
+            github_client_id=json_dict.get("github_client_id"),
+            github_client_secret=json_dict.get("github_client_secret"),
             root_user=root_user,
             storage_config_local=storage_config_local,
             storage_config_s3=storage_config_s3,
