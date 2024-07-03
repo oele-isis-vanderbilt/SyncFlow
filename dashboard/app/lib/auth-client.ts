@@ -11,38 +11,37 @@ export class AuthClient {
   }
 
   async loginWithGithub(token: JWT, user: User, account: Account) {
-    
     let serverUrl = this.auth_url;
     let githubToken = account.access_token;
 
     const payload = {
-        email: user.email,
-        avatar_url: user.image,
-        login: user.login
-    }
+      email: user.email,
+      avatar_url: user.image,
+      login: user.login,
+    };
 
     const response = await fetch(serverUrl + '/oauth/github/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${githubToken}`,
-        },
-        body: JSON.stringify(payload),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${githubToken}`,
+      },
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
-        let data = await response.json();
-        let token = data.accessToken;
-        let decoded_jwt = jwtDecode(token);
-        return {
-            id: decoded_jwt.userName,
-            name: decoded_jwt.userName,
-            email: decoded_jwt.email,
-            role: decoded_jwt.role,
-            accessToken: token,
-            refreshToken: data.refreshToken,
-            accessTokenExpires: decoded_jwt.exp * 1000,
-        } as SessionUser;
+      let data = await response.json();
+      let token = data.accessToken;
+      let decoded_jwt = jwtDecode(token);
+      return {
+        id: decoded_jwt.userName,
+        name: decoded_jwt.userName,
+        email: decoded_jwt.email,
+        role: decoded_jwt.role,
+        accessToken: token,
+        refreshToken: data.refreshToken,
+        accessTokenExpires: decoded_jwt.exp * 1000,
+      } as SessionUser;
     }
     return null;
   }
@@ -82,9 +81,9 @@ export class AuthClient {
 
   async refreshAccessToken(token) {
     const serverUrl = this.auth_url;
-  
+
     const refreshToken = token.refreshToken;
-  
+
     let response = await fetch(serverUrl + '/users/refresh-token', {
       method: 'POST',
       headers: {
@@ -92,7 +91,7 @@ export class AuthClient {
       },
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
-  
+
     if (response.ok) {
       let data = await response.json();
       let token = data.accessToken;
@@ -122,7 +121,7 @@ export class AuthClient {
         Authorization: `Bearer ${token}`,
       },
     });
-  
+
     if (response.ok) {
       return null;
     }

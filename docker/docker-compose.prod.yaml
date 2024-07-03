@@ -48,6 +48,8 @@ services:
       dockerfile: ../docker/Dockerfile.next
     image: syncflow-dashboard:latest
     container_name: syncflow-dashboard-prod
+    volumes:
+      - ~/deployment_dashboard_prod.json:/app/config/production.json
     ports:
       - "3000:3000"
     depends_on:

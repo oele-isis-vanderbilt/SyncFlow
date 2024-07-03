@@ -1,0 +1,6 @@
+{
+  "tagLine": "<strong>Welcome to SyncFlow.</strong> Use the dashboard to manage multimodal data collection with SyncFlow.",
+  "logoPath": "/syncflow.png",
+  "userPermissions": "publishOnly",
+  "mmla_api_url": "http://localhost:8081"
+}

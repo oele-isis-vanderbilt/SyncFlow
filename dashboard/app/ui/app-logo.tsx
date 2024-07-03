@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import deploymentConfig from '@/deployment-config';
+import deploymentConfig from '@/config';
 
 export default function AppLogo() {
   return (

@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import deploymentConfig from '@/deployment-config';
+import deploymentConfig from '@/config';
 import { Ok, Err } from 'ts-monads';
 import type { Result } from 'ts-monads/lib/Result';
 import { EgressInfo, ParticipantInfo, Room } from '@livekit/protocol';

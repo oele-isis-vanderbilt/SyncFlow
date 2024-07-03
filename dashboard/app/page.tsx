@@ -2,7 +2,7 @@ import AppLogo from '@/app/ui/app-logo';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
-import deploymentConfig from '@/deployment-config';
+import deploymentConfig from '@/config';
 
 export default function Page() {
   return (

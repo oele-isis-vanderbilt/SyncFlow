@@ -4,7 +4,7 @@ import {
   ApiKeyResponse,
   ApiKeyResponseWithoutSecret,
 } from '@/types/api';
-import deploymentConfig from '@/deployment-config';
+import deploymentConfig from '@/config';
 const PREFIXES = {
   CREATE_API_KEY: '/users/api-key',
   LIST_API_KEYS: '/users/api-keys',
