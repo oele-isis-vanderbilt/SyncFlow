@@ -9,7 +9,6 @@ import { AuthClient } from './app/lib/auth-client';
 
 const deploymentConfig = getConfig();
 const authClient = new AuthClient(deploymentConfig.mmla_api_url);
-console.log('Deployment Config', deploymentConfig);
 
 export const { handlers, auth, signOut, signIn } = NextAuth({
   ...authConfig,

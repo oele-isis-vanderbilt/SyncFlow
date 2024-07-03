@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - 103-deployment-config
 
   schedule:
     - cron: '0 0 * * *' # Run every day at 00:00 UTC
@@ -30,7 +29,6 @@ jobs:
             mkdir SyncFlowDeployment && cd SyncFlowDeployment
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
-            git checkout -b 103-deployment-config origin/103-deployment-config
             cp $HOME/.deployment_config_prod_cloud.json  deployment_config_prod_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_prod_cloud.json --outfile-name .env.prod
