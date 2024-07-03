@@ -86,7 +86,6 @@ async fn main() -> std::io::Result<()> {
             .configure(init_api_doc);
 
         if config.github_client_id.is_some() && config.github_client_secret.is_some() {
-            println!("Github OAuth enabled");
             app = app.configure(init_github_oauth_routes);
         }
 
