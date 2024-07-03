@@ -2,19 +2,21 @@ import type { DeploymentConfig } from '@/types/deployment-config-models';
 import { UserPermissions } from '@/types/deployment-config-models';
 
 const environment = process.env.NODE_ENV || 'development';
+let config: DeploymentConfig | null = null;
 
-// Dynamically import the correct config file based on the environment
-let config = null;
-
-try {
-  config = require(`./${environment}.json`);
-} catch (e) {
-  throw new Error(`Unknown environment: ${environment}`);
+export default function getConfig(): DeploymentConfig {
+  if (config) {
+    return config;
+  } else {
+    try {
+      config = require(`./${environment}.json`) as DeploymentConfig;
+      // Convert to enum
+      if (config.userPermissions) {
+        config.userPermissions = UserPermissions[config.userPermissions];
+      }
+    } catch (e) {
+      throw new Error(`Unknown environment: ${environment}`);
+    }
+  }
+  return config as DeploymentConfig;
 }
-
-// Convert to enum
-if (config.userPermissions) {
-  config.userPermissions = UserPermissions[config.userPermissions];
-}
-
-export default config as any as DeploymentConfig;

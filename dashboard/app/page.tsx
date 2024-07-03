@@ -2,9 +2,10 @@ import AppLogo from '@/app/ui/app-logo';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
-import deploymentConfig from '@/config';
+import getConfig from '@/config';
 
 export default function Page() {
+  const deploymentConfig = getConfig();
   return (
     <main className="flex h-full flex-col p-6">
       <div className="m-20 flex h-20 shrink-0 items-end rounded-lg p-4 md:h-64">
