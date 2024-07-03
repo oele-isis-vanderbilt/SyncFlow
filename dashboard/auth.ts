@@ -2,14 +2,12 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
 import { z } from 'zod';
-import { jwtDecode } from 'jwt-decode';
-import type { SessionUser } from '@/types/next-auth';
-import deploymentConfig from '@/deployment-config';
+import getConfig from '@/config';
 import { redirect } from 'next/navigation';
 import Github from 'next-auth/providers/github';
 import { AuthClient } from './app/lib/auth-client';
 
-
+const deploymentConfig = getConfig();
 const authClient = new AuthClient(deploymentConfig.mmla_api_url);
 
 export const { handlers, auth, signOut, signIn } = NextAuth({
@@ -19,11 +17,7 @@ export const { handlers, auth, signOut, signIn } = NextAuth({
   callbacks: {
     async jwt({ token, user, account }) {
       if (token && user && account && account.provider === 'github') {
-        let apiUser = await authClient.loginWithGithub(
-          token,
-          user,
-          account,
-        );
+        let apiUser = await authClient.loginWithGithub(token, user, account);
 
         if (apiUser) {
           return {

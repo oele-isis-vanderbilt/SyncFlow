@@ -4,7 +4,7 @@ import {
   ApiKeyResponse,
   ApiKeyResponseWithoutSecret,
 } from '@/types/api';
-import deploymentConfig from '@/deployment-config';
+import getConfig from '@/config';
 const PREFIXES = {
   CREATE_API_KEY: '/users/api-key',
   LIST_API_KEYS: '/users/api-keys',
@@ -35,5 +35,7 @@ class ApiClient extends AuthHttpClient {
     );
   }
 }
+
+const deploymentConfig = getConfig();
 
 export const apiClient = new ApiClient(deploymentConfig.mmla_api_url);

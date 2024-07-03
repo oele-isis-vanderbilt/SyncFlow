@@ -1,7 +1,8 @@
 import Image from 'next/image';
-import deploymentConfig from '@/deployment-config';
+import getConfig from '@/config';
 
 export default function AppLogo() {
+  const deploymentConfig = getConfig();
   return (
     <>
       <Image

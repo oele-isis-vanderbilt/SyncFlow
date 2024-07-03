@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import deploymentConfig from '@/deployment-config';
+import getConfig from '@/config';
 import { Ok, Err } from 'ts-monads';
 import type { Result } from 'ts-monads/lib/Result';
 import { EgressInfo, ParticipantInfo, Room } from '@livekit/protocol';
@@ -93,4 +93,5 @@ export class MMLAClient extends AuthHttpClient {
   }
 }
 
+const deploymentConfig = getConfig();
 export const mmlaClient = new MMLAClient(deploymentConfig.mmla_api_url);
