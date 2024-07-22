@@ -6,7 +6,10 @@ use shared::{
     response_models::Response as ApiResponse,
 };
 
-use crate::http_client::{HTTPAuthTokenClient, JSONResult};
+use crate::http_client::{ClientError, HTTPAuthTokenClient, JSONResult};
+use application::users::signed_token::generate_and_sign_jwt;
+use application::users::tokens_manager::ApiToken;
+use chrono;
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum TokenGeneratePermissions {
@@ -23,6 +26,29 @@ impl LiveKitClient {
     pub fn new(base_url: &str, token: &str) -> Self {
         let http_client = HTTPAuthTokenClient::new(base_url, token);
         LiveKitClient { http_client }
+    }
+
+    pub fn from_api_keys(
+        base_url: &str,
+        api_key: &str,
+        api_secret: &str,
+        project: Option<String>,
+        token_expriry: Option<usize>,
+    ) -> Result<Self, ClientError> {
+        let iat = chrono::Utc::now().timestamp() as usize;
+        let project = project.unwrap_or("SyncFlowClient".to_string());
+
+        let claims = ApiToken {
+            iss: api_key.to_string(),
+            exp: iat + token_expriry.unwrap_or(3600 * 24),
+            iat: iat,
+            project: Some(project),
+        };
+
+        let auth_token = generate_and_sign_jwt(&claims, api_secret).map_err(ClientError::from)?;
+
+        let http_client = HTTPAuthTokenClient::new(base_url, &auth_token);
+        Ok(Self { http_client })
     }
 
     pub fn healthcheck(&self) -> JSONResult<ApiResponse> {
