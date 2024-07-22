@@ -10,4 +10,10 @@ reqwest = { version = "0.11.24", features = ["blocking"] }
 serde = "1.0.197"
 serde_json = "1.0.114"
 shared = { path = "../shared" }
+application = { path = "../application" }
 log = "0.4.21"
+chrono = "0.4.38"
+
+[dev-dependencies]
+livekit = "0.4.1"
+tokio = "1.38.1"

@@ -1,3 +1,4 @@
+use application::users::signed_token::SignedTokenError;
 use reqwest::blocking::{Client, Response};
 use serde::Serialize;
 use shared::response_models::Response as SharedResponse;
@@ -6,6 +7,7 @@ use shared::response_models::Response as SharedResponse;
 pub enum ClientError {
     ReqwestError(reqwest::Error),
     HTTPError(SharedResponse),
+    TokenError(SignedTokenError),
 }
 
 impl From<reqwest::Error> for ClientError {
@@ -17,6 +19,12 @@ impl From<reqwest::Error> for ClientError {
 impl From<SharedResponse> for ClientError {
     fn from(error: SharedResponse) -> Self {
         ClientError::HTTPError(error)
+    }
+}
+
+impl From<SignedTokenError> for ClientError {
+    fn from(error: SignedTokenError) -> Self {
+        ClientError::TokenError(error)
     }
 }
 
