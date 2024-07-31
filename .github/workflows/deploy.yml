@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - 111-missing-tokio-feature
 
   schedule:
     - cron: '0 0 * * *' # Run every day at 00:00 UTC
@@ -30,7 +29,6 @@ jobs:
             mkdir SyncFlowDeployment && cd SyncFlowDeployment
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
-            git checkout -b 111-missing-tokio-feature origin/111-missing-tokio-feature
             cp $HOME/.deployment_config_prod_cloud.json  deployment_config_prod_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_prod_cloud.json --outfile-name .env.prod
