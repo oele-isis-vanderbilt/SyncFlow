@@ -377,6 +377,7 @@ dependencies = [
  "jsonwebtoken",
  "livekit-api",
  "livekit-protocol",
+ "livekit-runtime",
  "log",
  "rand",
  "reqwest 0.12.5",
