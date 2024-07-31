@@ -11,4 +11,4 @@ serde = "1.0.197"
 serde_json = "1.0.114"
 shared = { path = "../shared" }
 log = "0.4.21"
-livekit = { git="https://github.com/livekit/rust-sdks.git", package="livekit", features = ["rustls-tls-native-roots"] }
+livekit = { git="https://github.com/livekit/rust-sdks.git", package="livekit"}
