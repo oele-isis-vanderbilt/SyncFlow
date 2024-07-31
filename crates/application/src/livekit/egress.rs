@@ -91,6 +91,8 @@ impl EgressService {
                         force_path_style: true,
                         content_disposition: "".to_string(),
                         metadata: HashMap::new(),
+                        proxy: None,
+                        session_token: "".to_string(),
                     })),
                     disable_manifest: false,
                 }));
