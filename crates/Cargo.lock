@@ -377,6 +377,7 @@ dependencies = [
  "jsonwebtoken",
  "livekit-api",
  "livekit-protocol",
+ "livekit-runtime",
  "log",
  "rand",
  "reqwest 0.12.5",
@@ -3110,10 +3111,7 @@ checksum = "212d5dcb2a1ce06d81107c3d0ffa3121fe974b73f068c8282cb1c32328113b6c"
 dependencies = [
  "futures-util",
  "log",
- "rustls 0.21.12",
- "rustls-native-certs",
  "tokio",
- "tokio-rustls 0.24.1",
  "tungstenite",
 ]
 
@@ -3196,7 +3194,6 @@ dependencies = [
  "httparse",
  "log",
  "rand",
- "rustls 0.21.12",
  "sha1",
  "thiserror",
  "url",

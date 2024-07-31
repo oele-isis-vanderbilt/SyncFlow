@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-livekit-api = {git="https://github.com/livekit/rust-sdks.git", package="livekit-api" }
-livekit-protocol = {git="https://github.com/livekit/rust-sdks.git", package="livekit-protocol" }
+livekit-api = { git="https://github.com/livekit/rust-sdks.git", package="livekit-api" }
+livekit-protocol = { git="https://github.com/livekit/rust-sdks.git", package="livekit-protocol" }
+livekit-runtime = { git="https://github.com/livekit/rust-sdks.git", package="livekit-runtime", features = ["tokio"] }
 shared = { path = "../shared" }
 domain = { path = "../domain" }
 infrastructure = { path = "../infrastructure" }
