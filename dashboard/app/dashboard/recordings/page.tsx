@@ -11,5 +11,9 @@ export default async function Page() {
     return <NoPermission />;
   }
 
-  return <RoomsTable navPath={'recordings'} />;
+  return (
+    <main className="p-2">
+      <RoomsTable navPath={'recordings'} />
+    </main>
+  );
 }

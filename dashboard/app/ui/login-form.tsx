@@ -11,19 +11,20 @@ import { Button } from './button';
 
 import { useFormState, useFormStatus } from 'react-dom';
 import { authenticate } from '@/app/lib/actions';
+import { DarkModeSwitcher } from './dark-mode-switcher';
 
 export default function LoginForm() {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
   return (
     <form action={dispatch} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-900 px-6 pb-4 pt-8">
-        <h1 className={`${lusitana.className} mb-3 text-2xl`}>
+      <div className="flex-1 rounded-lg border-2 px-6 pb-4 pt-8 shadow dark:bg-gray-900">
+        <h1 className={`${lusitana.className} mb-3 text-2xl dark:text-white`}>
           Please log in to continue.
         </h1>
         <div className="w-full">
           <div>
             <label
-              className="mb-3 mt-5 block text-xs font-medium"
+              className="mb-3 mt-5 block text-xs font-medium dark:text-white"
               htmlFor="email"
             >
               Email
@@ -42,7 +43,7 @@ export default function LoginForm() {
           </div>
           <div className="mt-4">
             <label
-              className="mb-3 mt-5 block text-xs font-medium"
+              className="mb-3 mt-5 block text-xs font-medium dark:text-white"
               htmlFor="password"
             >
               Password

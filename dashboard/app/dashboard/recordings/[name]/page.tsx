@@ -10,12 +10,16 @@ export default async function Page({ params }: { params: { name: string } }) {
   if (!room) {
     return (
       <div className={'flex h-full items-center justify-center'}>
-        <h2 className={`${lusitana.className} text-2xl`}>
+        <h2 className={`${lusitana.className} text-2xl dark:text-white`}>
           Room {roomName} not found
         </h2>
       </div>
     );
   }
 
-  return <ActiveRecordings roomName={roomName} />;
+  return (
+    <main className="p-2">
+      <ActiveRecordings roomName={roomName} />
+    </main>
+  );
 }

@@ -18,8 +18,10 @@ export default function AudioStreams(
 
   return (
     <div className={'flex h-full w-full flex-col'}>
-      <div className={'flex items-center justify-between bg-black'}>
-        <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
+      <div className={'flex items-center justify-between'}>
+        <h2
+          className={`${lusitana.className} p-2 text-xl dark:text-white md:text-2xl`}
+        >
           {title}
         </h2>
       </div>

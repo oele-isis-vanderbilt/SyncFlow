@@ -52,11 +52,15 @@ export default async function ActiveRecordings({
     .flat();
   return (
     <div className={'flex h-full w-full flex-col'}>
-      <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
+      <h1
+        className={`${lusitana.className} mb-4 text-xl dark:text-white md:text-2xl`}
+      >
         Manage Recordings for room {roomName}
       </h1>
       {tracks.length === 0 ? (
-        <span>No Active Participants in the room</span>
+        <span className="dark:text-white">
+          No Active Participants in the room
+        </span>
       ) : (
         <div className={'flex flex-row gap-2'}>
           <div className={'flex-1'}>
@@ -88,7 +92,7 @@ function TracksTable({
         <AllTracksRecordButton tracks={tracks} />
       </div>
       <table className="w-full overflow-scroll text-left text-sm rtl:text-right">
-        <thead className="text-gray bg-gray-900 text-xs uppercase ">
+        <thead className="text-gray bg-gray-100 text-xs uppercase dark:bg-gray-900 dark:text-white ">
           <tr>
             <th scope="col" className="px-6 py-3">
               Participant
@@ -107,7 +111,10 @@ function TracksTable({
         <tbody>
           {tracks.map((track, index: number) => {
             return (
-              <tr key={index} className="border-5 border-indigo-200 bg-black">
+              <tr
+                key={index}
+                className="border-5 border-indigo-200 bg-gray-200 dark:bg-black dark:text-white"
+              >
                 <td className="whitespace-nowrap px-6 py-4">
                   {track.participant}
                 </td>

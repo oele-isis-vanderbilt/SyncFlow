@@ -1,6 +1,5 @@
 import {
   Footer,
-  FooterBrand,
   FooterCopyright,
   FooterDivider,
   FooterIcon,
@@ -8,13 +7,7 @@ import {
   FooterLinkGroup,
   FooterTitle,
 } from 'flowbite-react';
-import {
-  BsDribbble,
-  BsFacebook,
-  BsGithub,
-  BsInstagram,
-  BsTwitter,
-} from 'react-icons/bs';
+import { BsGithub } from 'react-icons/bs';
 import AppLogo from '../ui/app-logo';
 
 const FooterComp = () => {
