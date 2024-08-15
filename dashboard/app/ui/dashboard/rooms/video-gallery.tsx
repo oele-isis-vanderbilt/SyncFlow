@@ -170,7 +170,7 @@ function PagedTrackView({
   }, [tracks]);
 
   return (
-    <div className={'flex h-full w-full flex-col'}>
+    <div className={'flex h-full w-full flex-col p-2'}>
       <div className={'grid grid-cols-2 gap-2 md:grid-cols-6'}>
         {currentPageTracks?.map((track, index) => {
           return (

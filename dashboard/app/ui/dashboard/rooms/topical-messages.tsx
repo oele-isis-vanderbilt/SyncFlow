@@ -47,9 +47,11 @@ export default function TopicalMessages(
   });
 
   return (
-    <div className={'flex h-full w-full flex-col'}>
+    <div className={'flex h-full w-full flex-col dark:bg-gray-800'}>
       <div className={'flex items-center justify-between'}>
-        <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
+        <h2
+          className={`${lusitana.className} p-2 text-xl dark:text-white md:text-2xl`}
+        >
           {title}
         </h2>
       </div>
@@ -57,20 +59,20 @@ export default function TopicalMessages(
         <div className={'flex h-full w-full flex-row'}>
           <Tabs className={'h-full w-full'}>
             <TabList>
-              <Tab>
-                <div className={'flex items-center text-xl'}>
+              <Tab selectedClassName="react-tabs__tab--selected dark:bg-gray-800">
+                <div className={'flex items-center text-xl dark:text-white'}>
                   <HiArchive />
                   All
                 </div>
               </Tab>
-              <Tab>
-                <div className={'flex items-center text-xl'}>
+              <Tab selectedClassName="react-tabs__tab--selected dark:bg-gray-800">
+                <div className={'flex items-center text-xl  dark:text-white'}>
                   <HiChat />
                   Chat
                 </div>
               </Tab>
-              <Tab>
-                <div className={'flex items-center text-xl'}>
+              <Tab selectedClassName="react-tabs__tab--selected dark:bg-gray-800">
+                <div className={'flex items-center text-xl  dark:text-white'}>
                   <HiClipboardList />
                   Logs
                 </div>
