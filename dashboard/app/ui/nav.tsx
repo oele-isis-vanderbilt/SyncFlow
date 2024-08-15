@@ -44,7 +44,7 @@ const Nav = () => {
         <div className="flex items-center gap-2">
           <Link
             href="/login"
-            className="hidden rounded-lg p-2.5 text-lg font-medium text-gray-900 hover:text-cyan-700 dark:text-gray-300 dark:hover:text-cyan-500 lg:flex"
+            className="hidden rounded-lg p-2.5 text-lg font-medium text-gray-900 hover:text-cyan-700 lg:flex dark:text-gray-300 dark:hover:text-cyan-500"
           >
             Login!
           </Link>

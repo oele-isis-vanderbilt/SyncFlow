@@ -13,18 +13,14 @@ import FooterComp from './landing-page/Footer';
 export default function Page() {
   const deploymentConfig = getConfig();
   return (
-    <main className="relative">
+    <div className="relative">
       <Header />
-      <section className="border-b-2">
+      <main className="min-w-0 flex-auto divide-y dark:divide-gray-700">
         <Hero />
-      </section>
-      <section className="border-b-2">
         <Features />
-      </section>
-      <section className="border-b-2">
         <About />
-      </section>
+      </main>
       <FooterComp />
-    </main>
+    </div>
   );
 }

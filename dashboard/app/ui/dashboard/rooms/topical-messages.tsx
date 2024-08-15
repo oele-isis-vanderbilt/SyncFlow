@@ -50,7 +50,7 @@ export default function TopicalMessages(
     <div className={'flex h-full w-full flex-col dark:bg-gray-800'}>
       <div className={'flex items-center justify-between'}>
         <h2
-          className={`${lusitana.className} p-2 text-xl dark:text-white md:text-2xl`}
+          className={`${lusitana.className} p-2 text-xl md:text-2xl dark:text-white`}
         >
           {title}
         </h2>

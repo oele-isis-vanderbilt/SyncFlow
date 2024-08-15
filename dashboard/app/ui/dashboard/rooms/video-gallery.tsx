@@ -229,7 +229,7 @@ function VideoTile({
 function NoTrackMessage() {
   return (
     <div className={'flex h-full items-center justify-center'}>
-      <p className={'text-lg text-black dark:text-white md:text-2xl'}>
+      <p className={'text-lg text-black md:text-2xl dark:text-white'}>
         No Video Streams Available
       </p>
     </div>

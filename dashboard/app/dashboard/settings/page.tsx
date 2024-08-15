@@ -6,7 +6,7 @@ export default function Page() {
   return (
     <main className="p-2">
       <h1
-        className={`${lusitana.className} mb-4 text-xl dark:text-white md:text-2xl`}
+        className={`${lusitana.className} mb-4 text-xl md:text-2xl dark:text-white`}
       >
         Settings
       </h1>

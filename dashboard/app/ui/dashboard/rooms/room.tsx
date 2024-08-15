@@ -7,8 +7,6 @@ import {
   ControlBar,
   useRoomContext,
   useTracks,
-  Chat,
-  LayoutContextProvider,
 } from '@livekit/components-react';
 
 import { Tooltip } from 'flowbite-react';
@@ -65,7 +63,7 @@ export default function Room({
 
 function TopBar({ user }: { user: SessionUser | undefined }) {
   return (
-    <div className="flex h-20 w-full items-center justify-between py-2 dark:text-white md:py-5">
+    <div className="flex h-20 w-full items-center justify-between py-2 md:py-5 dark:text-white">
       <div className="w-1/2">
         <RoomName className={`${lusitana.className} p-2 text-xl md:text-2xl`} />
       </div>
@@ -93,13 +91,13 @@ export function RoomRecorderNavigator() {
 
   return (
     <div className={tracks.length > 0 ? 'block' : 'hidden'}>
-      <Tooltip content={'Manage Room Recordings'}>
-        <Link href={`/dashboard/recordings/${roomInfo.name!}/`} target="_blank">
+      <Tooltip content="Manage Room Recordings" animation={false}>
+        <a href={`/dashboard/recordings/${roomInfo.name!}/`} target="_blank">
           <BsRecordBtn
             className="cursor-pointer text-4xl hover:text-red-500"
             onClick={() => {}}
           />
-        </Link>
+        </a>
       </Tooltip>
     </div>
   );

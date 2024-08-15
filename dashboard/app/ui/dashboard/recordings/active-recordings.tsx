@@ -53,7 +53,7 @@ export default async function ActiveRecordings({
   return (
     <div className={'flex h-full w-full flex-col'}>
       <h1
-        className={`${lusitana.className} mb-4 text-xl dark:text-white md:text-2xl`}
+        className={`${lusitana.className} mb-4 text-xl md:text-2xl dark:text-white`}
       >
         Manage Recordings for room {roomName}
       </h1>

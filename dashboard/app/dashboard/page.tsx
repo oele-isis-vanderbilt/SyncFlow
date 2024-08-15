@@ -19,7 +19,7 @@ export default async function Page() {
   return (
     <main className="dark:bg-gray-800">
       <h1
-        className={`${lusitana.className} mb-4 p-2 text-xl dark:text-white md:text-2xl`}
+        className={`${lusitana.className} mb-4 p-2 text-xl md:text-2xl dark:text-white`}
       >
         SyncFlow Dashboard
       </h1>
@@ -31,7 +31,7 @@ export default async function Page() {
       <div className="mt-8 flex items-center p-2">
         <div>
           <h1
-            className={`${lusitana.className} mb-4 mt-4 text-xl dark:text-white md:text-2xl`}
+            className={`${lusitana.className} mb-4 mt-4 text-xl md:text-2xl dark:text-white`}
           >
             Rooms
           </h1>
