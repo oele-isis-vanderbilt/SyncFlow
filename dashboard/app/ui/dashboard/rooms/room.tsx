@@ -7,8 +7,6 @@ import {
   ControlBar,
   useRoomContext,
   useTracks,
-  Chat,
-  LayoutContextProvider,
 } from '@livekit/components-react';
 
 import { Tooltip } from 'flowbite-react';
@@ -41,15 +39,15 @@ export default function Room({
         redirectToDashboard();
       }}
     >
-      <div className="flex h-full w-full flex-col bg-black">
+      <div className="flex h-full w-full flex-col">
         <TopBar user={user} />
-        <div className="flex h-full w-full flex-row bg-black">
+        <div className="flex h-full w-full flex-row">
           <div className="h-full w-1/2 flex-1">
             <VideoGallery title={'Videos'} />
           </div>
           <div className="h-full w-1/2">
             <div className="flex h-full w-full flex-col">
-              <div className="h-1/2 w-full bg-white">
+              <div className="h-1/2 w-full">
                 <AudioStreams title={'Audio Streams'} />
               </div>
               <div className="h-1/2 w-full">
@@ -65,11 +63,11 @@ export default function Room({
 
 function TopBar({ user }: { user: SessionUser | undefined }) {
   return (
-    <div className="flex h-20 w-full items-center justify-between bg-black py-2 md:py-5">
+    <div className="flex h-20 w-full items-center justify-between py-2 md:py-5 dark:text-white">
       <div className="w-1/2">
         <RoomName className={`${lusitana.className} p-2 text-xl md:text-2xl`} />
       </div>
-      <div className="flex w-1/2 items-center justify-end gap-4">
+      <div className="flex w-1/2 items-center justify-end gap-4 p-2">
         <ControlBar
           controls={{
             microphone: false,
@@ -93,13 +91,13 @@ export function RoomRecorderNavigator() {
 
   return (
     <div className={tracks.length > 0 ? 'block' : 'hidden'}>
-      <Tooltip content={'Manage Room Recordings'}>
-        <Link href={`/dashboard/recordings/${roomInfo.name!}/`} target="_blank">
+      <Tooltip content="Manage Room Recordings" animation={false}>
+        <a href={`/dashboard/recordings/${roomInfo.name!}/`} target="_blank">
           <BsRecordBtn
             className="cursor-pointer text-4xl hover:text-red-500"
             onClick={() => {}}
           />
-        </Link>
+        </a>
       </Tooltip>
     </div>
   );

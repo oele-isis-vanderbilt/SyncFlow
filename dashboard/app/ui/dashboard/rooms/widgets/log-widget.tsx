@@ -56,7 +56,7 @@ export function LogViewerWidget({
         onChange={onSelectOptionChanged}
         placeholder={'Filter logs by participants'}
       />
-      <div className="h-full w-full">
+      <div className="dark:bg-gray-800! bg-gray-200! h-full w-full">
         <LazyLog
           caseInsensitive
           enableHotKeys

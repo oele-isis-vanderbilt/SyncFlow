@@ -24,7 +24,13 @@ export function ChatViewerWidget({
 
   const ChatMessageFormatter = (message: string) => {
     return (
-      <div className={'rounded-md bg-gray-700 p-2 text-white'}>{message}</div>
+      <div
+        className={
+          'rounded-md bg-gray-200 p-2 dark:bg-gray-900 dark:text-white'
+        }
+      >
+        {message}
+      </div>
     );
   };
   const renderItem = ({ key, index, style, parent }: ListRowProps) => {
@@ -45,6 +51,7 @@ export function ChatViewerWidget({
                 message: decoder.decode(chatMessage.payload),
                 timestamp: Date.now(), // FixMe: This should be the actual timestamp
               }}
+              className="lk-chat-entry dark:text-white"
               hideName={false}
               hideTimestamp={false}
               messageFormatter={ChatMessageFormatter}

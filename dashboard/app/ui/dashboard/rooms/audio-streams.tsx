@@ -18,8 +18,10 @@ export default function AudioStreams(
 
   return (
     <div className={'flex h-full w-full flex-col'}>
-      <div className={'flex items-center justify-between bg-black'}>
-        <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
+      <div className={'flex items-center justify-between'}>
+        <h2
+          className={`${lusitana.className} p-2 text-xl md:text-2xl dark:text-white`}
+        >
           {title}
         </h2>
       </div>
@@ -31,7 +33,7 @@ export default function AudioStreams(
                 {index === 0 && (
                   <div
                     className={
-                      'grid grid-cols-3 gap-4 px-6 pb-3 pt-6 text-xl font-bold text-black'
+                      'grid grid-cols-3 gap-4 px-6 pb-3 pt-6 text-xl font-bold dark:text-white'
                     }
                   >
                     <span>Publisher</span>
@@ -44,7 +46,7 @@ export default function AudioStreams(
                     'grid grid-cols-3 items-center gap-4 p-6 text-black'
                   }
                 >
-                  <span className={'overflow-ellipsis text-xl'}>
+                  <span className={'overflow-ellipsis text-xl dark:text-white'}>
                     Publisher &#8594;{' '}
                     {shortenText(track.participant.identity, 10)}
                   </span>
@@ -52,7 +54,9 @@ export default function AudioStreams(
                     track={track.publication?.audioTrack!}
                     shouldMute={true}
                   />
-                  <span>{track.participant.metadata || 'No metadata'}</span>
+                  <span className="dark:text-white">
+                    {track.participant.metadata || 'No metadata'}
+                  </span>
                 </div>
               </div>
             );

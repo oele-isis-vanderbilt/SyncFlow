@@ -69,8 +69,8 @@ export default function VideoGallery(
 
   return (
     <>
-      <div className={'flex h-full w-full flex-col'}>
-        <div className={'flex items-center justify-between bg-black'}>
+      <div className={'flex h-full w-full flex-col dark:text-white'}>
+        <div className={'flex items-center justify-between'}>
           <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
             {title}
           </h2>
@@ -81,7 +81,7 @@ export default function VideoGallery(
           </Tooltip>
         </div>
         <div className="flex-1 gap-2">
-          <div className="h-3/5 items-center justify-center bg-gray-300">
+          <div className="h-3/5 items-center justify-center bg-gray-200 dark:bg-gray-900">
             {toRenderTrack ? (
               <>
                 {toRenderTrack.publication?.isMuted ? (
@@ -92,16 +92,17 @@ export default function VideoGallery(
                     controls={true}
                   />
                 )}
-                <span className={'overflow-ellipsis text-xl'}>
+                <span className={'overflow-ellipsis text-xl dark:bg-gray-900'}>
                   {getHelpText(toRenderTrack)}
                 </span>
+                <hr />
               </>
             ) : (
               <NoTrackMessage />
             )}
           </div>
           <div className="h-2/5 pt-10">
-            <h2 className={`${lusitana.className} py-2 text-xl md:text-2xl`}>
+            <h2 className={`${lusitana.className} p-2 text-xl md:text-2xl`}>
               Participants
             </h2>
             <PagedTrackView
@@ -169,7 +170,7 @@ function PagedTrackView({
   }, [tracks]);
 
   return (
-    <div className={'flex h-full w-full flex-col'}>
+    <div className={'flex h-full w-full flex-col p-2'}>
       <div className={'grid grid-cols-2 gap-2 md:grid-cols-6'}>
         {currentPageTracks?.map((track, index) => {
           return (
@@ -228,7 +229,7 @@ function VideoTile({
 function NoTrackMessage() {
   return (
     <div className={'flex h-full items-center justify-center'}>
-      <p className={'text-lg text-black md:text-2xl'}>
+      <p className={'text-lg text-black md:text-2xl dark:text-white'}>
         No Video Streams Available
       </p>
     </div>

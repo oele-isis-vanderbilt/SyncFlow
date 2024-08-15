@@ -17,10 +17,12 @@ export default async function RoomsTable({ navPath }: { navPath: string }) {
   return (
     <>
       {names.length === 0 ? (
-        <p>No active rooms. Create one to get started.</p>
+        <p className="dark:text-white">
+          No active rooms. Create one to get started.
+        </p>
       ) : (
         <table className="w-full text-left text-sm rtl:text-right">
-          <thead className="text-gray bg-gray-900 text-xs uppercase ">
+          <thead className="text-gray bg-gray-100 text-xs uppercase dark:bg-gray-900 dark:text-white ">
             <tr>
               <th scope="col" className="px-6 py-3">
                 ID
@@ -49,7 +51,10 @@ export default async function RoomsTable({ navPath }: { navPath: string }) {
           <tbody>
             {roomsResult.unwrap().map((room, index: number) => {
               return (
-                <tr key={index} className="border-5 border-indigo-200 bg-black">
+                <tr
+                  key={index}
+                  className="border-5 border-indigo-200 bg-gray-200 dark:bg-black dark:text-white"
+                >
                   <td className="whitespace-nowrap px-6 py-4">
                     <Link href={`/dashboard/${navPath}/${room.name}`}>
                       <div className="text-blue text-sm hover:text-blue-400 hover:underline">
