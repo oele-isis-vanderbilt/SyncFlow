@@ -16,7 +16,7 @@ const FooterComp = () => {
       <div className="container mx-auto">
         <div className="grid w-full justify-between sm:flex sm:justify-between md:flex md:grid-cols-1">
           <div className="hidden w-full lg:flex">
-            <AppLogo />
+            <AppLogo w={400} h={312} />
           </div>
           <div className="grid grid-cols-2 gap-8 sm:mt-4 sm:grid-cols-3 sm:gap-6">
             <div>
