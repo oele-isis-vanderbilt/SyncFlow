@@ -1,6 +1,5 @@
 'use client';
 import Image from 'next/image';
-import GoogleLogo from '@/app/ui/oauth-logos/google.svg';
 import GitHubLogo from '@/app/ui/oauth-logos/github.svg';
 import { Button } from './button';
 import { providerLogin } from '../lib/actions';
