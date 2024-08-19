@@ -3,7 +3,6 @@ import { mmlaClient } from '@/app/lib/mmla-client';
 import RoomActions from '@/app/ui/dashboard/room-actions';
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { isAdmin } from '@/app/lib/utils';
 
 export default async function RoomsTable({ navPath }: { navPath: string }) {
   const roomsResult = await mmlaClient.listRooms();
@@ -84,7 +83,7 @@ export default async function RoomsTable({ navPath }: { navPath: string }) {
                   </td>
 
                   <td className="whitespace-nowrap px-6 py-4">
-                    <RoomActions room={room} isAdmin={isAdmin(session?.user)} />
+                    <RoomActions room={room} />
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
                     <div className="text-sm">{room.metadata || 'N/A'}</div>

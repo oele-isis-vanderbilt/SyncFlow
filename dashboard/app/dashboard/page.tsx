@@ -7,7 +7,6 @@ import RoomsTable from '@/app/ui/dashboard/rooms-table';
 import { auth } from '@/auth';
 
 import { Suspense } from 'react';
-import { isAdmin } from '@/app/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -36,7 +35,7 @@ export default async function Page() {
             Rooms
           </h1>
         </div>
-        {isAdmin(session?.user) ? <CreateRoom /> : null}
+        <CreateRoom />
       </div>
       <div className="mt-8 flex items-center p-2">
         <RoomsTable navPath={'rooms'} />
