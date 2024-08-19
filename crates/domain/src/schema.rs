@@ -111,6 +111,16 @@ pub mod syncflow {
             oauth_provider -> Nullable<Varchar>,
             #[max_length = 255]
             oauth_provider_user_id -> Nullable<Varchar>,
+            #[max_length = 255]
+            first_name -> Nullable<Varchar>,
+            #[max_length = 255]
+            middle_name -> Nullable<Varchar>,
+            #[max_length = 255]
+            last_name -> Nullable<Varchar>,
+            #[max_length = 255]
+            organization -> Nullable<Varchar>,
+            #[max_length = 255]
+            job_role -> Nullable<Varchar>,
         }
     }
 

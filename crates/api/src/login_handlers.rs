@@ -5,7 +5,7 @@ use application::users::tokens_manager::UserInfo;
 use shared::constants;
 use shared::response_models::Response;
 use shared::user_models::{
-    ApiKeyRequest, ApiKeyResponse, LoginRequest, RefreshTokenRequest, TokenResponse,
+    ApiKeyRequest, ApiKeyResponse, LoginRequest, RefreshTokenRequest, TokenResponse, SignUpRequest,
 };
 
 #[utoipa::path(
@@ -35,24 +35,25 @@ pub async fn login(
     }
 }
 
+
 #[utoipa::path(
     post,
-    path = "/users/refresh-token",
-    request_body = RefreshTokenRequest,
+    path = "/users/signup",
+    request_body = SignUpRequest,
     responses(
-        (status = 200, description = "User logged in successfully", body = bool),
-        (status = 404, description = "User not found"),
+        (status = 200, description = "User created succesfully", body =()),
+        (status = 409, description = "User already exists"),
         (status = 500, description = "Internal Server Error/DatabaseError")
     )
 )]
-#[post("/refresh-token")]
-pub async fn refresh_login_token(
+#[post("/signup")]
+pub async fn signup(
     user_auth: web::Data<AccountService>,
-    refresh_request: Json<RefreshTokenRequest>,
+    signup_request: Json<SignUpRequest>,
 ) -> HttpResponse {
-    match user_auth.refresh_token(refresh_request.into_inner()) {
-        Ok((access_token, refresh_token)) => {
-            HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token))
+    match user_auth.signup(signup_request.into_inner()) {
+        Ok(()) => {
+            HttpResponse::Ok().into()
         }
         Err(e) => {
             let response: Response = e.into();
@@ -93,6 +94,33 @@ pub async fn logout(req: HttpRequest, user_auth: web::Data<AccountService>) -> H
         .into(),
     }
 }
+
+#[utoipa::path(
+    post,
+    path = "/users/refresh-token",
+    request_body = RefreshTokenRequest,
+    responses(
+        (status = 200, description = "User logged in successfully", body = bool),
+        (status = 404, description = "User not found"),
+        (status = 500, description = "Internal Server Error/DatabaseError")
+    )
+)]
+#[post("/refresh-token")]
+pub async fn refresh_login_token(
+    user_auth: web::Data<AccountService>,
+    refresh_request: Json<RefreshTokenRequest>,
+) -> HttpResponse {
+    match user_auth.refresh_token(refresh_request.into_inner()) {
+        Ok((access_token, refresh_token)) => {
+            HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token))
+        }
+        Err(e) => {
+            let response: Response = e.into();
+            response.into()
+        }
+    }
+}
+
 
 #[post("/api-key")]
 pub async fn create_api_key(
@@ -217,6 +245,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
         .service(refresh_login_token)
         .service(create_api_key)
         .service(delete_api_key)
-        .service(list_all_api_keys);
+        .service(list_all_api_keys)
+        .service(signup);
     cfg.service(users_scope);
 }

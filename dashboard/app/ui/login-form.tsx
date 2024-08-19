@@ -11,7 +11,7 @@ import { Button } from './button';
 
 import { useFormState, useFormStatus } from 'react-dom';
 import { authenticate } from '@/app/lib/actions';
-import { DarkModeSwitcher } from './dark-mode-switcher';
+import Link from 'next/link';
 
 export default function LoginForm() {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
@@ -62,6 +62,8 @@ export default function LoginForm() {
             </div>
           </div>
         </div>
+        <div>
+        </div>
         <LoginButton />
         <div
           className="flex h-8 items-end space-x-1"
@@ -74,6 +76,13 @@ export default function LoginForm() {
               <p className="text-xs text-red-500">{errorMessage}</p>
             </>
           )}
+        </div>
+        <div className="text-sm dark:text-white">
+          Don't have an account?{' '}
+          <Link href="/signup" className='underline hover:text-blue-500'>
+            Sign Up
+          </Link>
+          !
         </div>
       </div>
     </form>

@@ -21,6 +21,15 @@ const RoomSchema = z.object({
   roomName: z.string(),
 });
 
+const SignUpSchema = z.object({
+  username: z.string(),
+  email: z.string().email(),
+  password: z.string().min(8),
+  confirmPassword: z.string().min(8),
+  firstName: z.string().min(0),
+  middleName: 
+});
+
 const CreateRoom = RoomSchema;
 
 export type State = {
@@ -102,6 +111,10 @@ export async function authenticate(
   }
 }
 
+export async function signOut() {
+  await signIn('signout');
+}
+
 export const providerLogin = async (provider: 'google' | 'github') => {
   await signIn(provider);
 };
@@ -174,3 +187,6 @@ export async function stopTracksEgress(egressIds: string[], roomName: string) {
 export async function apiSignInWithGithub() {
   await signIn('github');
 }
+
+
+export async function signUp()

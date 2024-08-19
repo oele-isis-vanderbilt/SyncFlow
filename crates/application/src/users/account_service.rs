@@ -5,7 +5,7 @@ use crate::users::user::UserError;
 use domain::models::{ApiKey, User};
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
-use shared::user_models::LoginRequest;
+use shared::user_models::{LoginRequest, SignUpRequest};
 use shared::user_models::{ApiKeyResponseWithoutSecret, RefreshTokenRequest};
 use std::sync::Arc;
 
@@ -29,6 +29,17 @@ impl AccountService {
                 jwt_refresh_expiration,
             ),
         }
+    }
+
+    pub fn signup(
+        &self,
+        request: SignUpRequest
+    ) -> Result<(), UserError> {
+        user::signup(
+            &request,
+            &mut self.pool.get().unwrap(),
+            &self.config.encryption_key,
+        )
     }
 
     /// Logs in a user
@@ -175,7 +186,7 @@ impl AccountService {
     }
 
     pub fn user_exists(&self, username: &str) -> bool {
-        user::user_exists(username, &mut self.pool.get().unwrap())
+        user::username_exists(username, &mut self.pool.get().unwrap())
     }
 
     pub fn decrypt_secret(&self, secret: &str) -> Result<String, UserError> {
