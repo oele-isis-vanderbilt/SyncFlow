@@ -2,9 +2,7 @@ use bcrypt::verify;
 use diesel::prelude::*;
 use diesel::result::Error as DieselError;
 use diesel::PgConnection;
-use domain::models::{
-    ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, Role, User,
-};
+use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, User};
 use std::fmt::Display;
 
 use crate::users::secret::{encrypt_string, key_secret_pair};
@@ -20,7 +18,6 @@ pub struct LoginSessionInfo {
     pub session_id: String,
     pub user_id: i32,
     pub user_name: String,
-    pub user_role: Role,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -109,7 +106,7 @@ pub fn login(
     conn: &mut PgConnection,
     encryption_secret: &str,
 ) -> Result<LoginSessionInfo, UserError> {
-    use domain::schema::users::dsl::*;
+    use domain::schema::syncflow::users::dsl::*;
 
     let (uname, passwd) = (login_request.username_or_email, login_request.password);
     // let user_to_verify = users.filter(username.eq(uname)).first::<User>(conn);
@@ -144,7 +141,6 @@ pub fn login(
                             session_id: session.session_id.to_string(),
                             user_id: session.user_id,
                             user_name: usr.username,
-                            user_role: usr.role,
                         };
                         Ok(session_info)
                     }
@@ -159,7 +155,7 @@ pub fn login(
 }
 
 pub fn new_login_session(uid: i32, conn: &mut PgConnection) -> Result<LoginSession, UserError> {
-    use domain::schema::login_sessions::dsl::*;
+    use domain::schema::syncflow::login_sessions::dsl::*;
     let new_login_session = NewLoginSession { user_id: uid };
 
     diesel::insert_into(login_sessions)
@@ -180,12 +176,11 @@ pub fn get_login_session_info(
         session_id: login_session_info.session_id.to_string(),
         user_id: login_session_info.user_id,
         user_name: user_info.username,
-        user_role: user_info.role,
     })
 }
 
 pub fn delete_login_session(sid: &str, conn: &mut PgConnection) -> Result<bool, UserError> {
-    use domain::schema::login_sessions::dsl::*;
+    use domain::schema::syncflow::login_sessions::dsl::*;
 
     let session_uuid = Uuid::parse_str(sid);
 
@@ -212,7 +207,7 @@ pub fn delete_login_session(sid: &str, conn: &mut PgConnection) -> Result<bool, 
 }
 
 pub fn is_valid_login_session(sid: &str, conn: &mut PgConnection) -> bool {
-    use domain::schema::login_sessions::dsl::*;
+    use domain::schema::syncflow::login_sessions::dsl::*;
 
     let session_uuid = Uuid::parse_str(sid);
 
@@ -243,19 +238,18 @@ pub fn create_user(
         username: username.to_owned(),
         email: email.to_owned(),
         password: Some(hashed_password),
-        role: if is_admin { Role::ADMIN } else { Role::USER },
         oauth_provider: None,
         oauth_provider_user_id: None,
     };
 
-    diesel::insert_into(domain::schema::users::table)
+    diesel::insert_into(domain::schema::syncflow::users::table)
         .values(&new_user)
         .get_result::<User>(conn)
         .map_err(|e| UserError::DatabaseError(e.to_string()))
 }
 
 pub fn user_exists(uname: &str, conn: &mut PgConnection) -> bool {
-    use domain::schema::users::dsl::*;
+    use domain::schema::syncflow::users::dsl::*;
 
     let user_result = users.filter(username.eq(uname)).first::<User>(conn);
     user_result.is_ok()
@@ -265,7 +259,7 @@ pub fn create_or_get_github_user(
     github_user: &GithubUser,
     conn: &mut PgConnection,
 ) -> Result<User, UserError> {
-    use domain::schema::users::dsl::*;
+    use domain::schema::syncflow::users::dsl::*;
     let user_id = github_user.login.clone();
 
     match users
@@ -282,7 +276,6 @@ pub fn create_or_get_github_user(
                 username: github_user.login.clone(),
                 email: github_user.email.clone().unwrap_or_default(),
                 password: None,
-                role: Role::ADMIN,
                 oauth_provider: Some("github".to_string()),
                 oauth_provider_user_id: Some(user_id),
             };
@@ -318,7 +311,6 @@ pub fn login_with_github(
         session_id: new_session.session_id.to_string(),
         user_id: new_session.user_id,
         user_name: user.username,
-        user_role: user.role,
     })
 }
 
@@ -352,7 +344,7 @@ pub fn generate_api_key(
     kt: KeyType,
     key_comments: Option<String>,
 ) -> Result<ApiKey, UserError> {
-    use domain::schema::api_keys::dsl::*;
+    use domain::schema::syncflow::api_keys::dsl::*;
 
     let key_secret_pair = key_secret_pair();
     let encrypted_secret_string = encrypt_string(&key_secret_pair.secret, encryption_key)
@@ -374,7 +366,7 @@ pub fn generate_api_key(
 }
 
 pub fn fetch_login_key(uid: i32, conn: &mut PgConnection) -> Result<ApiKey, UserError> {
-    use domain::schema::api_keys::dsl::*;
+    use domain::schema::syncflow::api_keys::dsl::*;
 
     api_keys
         .filter(user_id.eq(uid).and(key_type.eq(KeyType::Login)))
@@ -383,7 +375,7 @@ pub fn fetch_login_key(uid: i32, conn: &mut PgConnection) -> Result<ApiKey, User
 }
 
 pub fn fetch_api_key_by_id(key_id: &str, conn: &mut PgConnection) -> Result<ApiKey, UserError> {
-    use domain::schema::api_keys::dsl::*;
+    use domain::schema::syncflow::api_keys::dsl::*;
 
     api_keys
         .filter(key.eq(key_id))
@@ -392,7 +384,7 @@ pub fn fetch_api_key_by_id(key_id: &str, conn: &mut PgConnection) -> Result<ApiK
 }
 
 pub fn fetch_api_key_by_key(key_ref: &str, conn: &mut PgConnection) -> Result<ApiKey, UserError> {
-    use domain::schema::api_keys::dsl::*;
+    use domain::schema::syncflow::api_keys::dsl::*;
 
     api_keys
         .filter(key.eq(key_ref))
@@ -401,7 +393,7 @@ pub fn fetch_api_key_by_key(key_ref: &str, conn: &mut PgConnection) -> Result<Ap
 }
 
 pub fn get_user(uid: i32, conn: &mut PgConnection) -> Result<User, UserError> {
-    use domain::schema::users::dsl::*;
+    use domain::schema::syncflow::users::dsl::*;
 
     users
         .filter(id.eq(uid))
@@ -410,7 +402,7 @@ pub fn get_user(uid: i32, conn: &mut PgConnection) -> Result<User, UserError> {
 }
 
 pub fn get_login_session(sid: &str, conn: &mut PgConnection) -> Result<LoginSession, UserError> {
-    use domain::schema::login_sessions::dsl::*;
+    use domain::schema::syncflow::login_sessions::dsl::*;
     let session_uuid = Uuid::parse_str(sid);
     match session_uuid {
         Ok(suuid) => login_sessions
@@ -422,7 +414,7 @@ pub fn get_login_session(sid: &str, conn: &mut PgConnection) -> Result<LoginSess
 }
 
 pub fn get_all_api_keys(uid: i32, conn: &mut PgConnection) -> Result<Vec<ApiKey>, UserError> {
-    use domain::schema::api_keys::dsl::*;
+    use domain::schema::syncflow::api_keys::dsl::*;
 
     api_keys
         .filter(user_id.eq(uid).and(key_type.eq(KeyType::Api)))
@@ -435,7 +427,7 @@ pub fn delete_api_key(
     key_ref: &str,
     conn: &mut PgConnection,
 ) -> Result<ApiKey, UserError> {
-    use domain::schema::api_keys::dsl::*;
+    use domain::schema::syncflow::api_keys::dsl::*;
 
     diesel::delete(api_keys.filter(user_id.eq(uid).and(key.eq(key_ref))))
         .get_result::<ApiKey>(conn)

@@ -27,7 +27,7 @@ impl UserActions {
         &self,
         new_create_room_action: NewCreateRoomAction,
     ) -> Result<CreateRoomAction, UserActionError> {
-        use domain::schema::create_room_actions::dsl::*;
+        use domain::schema::syncflow::create_room_actions::dsl::*;
         let mut conn = self.pool.get().unwrap();
 
         diesel::insert_into(create_room_actions)
@@ -47,7 +47,7 @@ impl UserActions {
         &self,
         new_delete_room_action: NewDeleteRoomAction,
     ) -> Result<DeleteRoomAction, UserActionError> {
-        use domain::schema::delete_room_actions::dsl::*;
+        use domain::schema::syncflow::delete_room_actions::dsl::*;
         let mut conn = self.pool.get().unwrap();
 
         diesel::insert_into(delete_room_actions)
@@ -63,7 +63,7 @@ impl UserActions {
         &self,
         new_list_room_action: NewListRoomsAction,
     ) -> Result<ListRoomsAction, UserActionError> {
-        use domain::schema::list_rooms_actions::dsl::*;
+        use domain::schema::syncflow::list_rooms_actions::dsl::*;
         let mut conn = self.pool.get().unwrap();
 
         diesel::insert_into(list_rooms_actions)
@@ -76,7 +76,7 @@ impl UserActions {
     }
 
     pub fn list_created_rooms(&self, uid: i32) -> Result<Vec<CreateRoomAction>, UserActionError> {
-        use domain::schema::create_room_actions::dsl::*;
+        use domain::schema::syncflow::create_room_actions::dsl::*;
         let mut conn = self.pool.get().unwrap();
 
         create_room_actions
@@ -92,7 +92,7 @@ impl UserActions {
         &self,
         new_generate_token_action: NewGenerateTokenAction,
     ) -> Result<GenerateTokenAction, UserActionError> {
-        use domain::schema::generate_token_actions::dsl::*;
+        use domain::schema::syncflow::generate_token_actions::dsl::*;
         let mut conn = self.pool.get().unwrap();
 
         diesel::insert_into(generate_token_actions)
@@ -108,7 +108,7 @@ impl UserActions {
         &self,
         new_egress_action: NewUserEgressAction,
     ) -> Result<UserEgressAction, UserActionError> {
-        use domain::schema::egress_actions::dsl::*;
+        use domain::schema::syncflow::egress_actions::dsl::*;
         let mut conn = self.pool.get().unwrap();
 
         diesel::insert_into(egress_actions)
@@ -124,7 +124,7 @@ impl UserActions {
         &self,
         action: NewUserEgressAction,
     ) -> Result<UserEgressAction, UserActionError> {
-        use domain::schema::egress_actions::dsl::*;
+        use domain::schema::syncflow::egress_actions::dsl::*;
         let mut conn = self.pool.get().unwrap();
 
         diesel::update(egress_actions.filter(egress_id.eq(&action.egress_id)))

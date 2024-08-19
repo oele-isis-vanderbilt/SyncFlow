@@ -3,7 +3,7 @@ use crate::users::signed_token::{decode_jwt_unsafe, generate_and_sign_jwt, verif
 use crate::users::user;
 use crate::users::user::{LoginSessionInfo, UserError};
 use diesel::PgConnection;
-use domain::models::{ApiKey, Role};
+use domain::models::ApiKey;
 use serde::{Deserialize, Serialize};
 
 pub type UserTokenType = TokenTypes;
@@ -13,7 +13,6 @@ pub type UserTokenType = TokenTypes;
 pub struct UserInfo {
     pub user_id: i32,
     pub user_name: String,
-    pub user_role: Role,
     pub login_session: Option<String>,
 }
 
@@ -34,7 +33,6 @@ pub struct LoginToken {
     // Data
     pub user_name: String,
     pub user_id: i32,
-    pub role: Role,
     pub login_session: String,
 }
 
@@ -95,7 +93,6 @@ impl JWTTokensManager {
             iss: api_key.key.to_owned(),
             user_name: login_session_info.user_name.to_owned(),
             user_id: login_session_info.user_id,
-            role: login_session_info.user_role.to_owned(),
             login_session: login_session_info.session_id.to_owned(),
         };
 
@@ -121,7 +118,6 @@ impl JWTTokensManager {
             iss: api_key.key.to_owned(),
             user_name: login_session_info.user_name.to_owned(),
             user_id: login_session_info.user_id,
-            role: login_session_info.user_role.to_owned(),
             login_session: login_session_info.session_id.to_owned(),
         };
 
@@ -187,7 +183,6 @@ impl JWTTokensManager {
                 Ok(UserInfo {
                     user_id: token_data.user_id,
                     user_name: token_data.user_name.to_owned(),
-                    user_role: token_data.role.to_owned(),
                     login_session: Some(token_data.login_session.to_owned()),
                 })
             }
@@ -213,7 +208,6 @@ impl JWTTokensManager {
                 Ok(UserInfo {
                     user_id: user.id,
                     user_name: user.username.to_owned(),
-                    user_role: user.role.to_owned(),
                     login_session: Some(token_data.login_session.to_owned()),
                 })
             }
@@ -239,7 +233,6 @@ impl JWTTokensManager {
                 Ok(UserInfo {
                     user_id: user.id,
                     user_name: user.username.to_owned(),
-                    user_role: user.role.to_owned(),
                     login_session: None,
                 })
             }

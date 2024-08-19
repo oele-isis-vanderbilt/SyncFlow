@@ -18,7 +18,6 @@ import { lusitana } from '@/app/ui/fonts';
 import { redirectToDashboard } from '@/app/lib/actions';
 import { BsRecordBtn } from 'react-icons/bs';
 import type { SessionUser } from '@/types/next-auth';
-import { isAdmin } from '@/app/lib/utils';
 import TopicalMessages from '@/app/ui/dashboard/rooms/topical-messages';
 
 export default function Room({
@@ -79,7 +78,7 @@ function TopBar({ user }: { user: SessionUser | undefined }) {
           className={`flex text-xl`}
           variation={'verbose'}
         />
-        {isAdmin(user) && <RoomRecorderNavigator />}
+        <RoomRecorderNavigator />
       </div>
     </div>
   );

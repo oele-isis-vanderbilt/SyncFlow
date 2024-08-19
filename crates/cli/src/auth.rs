@@ -71,7 +71,7 @@ impl Auth {
                         Ok(token_response) => {
                             let creds = Credentials {
                                 base_url: login.base_url.clone(),
-                                token: token_response.token.clone(),
+                                token: token_response.access_token.clone(),
                                 username: login.username.clone(),
                             };
                             let save_result = save_credentials(&creds);

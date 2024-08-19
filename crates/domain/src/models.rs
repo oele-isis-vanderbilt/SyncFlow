@@ -1,30 +1,12 @@
-use crate::schema::{
+use crate::schema::syncflow::{
     api_keys, create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
     list_rooms_actions, login_sessions, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 use utoipa::ToSchema;
 use uuid::Uuid;
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum, PartialEq)]
-#[ExistingTypePath = "crate::schema::sql_types::Role"]
-#[DbValueStyle = "UPPERCASE"]
-pub enum Role {
-    ADMIN,
-    USER,
-}
-
-impl Display for Role {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Role::ADMIN => write!(f, "ADMIN"),
-            Role::USER => write!(f, "USER"),
-        }
-    }
-}
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = users)]
@@ -40,8 +22,6 @@ pub struct User {
     #[diesel(column_name = "updatedAt")]
     pub updated_at: Option<chrono::NaiveDateTime>,
 
-    pub role: Role,
-
     pub oauth_provider: Option<String>,
     pub oauth_provider_user_id: Option<String>,
 }
@@ -52,7 +32,6 @@ pub struct NewUser {
     pub username: String,
     pub email: String,
     pub password: Option<String>,
-    pub role: Role,
     pub oauth_provider: Option<String>,
     pub oauth_provider_user_id: Option<String>,
 }
@@ -136,7 +115,7 @@ pub struct NewGenerateTokenAction {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
-#[ExistingTypePath = "crate::schema::sql_types::EgressDestination"]
+#[ExistingTypePath = "crate::schema::syncflow::sql_types::EgressDestination"]
 #[DbValueStyle = "PascalCase"]
 pub enum EgressDestination {
     S3,
@@ -144,7 +123,7 @@ pub enum EgressDestination {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
-#[ExistingTypePath = "crate::schema::sql_types::EgressType"]
+#[ExistingTypePath = "crate::schema::syncflow::sql_types::EgressType"]
 #[DbValueStyle = "PascalCase"]
 pub enum EgressType {
     RoomComposite,
@@ -161,13 +140,14 @@ pub struct UserEgressAction {
     pub user_id: i32,
     pub egress_id: String,
     pub room_name: String,
-    pub egress_destination: EgressDestination,
-    pub egress_type: EgressType,
+
     pub egress_destination_path: String,
     pub egress_destination_root: String,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,
     pub success: bool,
+    pub egress_destination: EgressDestination,
+    pub egress_type: EgressType,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
@@ -176,16 +156,16 @@ pub struct NewUserEgressAction {
     pub user_id: i32,
     pub egress_id: String,
     pub room_name: String,
-    pub egress_destination: EgressDestination,
-    pub egress_type: EgressType,
     pub egress_destination_path: String,
     pub egress_destination_root: String,
     pub success: bool,
     pub updated_at: Option<chrono::NaiveDateTime>,
+    pub egress_destination: EgressDestination,
+    pub egress_type: EgressType,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum, Eq, PartialEq)]
-#[ExistingTypePath = "crate::schema::sql_types::KeyType"]
+#[ExistingTypePath = "crate::schema::syncflow::sql_types::KeyType"]
 #[DbValueStyle = "PascalCase"]
 pub enum KeyType {
     Login,
@@ -196,13 +176,13 @@ pub enum KeyType {
 #[diesel(table_name = api_keys)]
 pub struct ApiKey {
     pub id: i32,
-    pub key_type: KeyType,
     pub key: String,
     pub user_id: i32,
     pub secret: String,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub valid: bool,
     pub comment: Option<String>,
+    pub key_type: KeyType,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]

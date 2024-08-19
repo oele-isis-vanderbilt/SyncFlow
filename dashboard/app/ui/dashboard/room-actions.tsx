@@ -17,33 +17,23 @@ const iconsMap = {
   record: BsRecordBtn,
 };
 
-export default function RoomActions({
-  room,
-  isAdmin,
-}: {
-  room: Room;
-  isAdmin: boolean;
-}) {
+export default function RoomActions({ room }: { room: Room }) {
   return (
     <div className="flex items-center">
-      {isAdmin && (
-        <RoomAction
-          type="delete"
-          onClick={async () => {
-            await deleteRoom(room.name);
-          }}
-          className="cursor-pointer hover:text-red-700"
-        />
-      )}
-      {isAdmin && (
-        <RoomAction
-          type={'record'}
-          onClick={async () => {
-            await redirectToRoomRecording(room.name);
-          }}
-          className={'ml-2 cursor-pointer hover:text-red-700'}
-        />
-      )}
+      <RoomAction
+        type="delete"
+        onClick={async () => {
+          await deleteRoom(room.name);
+        }}
+        className="cursor-pointer hover:text-red-700"
+      />
+      <RoomAction
+        type={'record'}
+        onClick={async () => {
+          await redirectToRoomRecording(room.name);
+        }}
+        className={'ml-2 cursor-pointer hover:text-red-700'}
+      />
     </div>
   );
 }
