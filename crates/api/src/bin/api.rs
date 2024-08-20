@@ -50,11 +50,7 @@ async fn main() -> std::io::Result<()> {
     {
         let root_user = config.root_user.as_ref().unwrap();
         let user = auth_service
-            .create_user(
-                &root_user.username,
-                &root_user.email,
-                &root_user.password,
-            )
+            .create_user(&root_user.username, &root_user.email, &root_user.password)
             .unwrap_or_else(|e| panic!("Failed to create root user: {}", e));
         info!("Root user created: {:?}", user);
     }

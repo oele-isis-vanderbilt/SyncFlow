@@ -174,19 +174,26 @@ pub fn signup(
     let user_exists = username_exists(&signup_request.username, conn);
 
     if user_exists {
-        return Err(UserError::UserNameAlreadyExists("User already exists".to_string()));
+        return Err(UserError::UserNameAlreadyExists(
+            "User already exists".to_string(),
+        ));
     }
 
     let email_exists = email_exists(&signup_request.email, conn);
 
     if email_exists {
-        return Err(UserError::UserEmailAlreadyExists("Email already exists".to_string()));
+        return Err(UserError::UserEmailAlreadyExists(
+            "Email already exists".to_string(),
+        ));
     }
 
     let new_user = NewUser {
         username: signup_request.username.clone(),
         email: signup_request.email.clone(),
-        password: Some(generate_hash(&signup_request.password).map_err(|e| UserError::HashError(e.to_string()))?),
+        password: Some(
+            generate_hash(&signup_request.password)
+                .map_err(|e| UserError::HashError(e.to_string()))?,
+        ),
         oauth_provider: None,
         oauth_provider_user_id: None,
         first_name: signup_request.first_name.clone(),

@@ -5,7 +5,7 @@ use application::users::tokens_manager::UserInfo;
 use shared::constants;
 use shared::response_models::Response;
 use shared::user_models::{
-    ApiKeyRequest, ApiKeyResponse, LoginRequest, RefreshTokenRequest, TokenResponse, SignUpRequest,
+    ApiKeyRequest, ApiKeyResponse, LoginRequest, RefreshTokenRequest, SignUpRequest, TokenResponse,
 };
 
 #[utoipa::path(
@@ -35,7 +35,6 @@ pub async fn login(
     }
 }
 
-
 #[utoipa::path(
     post,
     path = "/users/signup",
@@ -52,9 +51,7 @@ pub async fn signup(
     signup_request: Json<SignUpRequest>,
 ) -> HttpResponse {
     match user_auth.signup(signup_request.into_inner()) {
-        Ok(()) => {
-            HttpResponse::Ok().into()
-        }
+        Ok(()) => HttpResponse::Ok().into(),
         Err(e) => {
             let response: Response = e.into();
             response.into()
@@ -120,7 +117,6 @@ pub async fn refresh_login_token(
         }
     }
 }
-
 
 #[post("/api-key")]
 pub async fn create_api_key(

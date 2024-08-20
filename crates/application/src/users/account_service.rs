@@ -5,8 +5,8 @@ use crate::users::user::UserError;
 use domain::models::{ApiKey, User};
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
-use shared::user_models::{LoginRequest, SignUpRequest};
 use shared::user_models::{ApiKeyResponseWithoutSecret, RefreshTokenRequest};
+use shared::user_models::{LoginRequest, SignUpRequest};
 use std::sync::Arc;
 
 pub struct AccountService {
@@ -31,10 +31,7 @@ impl AccountService {
         }
     }
 
-    pub fn signup(
-        &self,
-        request: SignUpRequest
-    ) -> Result<(), UserError> {
+    pub fn signup(&self, request: SignUpRequest) -> Result<(), UserError> {
         user::signup(
             &request,
             &mut self.pool.get().unwrap(),
@@ -175,12 +172,7 @@ impl AccountService {
         email: &str,
         password: &str,
     ) -> Result<User, UserError> {
-        user::create_user(
-            username,
-            email,
-            password,
-            &mut self.pool.get().unwrap(),
-        )
+        user::create_user(username, email, password, &mut self.pool.get().unwrap())
     }
 
     pub fn user_exists(&self, username: &str) -> bool {
