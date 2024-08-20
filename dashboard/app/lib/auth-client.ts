@@ -2,6 +2,23 @@ import type { Account, User } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import type { SessionUser } from '@/types/next-auth';
 import { jwtDecode } from 'jwt-decode';
+import { z } from 'zod';
+import getConfig from '@/config';
+
+export const SignUpSchema = z.object({
+  username: z.string(),
+  email: z.string().email({
+    message: 'Invalid email address',
+  }),
+  password: z.string().min(4),
+  firstName: z.string().optional(),
+  middleName: z.string().optional(),
+  lastName: z.string().optional(),
+  organization: z.string().optional(),
+  jobRole: z.string().optional(),
+});
+
+export type SignUpRequest = z.infer<typeof SignUpSchema>;
 
 export class AuthClient {
   auth_url: string;
@@ -127,4 +144,24 @@ export class AuthClient {
     }
     return null;
   }
+
+  async signUp(userDetails: SignUpRequest): Promise<Response> {
+    let server_url = this.auth_url;
+    let response = await fetch(server_url + '/users/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userDetails),
+    });
+
+    if (response.status >= 500) {
+      throw new Error('Internal Server error, please try again later');
+    }
+
+    return response;
+  }
 }
+
+const deploymentConfig = getConfig();
+export const authClient = new AuthClient(deploymentConfig.mmla_api_url);

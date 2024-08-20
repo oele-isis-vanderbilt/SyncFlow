@@ -8,7 +8,7 @@ use std::fmt::Display;
 use crate::users::secret::{encrypt_string, key_secret_pair};
 use serde::{Deserialize, Serialize};
 use shared::response_models::Response;
-use shared::user_models::LoginRequest;
+use shared::user_models::{LoginRequest, SignUpRequest};
 use uuid::Uuid;
 
 use super::oauth::github::GithubUser;
@@ -23,6 +23,8 @@ pub struct LoginSessionInfo {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum UserError {
     UserNotFound(String),
+    UserNameAlreadyExists(String),
+    UserEmailAlreadyExists(String),
     PasswordMismatch(String),
     DatabaseError(String),
     TokenExpired(String),
@@ -37,6 +39,8 @@ impl Display for UserError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             UserError::UserNotFound(e) => write!(f, "User not found: {}", e),
+            UserError::UserNameAlreadyExists(e) => write!(f, "User already exists: {}", e),
+            UserError::UserEmailAlreadyExists(e) => write!(f, "Email already exists: {}", e),
             UserError::PasswordMismatch(e) => write!(f, "Password mismatch: {}", e),
             UserError::DatabaseError(e) => write!(f, "Database error: {}", e),
             UserError::TokenExpired(e) => write!(f, "Token expired: {}", e),
@@ -54,6 +58,14 @@ impl From<UserError> for Response {
         match val {
             UserError::UserNotFound(e) => Response {
                 status: 404,
+                message: e,
+            },
+            UserError::UserNameAlreadyExists(e) => Response {
+                status: 409,
+                message: e,
+            },
+            UserError::UserEmailAlreadyExists(e) => Response {
+                status: 409,
                 message: e,
             },
             UserError::PasswordMismatch(e) => Response {
@@ -154,6 +166,53 @@ pub fn login(
     }
 }
 
+pub fn signup(
+    signup_request: &SignUpRequest,
+    conn: &mut PgConnection,
+    encryption_key: &str,
+) -> Result<(), UserError> {
+    let user_exists = username_exists(&signup_request.username, conn);
+
+    if user_exists {
+        return Err(UserError::UserNameAlreadyExists(
+            "User already exists".to_string(),
+        ));
+    }
+
+    let email_exists = email_exists(&signup_request.email, conn);
+
+    if email_exists {
+        return Err(UserError::UserEmailAlreadyExists(
+            "Email already exists".to_string(),
+        ));
+    }
+
+    let new_user = NewUser {
+        username: signup_request.username.clone(),
+        email: signup_request.email.clone(),
+        password: Some(
+            generate_hash(&signup_request.password)
+                .map_err(|e| UserError::HashError(e.to_string()))?,
+        ),
+        oauth_provider: None,
+        oauth_provider_user_id: None,
+        first_name: signup_request.first_name.clone(),
+        middle_name: signup_request.middle_name.clone(),
+        last_name: signup_request.last_name.clone(),
+        organization: signup_request.organization.clone(),
+        job_role: signup_request.job_role.clone(),
+    };
+
+    let created_user = diesel::insert_into(domain::schema::syncflow::users::table)
+        .values(&new_user)
+        .get_result::<User>(conn)
+        .map_err(|e| UserError::DatabaseError(e.to_string()))?;
+
+    generate_login_key(created_user.id, encryption_key, conn)?;
+
+    Ok(())
+}
+
 pub fn new_login_session(uid: i32, conn: &mut PgConnection) -> Result<LoginSession, UserError> {
     use domain::schema::syncflow::login_sessions::dsl::*;
     let new_login_session = NewLoginSession { user_id: uid };
@@ -229,7 +288,6 @@ pub fn create_user(
     username: &str,
     email: &str,
     password: &str,
-    is_admin: bool,
     conn: &mut PgConnection,
 ) -> Result<User, UserError> {
     let hashed_password =
@@ -240,6 +298,7 @@ pub fn create_user(
         password: Some(hashed_password),
         oauth_provider: None,
         oauth_provider_user_id: None,
+        ..Default::default()
     };
 
     diesel::insert_into(domain::schema::syncflow::users::table)
@@ -248,10 +307,17 @@ pub fn create_user(
         .map_err(|e| UserError::DatabaseError(e.to_string()))
 }
 
-pub fn user_exists(uname: &str, conn: &mut PgConnection) -> bool {
+pub fn username_exists(uname: &str, conn: &mut PgConnection) -> bool {
     use domain::schema::syncflow::users::dsl::*;
 
     let user_result = users.filter(username.eq(uname)).first::<User>(conn);
+    user_result.is_ok()
+}
+
+pub fn email_exists(em: &str, conn: &mut PgConnection) -> bool {
+    use domain::schema::syncflow::users::dsl::*;
+
+    let user_result = users.filter(email.eq(em)).first::<User>(conn);
     user_result.is_ok()
 }
 
@@ -278,6 +344,7 @@ pub fn create_or_get_github_user(
                 password: None,
                 oauth_provider: Some("github".to_string()),
                 oauth_provider_user_id: Some(user_id),
+                ..Default::default()
             };
 
             diesel::insert_into(users)

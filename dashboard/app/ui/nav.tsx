@@ -50,7 +50,7 @@ const Nav = () => {
           </Link>
           <Link
             aria-hidden
-            href="#"
+            href="/signup"
             className="flex items-center gap-3 text-2xl font-semibold text-gray-900 dark:text-white"
           >
             <button className="hidden items-center gap-1.5 rounded-lg bg-blue-700 p-2.5 text-lg font-medium text-white lg:flex">

@@ -24,9 +24,14 @@ pub struct User {
 
     pub oauth_provider: Option<String>,
     pub oauth_provider_user_id: Option<String>,
+    pub first_name: Option<String>,
+    pub middle_name: Option<String>,
+    pub last_name: Option<String>,
+    pub organization: Option<String>,
+    pub job_role: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Default)]
 #[diesel(table_name = users)]
 pub struct NewUser {
     pub username: String,
@@ -34,6 +39,11 @@ pub struct NewUser {
     pub password: Option<String>,
     pub oauth_provider: Option<String>,
     pub oauth_provider_user_id: Option<String>,
+    pub first_name: Option<String>,
+    pub middle_name: Option<String>,
+    pub last_name: Option<String>,
+    pub organization: Option<String>,
+    pub job_role: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]

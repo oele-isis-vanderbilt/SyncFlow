@@ -1,7 +1,8 @@
 pub const AUTHORIZATION_HEADER: &str = "Authorization";
 
-pub const IGNORE_ROUTES: [&str; 7] = [
+pub const IGNORE_ROUTES: [&str; 8] = [
     "/users/login",
+    "/users/signup",
     "/users/refresh-token",
     "/oauth/github/login",
     "/rapidoc",
