@@ -76,7 +76,7 @@ export default function LoginForm() {
           )}
         </div>
         <div className="text-sm dark:text-white">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/signup" className="underline hover:text-blue-500">
             Sign Up
           </Link>
