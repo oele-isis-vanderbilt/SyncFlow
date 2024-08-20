@@ -5,10 +5,7 @@ import { z } from 'zod';
 import getConfig from '@/config';
 import { redirect } from 'next/navigation';
 import Github from 'next-auth/providers/github';
-import { AuthClient } from './app/lib/auth-client';
-
-const deploymentConfig = getConfig();
-const authClient = new AuthClient(deploymentConfig.mmla_api_url);
+import { authClient } from './app/lib/auth-client';
 
 export const { handlers, auth, signOut, signIn } = NextAuth({
   ...authConfig,

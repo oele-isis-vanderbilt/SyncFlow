@@ -8,6 +8,7 @@ pub struct LoginRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct SignUpRequest {
     pub username: String,
     pub email: String,

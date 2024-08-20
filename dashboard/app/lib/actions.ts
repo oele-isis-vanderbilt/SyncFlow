@@ -13,21 +13,13 @@ import { JsonValue } from '@bufbuild/protobuf';
 import { apiClient } from '@/app/lib/api-client';
 import { ApiKeyRequest } from '@/types/api';
 import { unstable_noStore as noStore } from 'next/cache';
+import { authClient, SignUpSchema } from './auth-client';
 
 const APP_NAME = 'SyncFlow';
 const USER_NAME = 'admin';
 
 const RoomSchema = z.object({
   roomName: z.string(),
-});
-
-const SignUpSchema = z.object({
-  username: z.string(),
-  email: z.string().email(),
-  password: z.string().min(8),
-  confirmPassword: z.string().min(8),
-  firstName: z.string().min(0),
-  middleName: 
 });
 
 const CreateRoom = RoomSchema;
@@ -37,6 +29,11 @@ export type State = {
     roomName?: string;
   };
   message?: string | null;
+};
+
+export type SignUpState = {
+  errors?: string[];
+  success: boolean;
 };
 
 const randomRoomName = () => {
@@ -188,5 +185,43 @@ export async function apiSignInWithGithub() {
   await signIn('github');
 }
 
+export async function signUp(
+  prevState: SignUpState | undefined,
+  formData: FormData,
+): Promise<SignUpState> {
+  let formDataObj = Object.fromEntries(formData.entries());
+  const data = SignUpSchema.extend({
+    confirmPassword: z.string().min(8),
+  })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: 'Passwords do not match',
+      path: ['confirmPassword'],
+    })
+    .safeParse(formDataObj);
 
-export async function signUp()
+  if (!data.success) {
+    return {
+      success: false,
+      errors: data.error.issues.map((issue) => issue.message),
+    };
+  } else {
+    try {
+      let signUpRequest = SignUpSchema.parse(data.data);
+      let response = await authClient.signUp(signUpRequest);
+      if (response.status === 200) {
+        return { success: true };
+      } else {
+        let json = await response.json();
+        return {
+          success: false,
+          errors: [json.message],
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        errors: ['An error occurred while signing up. Please try again.'],
+      };
+    }
+  }
+}

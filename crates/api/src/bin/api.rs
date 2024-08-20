@@ -54,7 +54,6 @@ async fn main() -> std::io::Result<()> {
                 &root_user.username,
                 &root_user.email,
                 &root_user.password,
-                true,
             )
             .unwrap_or_else(|e| panic!("Failed to create root user: {}", e));
         info!("Root user created: {:?}", user);

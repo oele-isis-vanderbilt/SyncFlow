@@ -174,13 +174,11 @@ impl AccountService {
         username: &str,
         email: &str,
         password: &str,
-        admin: bool,
     ) -> Result<User, UserError> {
         user::create_user(
             username,
             email,
             password,
-            admin,
             &mut self.pool.get().unwrap(),
         )
     }

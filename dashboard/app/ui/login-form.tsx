@@ -62,8 +62,7 @@ export default function LoginForm() {
             </div>
           </div>
         </div>
-        <div>
-        </div>
+        <div></div>
         <LoginButton />
         <div
           className="flex h-8 items-end space-x-1"
@@ -79,7 +78,7 @@ export default function LoginForm() {
         </div>
         <div className="text-sm dark:text-white">
           Don't have an account?{' '}
-          <Link href="/signup" className='underline hover:text-blue-500'>
+          <Link href="/signup" className="underline hover:text-blue-500">
             Sign Up
           </Link>
           !
