@@ -26,6 +26,7 @@ pub fn init_api_doc(config: &mut ServiceConfig) {
             crate::login_handlers::logout,
             crate::login_handlers::refresh_login_token,
             crate::login_handlers::signup,
+            crate::login_handlers::me,
         ),
         components(
             schemas(Response, LoginRequest, RefreshTokenRequest, SignUpRequest,

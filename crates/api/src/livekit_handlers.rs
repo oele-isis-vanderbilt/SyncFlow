@@ -1,3 +1,4 @@
+use crate::helpers::{error_response, json_ok_response};
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use application::mmla::mmla_service::MMLAService;
@@ -40,29 +41,18 @@ pub async fn generate_token(
     token_request: Json<TokenRequest>,
     mmla_service: web::Data<MMLAService>,
     deployment_config: web::Data<DeploymentConfig>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let token_result = mmla_service
-                .generate_token(
-                    user_info.into_inner().user_id,
-                    token_request.into_inner(),
-                    deployment_config.livekit_api_key.clone(),
-                    deployment_config.livekit_api_secret.clone(),
-                )
-                .await;
-
-            match token_result {
-                Ok(token) => HttpResponse::Ok().json(token),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .generate_token(
+            user_data.into_inner().user_id,
+            token_request.into_inner(),
+            deployment_config.livekit_api_key.clone(),
+            deployment_config.livekit_api_secret.clone(),
+        )
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -78,26 +68,16 @@ pub async fn generate_token(
 pub async fn create_room(
     mmla_service: web::Data<MMLAService>,
     room_create_request: Json<CreateRoomRequest>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-
-            let req_json = room_create_request.into_inner();
-            println!("{:?}", req_json);
-            let create_room_result = mmla_service.create_room(user_info.user_id, req_json).await;
-
-            match create_room_result {
-                Ok(room) => HttpResponse::Ok().json(room),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .create_room(
+            user_data.into_inner().user_id,
+            room_create_request.into_inner(),
+        )
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -115,25 +95,13 @@ pub async fn create_room(
 pub async fn delete_room(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let delete_room_result = mmla_service
-                .delete_room(user_info.user_id, room_name.to_owned())
-                .await;
-
-            match delete_room_result {
-                Ok(room) => HttpResponse::Ok().json(room),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .delete_room(user_data.into_inner().user_id, room_name.to_owned())
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -147,23 +115,13 @@ pub async fn delete_room(
 #[get("/list-rooms")]
 pub async fn list_rooms(
     mmla_service: web::Data<MMLAService>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let list_rooms_result = mmla_service.list_rooms(user_info.user_id).await;
-
-            match list_rooms_result {
-                Ok(rooms) => HttpResponse::Ok().json(rooms),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .list_rooms(user_data.into_inner().user_id)
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -181,25 +139,13 @@ pub async fn list_rooms(
 pub async fn list_participants(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let list_participants_result = mmla_service
-                .list_participants(user_info.user_id, &room_name)
-                .await;
-
-            match list_participants_result {
-                Ok(participants) => HttpResponse::Ok().json(participants),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .list_participants(user_data.into_inner().user_id, &room_name)
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -217,25 +163,13 @@ pub async fn list_participants(
 pub async fn list_egresses(
     mmla_service: web::Data<MMLAService>,
     room_name: web::Path<String>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let list_egresses_result = mmla_service
-                .list_egresses(user_info.user_id, &room_name)
-                .await;
-
-            match list_egresses_result {
-                Ok(egresses) => HttpResponse::Ok().json(egresses),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .list_egresses(user_data.into_inner().user_id, &room_name)
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -250,26 +184,14 @@ pub async fn list_egresses(
 pub async fn begin_track_egress(
     mmla_service: web::Data<MMLAService>,
     params: web::Path<(String, String)>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
     let (room_name, track_sid) = params.into_inner();
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let begin_egress_result = mmla_service
-                .record_track(user_info.user_id, &room_name, &track_sid)
-                .await;
-
-            match begin_egress_result {
-                Ok(egress_result) => HttpResponse::Ok().json(egress_result),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .record_track(user_data.into_inner().user_id, &room_name, &track_sid)
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -284,26 +206,14 @@ pub async fn begin_track_egress(
 pub async fn stop_recording(
     mmla_service: web::Data<MMLAService>,
     params: web::Path<(String, String)>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
     let (room_name, track_sid) = params.into_inner();
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let stop_recording_result = mmla_service
-                .stop_recording(user_info.user_id, &room_name, &track_sid)
-                .await;
-
-            match stop_recording_result {
-                Ok(egress_result) => HttpResponse::Ok().json(egress_result),
-                Err(err) => {
-                    let response: Response = err.into();
-                    response.into()
-                }
-            }
-        }
-        None => HttpResponse::Unauthorized().body("Unauthorized"),
-    }
+    mmla_service
+        .stop_recording(user_data.into_inner().user_id, &room_name, &track_sid)
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {

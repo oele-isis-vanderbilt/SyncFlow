@@ -5,6 +5,7 @@ use crate::schema::syncflow::{
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
+use shared::user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, UserProfile};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -29,6 +30,20 @@ pub struct User {
     pub last_name: Option<String>,
     pub organization: Option<String>,
     pub job_role: Option<String>,
+}
+
+impl From<User> for UserProfile {
+    fn from(value: User) -> Self {
+        UserProfile {
+            username: value.username,
+            email: value.email,
+            first_name: value.first_name,
+            last_name: value.last_name,
+            organization: value.organization,
+            job_role: value.job_role,
+            middle_name: value.middle_name,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Default)]
@@ -193,6 +208,33 @@ pub struct ApiKey {
     pub valid: bool,
     pub comment: Option<String>,
     pub key_type: KeyType,
+}
+
+impl From<ApiKey> for ApiKeyResponse {
+    fn from(value: ApiKey) -> Self {
+        ApiKeyResponse {
+            key: value.key,
+            secret: value.secret,
+            comment: value.comment.unwrap_or_default(),
+            created_at: value
+                .created_at
+                .map(|c| c.and_utc().timestamp() as usize)
+                .unwrap_or_default(),
+        }
+    }
+}
+
+impl From<ApiKey> for ApiKeyResponseWithoutSecret {
+    fn from(value: ApiKey) -> Self {
+        ApiKeyResponseWithoutSecret {
+            key: value.key,
+            comment: value.comment.unwrap_or_default(),
+            created_at: value
+                .created_at
+                .map(|c| c.and_utc().timestamp() as usize)
+                .unwrap_or_default(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
