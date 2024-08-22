@@ -373,6 +373,7 @@ dependencies = [
  "diesel",
  "diesel-derive-enum",
  "domain",
+ "futures",
  "infrastructure",
  "jsonwebtoken",
  "livekit-api",
@@ -384,6 +385,7 @@ dependencies = [
  "serde",
  "serde_json",
  "shared",
+ "thiserror",
  "uuid",
 ]
 
@@ -962,6 +964,7 @@ dependencies = [
  "diesel-derive-enum",
  "infrastructure",
  "serde",
+ "shared",
  "utoipa",
  "uuid",
 ]

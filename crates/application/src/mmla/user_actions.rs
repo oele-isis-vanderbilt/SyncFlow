@@ -7,9 +7,11 @@ use domain::models::{
 use infrastructure::DbPool;
 use log::{error, info};
 use std::sync::Arc;
+use thiserror::Error;
 
+#[derive(Debug, Error)]
 pub enum UserActionError {
-    RoomCreationError(String),
+    #[error("Database Error: {0}")]
     DatabaseError(String),
 }
 

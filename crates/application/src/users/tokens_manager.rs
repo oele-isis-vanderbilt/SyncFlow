@@ -110,8 +110,8 @@ impl JWTTokensManager {
 
         //ToDo: Make this configurable
         let login_token_expiry =
-            chrono::Utc::now().timestamp() as usize + self.access_token_expiration as usize;
-        let refresh_token_expiry = login_token_expiry + self.refresh_token_expiration as usize;
+            chrono::Utc::now().timestamp() as usize + self.access_token_expiration;
+        let refresh_token_expiry = login_token_expiry + self.refresh_token_expiration;
         let user_token = LoginToken {
             iat: chrono::Utc::now().timestamp() as usize,
             exp: login_token_expiry,
@@ -146,11 +146,11 @@ impl JWTTokensManager {
 
     pub fn decode_token_unsafe(&self, token: &str) -> Result<TokenTypes, UserError> {
         if let Ok(token_data) = decode_jwt_unsafe::<LoginToken>(token) {
-            return Ok(TokenTypes::LoginToken(token_data));
+            Ok(TokenTypes::LoginToken(token_data))
         } else if let Ok(token_data) = decode_jwt_unsafe::<RefreshToken>(token) {
-            return Ok(TokenTypes::RefreshToken(token_data));
+            Ok(TokenTypes::RefreshToken(token_data))
         } else if let Ok(token_data) = decode_jwt_unsafe::<ApiToken>(token) {
-            return Ok(TokenTypes::ApiToken(token_data));
+            Ok(TokenTypes::ApiToken(token_data))
         } else {
             return Err(UserError::TokenError("Invalid token".to_string()));
         }

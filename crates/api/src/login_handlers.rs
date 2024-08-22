@@ -1,12 +1,11 @@
+use crate::helpers::{error_response, json_ok_response};
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
 use application::users::tokens_manager::UserInfo;
 use shared::constants;
 use shared::response_models::Response;
-use shared::user_models::{
-    ApiKeyRequest, ApiKeyResponse, LoginRequest, RefreshTokenRequest, SignUpRequest, TokenResponse,
-};
+use shared::user_models::{ApiKeyRequest, LoginRequest, RefreshTokenRequest, SignUpRequest};
 
 #[utoipa::path(
     post,
@@ -24,15 +23,10 @@ pub async fn login(
     user_auth: web::Data<AccountService>,
     login_request: Json<LoginRequest>,
 ) -> HttpResponse {
-    match user_auth.login(login_request.into_inner()) {
-        Ok((access_token, refresh_token)) => {
-            HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token))
-        }
-        Err(e) => {
-            let response: Response = e.into();
-            response.into()
-        }
-    }
+    user_auth
+        .login(login_request.into_inner())
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -50,13 +44,10 @@ pub async fn signup(
     user_auth: web::Data<AccountService>,
     signup_request: Json<SignUpRequest>,
 ) -> HttpResponse {
-    match user_auth.signup(signup_request.into_inner()) {
-        Ok(()) => HttpResponse::Ok().into(),
-        Err(e) => {
-            let response: Response = e.into();
-            response.into()
-        }
-    }
+    user_auth
+        .signup(signup_request.into_inner())
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -107,95 +98,37 @@ pub async fn refresh_login_token(
     user_auth: web::Data<AccountService>,
     refresh_request: Json<RefreshTokenRequest>,
 ) -> HttpResponse {
-    match user_auth.refresh_token(refresh_request.into_inner()) {
-        Ok((access_token, refresh_token)) => {
-            HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token))
-        }
-        Err(e) => {
-            let response: Response = e.into();
-            response.into()
-        }
-    }
+    user_auth
+        .refresh_token(refresh_request.into_inner())
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[post("/api-key")]
 pub async fn create_api_key(
     api_token_request: Json<ApiKeyRequest>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let user_id = user_info.user_id;
-            let api_key =
-                user_auth.generate_api_keys(user_id, Some(api_token_request.comment.clone()));
-            match api_key {
-                Ok(key) => {
-                    let decrypted = user_auth.decrypt_secret(&key.secret);
-                    match decrypted {
-                        Ok(secret) => {
-                            let key_response = ApiKeyResponse {
-                                key: key.key,
-                                secret,
-                                created_at: key
-                                    .created_at
-                                    .map(|c| c.and_utc().timestamp() as usize)
-                                    .unwrap_or_default(),
-                                comment: key.comment.unwrap_or_default(),
-                            };
-                            HttpResponse::Ok().json(key_response)
-                        }
-                        Err(e) => {
-                            let response: Response = e.into();
-                            response.into()
-                        }
-                    }
-                }
-                Err(e) => {
-                    let response: Response = e.into();
-                    response.into()
-                }
-            }
-        }
-        None => {
-            let response = Response {
-                status: 401,
-                message: constants::MESSAGE_INVALID_TOKEN.to_string(),
-            };
-            response.into()
-        }
-    }
+    user_auth
+        .generate_api_keys(
+            user_data.into_inner().user_id,
+            &api_token_request.into_inner(),
+        )
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[delete("/api-key/{key_id}")]
 pub async fn delete_api_key(
     account_service: web::Data<AccountService>,
     key_id: web::Path<String>,
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let user_id = user_info.user_id;
-            let key_id = key_id.into_inner();
-            let result = account_service.delete_api_key(user_id, &key_id);
-            match result {
-                Ok(api_key_resp) => HttpResponse::Ok().json(api_key_resp),
-                Err(e) => {
-                    let response: Response = e.into();
-                    response.into()
-                }
-            }
-        }
-        None => {
-            let response = Response {
-                status: 401,
-                message: constants::MESSAGE_INVALID_TOKEN.to_string(),
-            };
-            response.into()
-        }
-    }
+    account_service
+        .delete_api_key(user_data.into_inner().user_id, &key_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 #[utoipa::path(
@@ -208,30 +141,32 @@ pub async fn delete_api_key(
 )]
 #[get("/api-keys")]
 pub async fn list_all_api_keys(
-    user_data: Option<ReqData<UserInfo>>,
+    user_data: ReqData<UserInfo>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
-    match user_data {
-        Some(user_info) => {
-            let user_info = user_info.into_inner();
-            let user_id = user_info.user_id;
-            let api_keys = user_auth.list_api_keys(user_id);
-            match api_keys {
-                Ok(keys) => HttpResponse::Ok().json(keys),
-                Err(e) => {
-                    let response: Response = e.into();
-                    response.into()
-                }
-            }
-        }
-        None => {
-            let response = Response {
-                status: 401,
-                message: constants::MESSAGE_INVALID_TOKEN.to_string(),
-            };
-            response.into()
-        }
-    }
+    user_auth
+        .list_api_keys(user_data.into_inner().user_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+#[utoipa::path(
+    get,
+    path = "/me",
+    responses(
+        (status = 200, description = "Get the user", body = User),
+        (status = 401, description = "Invalid Token")
+    )
+)]
+#[get("/me")]
+pub async fn me(
+    user_data: ReqData<UserInfo>,
+    user_auth: web::Data<AccountService>,
+) -> HttpResponse {
+    user_auth
+        .get_user(user_data.into_inner().user_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
@@ -242,6 +177,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
         .service(create_api_key)
         .service(delete_api_key)
         .service(list_all_api_keys)
-        .service(signup);
+        .service(signup)
+        .service(me);
     cfg.service(users_scope);
 }

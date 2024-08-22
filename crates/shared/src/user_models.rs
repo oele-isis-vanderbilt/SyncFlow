@@ -73,3 +73,15 @@ impl TokenResponse {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UserProfile {
+    pub username: String,
+    pub email: String,
+    pub first_name: Option<String>,
+    pub middle_name: Option<String>,
+    pub last_name: Option<String>,
+    pub organization: Option<String>,
+    pub job_role: Option<String>,
+}

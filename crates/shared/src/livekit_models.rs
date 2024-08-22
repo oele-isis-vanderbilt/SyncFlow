@@ -91,23 +91,23 @@ impl From<VideoGrants> for VideoGrantsWrapper {
     }
 }
 
-impl Into<VideoGrants> for VideoGrantsWrapper {
-    fn into(self) -> VideoGrants {
+impl From<VideoGrantsWrapper> for VideoGrants {
+    fn from(value: VideoGrantsWrapper) -> Self {
         VideoGrants {
-            room_create: self.room_create,
-            room_list: self.room_list,
-            room_record: self.room_record,
-            room_admin: self.room_admin,
-            room_join: self.room_join,
-            room: self.room,
-            can_publish: self.can_publish,
-            can_subscribe: self.can_subscribe,
-            can_publish_data: self.can_publish_data,
-            can_publish_sources: self.can_publish_sources,
-            can_update_own_metadata: self.can_update_own_metadata,
-            ingress_admin: self.ingress_admin,
-            hidden: self.hidden,
-            recorder: self.recorder,
+            room_create: value.room_create,
+            room_list: value.room_list,
+            room_record: value.room_record,
+            room_admin: value.room_admin,
+            room_join: value.room_join,
+            room: value.room,
+            can_publish: value.can_publish,
+            can_subscribe: value.can_subscribe,
+            can_publish_data: value.can_publish_data,
+            can_publish_sources: value.can_publish_sources,
+            can_update_own_metadata: value.can_update_own_metadata,
+            ingress_admin: value.ingress_admin,
+            hidden: value.hidden,
+            recorder: value.recorder,
         }
     }
 }

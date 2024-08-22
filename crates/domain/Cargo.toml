@@ -13,4 +13,4 @@ serde = { version = "1.0.197", features = ["derive"] }
 utoipa = "4.2.0"
 uuid = { version = "1.7.0", features = ["v4", "serde"] }
 infrastructure = { path = "../infrastructure" }
-
+shared = { path = "../shared" }

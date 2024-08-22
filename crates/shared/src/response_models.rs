@@ -8,9 +8,8 @@ pub struct Response {
 }
 
 // Map to HttpResponse
-impl Into<HttpResponse> for Response {
-    fn into(self) -> HttpResponse {
-        HttpResponse::build(actix_web::http::StatusCode::from_u16(self.status as u16).unwrap())
-            .json(&self)
+impl From<Response> for HttpResponse {
+    fn from(val: Response) -> HttpResponse {
+        HttpResponse::build(actix_web::http::StatusCode::from_u16(val.status).unwrap()).json(&val)
     }
 }
