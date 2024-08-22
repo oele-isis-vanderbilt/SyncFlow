@@ -3,7 +3,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use shared::constants::APPLICATION_NAME;
-use std::fmt::Display;
+use thiserror::Error;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct GithubTokenPayload {
@@ -17,19 +17,12 @@ pub struct GithubUser {
     pub email: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Error)]
 pub enum GithubOAuthError {
+    #[error("Verification error: {0}")]
     VerificationError(String),
+    #[error("Reqwest error: {0}")]
     ReqwestError(String),
-}
-
-impl Display for GithubOAuthError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            GithubOAuthError::VerificationError(e) => write!(f, "Verification error: {}", e),
-            GithubOAuthError::ReqwestError(e) => write!(f, "Reqwest error: {}", e),
-        }
-    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

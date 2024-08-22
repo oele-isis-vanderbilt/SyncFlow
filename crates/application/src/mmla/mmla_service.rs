@@ -132,9 +132,9 @@ impl MMLAService {
         let active_rooms = self.room_service.list_rooms(None).await?;
 
         let collected_rooms: Vec<LivekitRoom> = stream::iter(active_rooms)
-            .filter_map(|room| {
-                async move { self.find_user_created_room(user_id, &room.name).await }
-            })
+            .filter_map(
+                |room| async move { self.find_user_created_room(user_id, &room.name).await },
+            )
             .collect()
             .await;
 

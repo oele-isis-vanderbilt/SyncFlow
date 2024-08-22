@@ -7,11 +7,13 @@ pub fn get_track_egress_destination(request: Option<Request>) -> Option<EgressDe
     if let Some(Request::Track(req)) = request {
         req.output.and_then(|output| match output {
             Output::File(f) => {
-                f.output.and_then(|destination| match destination {
-                    DirectFileOutputOptions::S3(_) => Some(EgressDestination::S3),
-                    // FixMe: Other Options not supported yet by the deployment
-                    _ => None,
-                }).or(Some(EgressDestination::LocalFile))
+                f.output
+                    .and_then(|destination| match destination {
+                        DirectFileOutputOptions::S3(_) => Some(EgressDestination::S3),
+                        // FixMe: Other Options not supported yet by the deployment
+                        _ => None,
+                    })
+                    .or(Some(EgressDestination::LocalFile))
             }
             _ => None,
         })

@@ -3,9 +3,8 @@ use diesel::prelude::*;
 use diesel::result::Error as DieselError;
 use diesel::PgConnection;
 use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, User};
-use std::fmt::Display;
 
-use super::oauth::github::GithubUser;
+use super::oauth::github::{GithubOAuthError, GithubUser};
 use crate::users::secret::{encrypt_string, key_secret_pair};
 use serde::{Deserialize, Serialize};
 use shared::response_models::Response;
@@ -20,37 +19,30 @@ pub struct LoginSessionInfo {
     pub user_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Error, Clone)]
+#[derive(Debug, Serialize, Deserialize, Error)]
 pub enum UserError {
+    #[error("User not found: {0}")]
     UserNotFound(String),
+    #[error("User name already exists: {0}")]
     UserNameAlreadyExists(String),
+    #[error("User email already exists: {0}")]
     UserEmailAlreadyExists(String),
+    #[error("Password mismatch: {0}")]
     PasswordMismatch(String),
+    #[error("Database error: {0}")]
     DatabaseError(String),
+    #[error("Token expired: {0}")]
     TokenExpired(String),
+    #[error("Login session not found: {0}")]
     LoginSessionNotFound(String),
+    #[error("Token error: {0}")]
     TokenError(String),
+    #[error("Secret error: {0}")]
     SecretError(String),
+    #[error("Hash error: {0}")]
     HashError(String),
-    OAuthError(String),
-}
-
-impl Display for UserError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            UserError::UserNotFound(e) => write!(f, "User not found: {}", e),
-            UserError::UserNameAlreadyExists(e) => write!(f, "User already exists: {}", e),
-            UserError::UserEmailAlreadyExists(e) => write!(f, "Email already exists: {}", e),
-            UserError::PasswordMismatch(e) => write!(f, "Password mismatch: {}", e),
-            UserError::DatabaseError(e) => write!(f, "Database error: {}", e),
-            UserError::TokenExpired(e) => write!(f, "Token expired: {}", e),
-            UserError::LoginSessionNotFound(e) => write!(f, "Login session not found: {}", e),
-            UserError::TokenError(e) => write!(f, "Token error: {}", e),
-            UserError::SecretError(e) => write!(f, "Secret error: {}", e),
-            UserError::HashError(e) => write!(f, "Hash error: {}", e),
-            UserError::OAuthError(e) => write!(f, "OAuth error: {}", e),
-        }
-    }
+    #[error("OAuth error: {0}")]
+    GithubOAuthError(#[from] GithubOAuthError),
 }
 
 impl From<UserError> for Response {
@@ -96,9 +88,9 @@ impl From<UserError> for Response {
                 status: 500,
                 message: e,
             },
-            UserError::OAuthError(e) => Response {
+            UserError::GithubOAuthError(e) => Response {
                 status: 500,
-                message: e,
+                message: e.to_string(),
             },
         }
     }
