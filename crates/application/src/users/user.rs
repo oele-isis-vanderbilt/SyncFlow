@@ -5,13 +5,13 @@ use diesel::PgConnection;
 use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, User};
 use std::fmt::Display;
 
+use super::oauth::github::GithubUser;
 use crate::users::secret::{encrypt_string, key_secret_pair};
 use serde::{Deserialize, Serialize};
 use shared::response_models::Response;
 use shared::user_models::{LoginRequest, SignUpRequest};
+use thiserror::Error;
 use uuid::Uuid;
-
-use super::oauth::github::GithubUser;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginSessionInfo {
@@ -20,7 +20,7 @@ pub struct LoginSessionInfo {
     pub user_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Error, Clone)]
 pub enum UserError {
     UserNotFound(String),
     UserNameAlreadyExists(String),
