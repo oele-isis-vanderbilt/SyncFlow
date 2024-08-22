@@ -84,7 +84,7 @@ pub async fn verify_user_token(
             serde_json::from_value(json_value)
                 .map_err(|err| GithubOAuthError::ReqwestError(err.to_string()))?;
 
-        if &verification_response.app.client_id != client_id {
+        if verification_response.app.client_id != client_id {
             let message =
                 "The client ID in the response does not match the client ID in the request.";
             return Err(GithubOAuthError::VerificationError(message.to_owned()));
@@ -96,7 +96,7 @@ pub async fn verify_user_token(
 
         verification_response.user.email = user.email.clone();
 
-        return Ok(verification_response);
+        Ok(verification_response)
     } else {
         let error_text = response
             .text()

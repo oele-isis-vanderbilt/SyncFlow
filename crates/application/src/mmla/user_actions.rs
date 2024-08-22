@@ -11,9 +11,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum UserActionError {
-    #[error("Error creating room: {0}")]
-    RoomCreationError(String),
-    #[error("Error deleting room: {0}")]
+    #[error("Database Error: {0}")]
     DatabaseError(String),
 }
 

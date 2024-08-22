@@ -27,15 +27,15 @@ async fn login_with_github(
 
         match token_result {
             Ok((access_token, refresh_token)) => {
-                return HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token));
+                HttpResponse::Ok().json(TokenResponse::bearer(access_token, refresh_token))
             }
             Err(e) => {
                 let response: Response = e.into();
-                return response.into();
+                response.into()
             }
         }
     } else {
-        return HttpResponse::Unauthorized().body("Invalid Authorization Header");
+        HttpResponse::Unauthorized().body("Invalid Authorization Header")
     }
 }
 

@@ -29,7 +29,7 @@ pub fn get_livekit_server_http_url() -> String {
 pub async fn ping_livekit() -> bool {
     let url = get_livekit_server_http_url();
     let client = reqwest::Client::new();
-    let response = client.get(&format!("{}", url)).send().await;
+    let response = client.get(url).send().await;
     match response {
         Ok(resp) => resp.status().is_success(),
         Err(_) => false,

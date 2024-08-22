@@ -115,7 +115,7 @@ impl MMLAService {
             .await
             .ok_or_else(|| MMLAServiceError::RoomNotFoundError(room_name.clone()))?;
 
-        let _ = self.room_service.delete_room(&room.name).await?;
+        self.room_service.delete_room(&room.name).await?;
         let new_delete_room_action = NewDeleteRoomAction {
             user_id,
             room_name: room.name.clone(),
@@ -133,7 +133,6 @@ impl MMLAService {
 
         let collected_rooms: Vec<LivekitRoom> = stream::iter(active_rooms)
             .filter_map(|room| {
-                let user_id = user_id;
                 async move { self.find_user_created_room(user_id, &room.name).await }
             })
             .collect()

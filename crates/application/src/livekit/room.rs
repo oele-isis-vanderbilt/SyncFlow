@@ -28,10 +28,12 @@ impl RoomService {
         name: &str,
         options: RoomOptions,
     ) -> ServiceResult<proto::Room> {
-        let mut create_options = CreateRoomOptions::default();
-        create_options.max_participants = options.max_participants;
-        create_options.metadata = options.metadata;
-        create_options.empty_timeout = options.empty_timeout;
+        let create_options = CreateRoomOptions {
+            max_participants: options.max_participants,
+            metadata: options.metadata,
+            empty_timeout: options.empty_timeout,
+            ..Default::default()
+        };
 
         self.client.create_room(name, create_options).await
     }

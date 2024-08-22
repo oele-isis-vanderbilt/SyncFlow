@@ -166,7 +166,7 @@ impl AccountService {
             .await
             .map_err(|e| UserError::OAuthError(e.to_string()))?;
 
-        let github_user = fetch_github_user(&auth_token)
+        let github_user = fetch_github_user(auth_token)
             .await
             .map_err(|e| UserError::OAuthError(e.to_string()))?;
 
