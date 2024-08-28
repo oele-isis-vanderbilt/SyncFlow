@@ -111,15 +111,15 @@ export class AuthClient {
 
     if (response.ok) {
       let data = await response.json();
-      let token = data.accessToken;
-      let decoded_jwt = jwtDecode(token);
+      let decoded_jwt = jwtDecode(data.accessToken);
       const refreshedTokens = {
         ...token,
+        jwt: data.accessToken,
         id: decoded_jwt.userName,
         name: decoded_jwt.userName,
         email: decoded_jwt.userName,
         role: decoded_jwt.role,
-        accessToken: token,
+        accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         accessTokenExpires: decoded_jwt.exp * 1000,
       };
