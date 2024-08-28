@@ -1,4 +1,5 @@
 use super::{secret, tokens_manager, user};
+use crate::project;
 use crate::users::oauth::github::{fetch_github_user, verify_user_token, GithubUser};
 use crate::users::tokens_manager::{TokenTypes, UserInfo};
 use crate::users::user::UserError;
@@ -6,11 +7,12 @@ use domain::models::User;
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
 use shared::user_models::{
-    ApiKeyRequest, ApiKeyResponse, ApiKeyResponseWithoutSecret, RefreshTokenRequest, TokenResponse,
-    UserProfile,
+    ApiKeyRequest, ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, ProjectRequest,
+    RefreshTokenRequest, TokenResponse, UserProfile,
 };
 use shared::user_models::{LoginRequest, SignUpRequest};
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub struct AccountService {
     pool: Arc<DbPool>,
@@ -134,6 +136,54 @@ impl AccountService {
         key_id: &str,
     ) -> Result<ApiKeyResponseWithoutSecret, UserError> {
         user::delete_api_key(user_id, key_id, &mut self.pool.get().unwrap()).map(Into::into)
+    }
+
+    pub fn create_project(
+        &self,
+        user_id: i32,
+        new_project_request: &ProjectRequest,
+    ) -> Result<ProjectInfo, UserError> {
+        let project = project::project::create_project(
+            user_id,
+            new_project_request,
+            &self.config.encryption_key,
+            &mut self.pool.get().unwrap(),
+        )?;
+
+        Ok(project.into())
+    }
+
+    pub fn get_projects(&self, user_id: i32) -> Result<Vec<ProjectInfo>, UserError> {
+        let projects = project::project::list_projects(user_id, &mut self.pool.get().unwrap())?;
+        Ok(projects.into_iter().map(Into::into).collect())
+    }
+
+    pub fn get_project(&self, user_id: i32, project_id: &str) -> Result<ProjectInfo, UserError> {
+        let project =
+            project::project::get_project(user_id, project_id, &mut self.pool.get().unwrap())?;
+        Ok(project.into())
+    }
+
+    pub fn delete_project(&self, user_id: i32, project_id: &str) -> Result<ProjectInfo, UserError> {
+        let project =
+            project::project::delete_project(user_id, project_id, &mut self.pool.get().unwrap())?;
+        Ok(project.into())
+    }
+
+    pub fn update_project(
+        &self,
+        user_id: i32,
+        project_id: Uuid,
+        new_project_request: &ProjectRequest,
+    ) -> Result<ProjectInfo, UserError> {
+        let project = project::project::update_project(
+            user_id,
+            project_id,
+            new_project_request,
+            &self.config.encryption_key,
+            &mut self.pool.get().unwrap(),
+        )?;
+        Ok(project.into())
     }
 
     pub fn create_user(

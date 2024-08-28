@@ -5,11 +5,17 @@ import {
   VideoCameraIcon,
 } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
+import { HiChartPie } from 'react-icons/hi';
+import { SiSession } from 'react-icons/si';
+import { CgMediaLive } from 'react-icons/cg';
 
 const iconMap = {
   rooms: HomeModernIcon,
   participants: UserGroupIcon,
   recordings: VideoCameraIcon,
+  projects: HiChartPie,
+  sessions: SiSession,
+  liveSessions: CgMediaLive,
 };
 
 async function roomsSummary() {
@@ -46,6 +52,16 @@ export async function SummaryCards() {
   );
 }
 
+export async function UserSummaryCards({}) {
+  return (
+    <>
+      <Card title="Projects" value={1} type="projects" />
+      <Card title="Sessions" value={2} type="sessions" />
+      <Card title="Active Sessions" value={0} type="liveSessions" />
+    </>
+  );
+}
+
 export function Card({
   title,
   value,
@@ -53,7 +69,13 @@ export function Card({
 }: {
   title: string;
   value: string | number;
-  type: 'rooms' | 'participants' | 'recordings';
+  type:
+    | 'rooms'
+    | 'participants'
+    | 'recordings'
+    | 'projects'
+    | 'sessions'
+    | 'liveSessions';
 }) {
   const Icon = iconMap[type];
 

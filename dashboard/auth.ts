@@ -43,7 +43,7 @@ export const { handlers, auth, signOut, signIn } = NextAuth({
         return token;
       }
 
-      const refreshedTokens = await refreshAccessToken(token);
+      const refreshedTokens = await authClient.refreshAccessToken(token);
       if (refreshedTokens === null) {
         redirect('/login');
       }

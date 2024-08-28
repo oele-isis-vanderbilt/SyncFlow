@@ -4,6 +4,7 @@ use api::auth_middleware;
 use api::livekit_handlers::init_routes as lk_init_routes;
 use api::login_handlers::init_routes as login_init_routes;
 use api::oauth_handlers::init_github_oauth_routes;
+use api::project_handlers::init_routes as project_init_routes;
 use application::livekit::egress::EgressService;
 use application::livekit::room::RoomService;
 use application::mmla::mmla_service::MMLAService;
@@ -78,7 +79,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(config.clone()))
             .configure(lk_init_routes)
             .configure(login_init_routes)
-            .configure(init_api_doc);
+            .configure(init_api_doc)
+            .configure(project_init_routes);
 
         if config.github_client_id.is_some() && config.github_client_secret.is_some() {
             app = app.configure(init_github_oauth_routes);

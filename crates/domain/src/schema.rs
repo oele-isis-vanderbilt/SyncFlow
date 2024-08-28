@@ -13,6 +13,10 @@ pub mod syncflow {
         #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
         #[diesel(postgres_type(name = "KeyType", schema = "syncflow"))]
         pub struct KeyType;
+
+        #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+        #[diesel(postgres_type(name = "StorageType", schema = "syncflow"))]
+        pub struct StorageType;
     }
 
     diesel::table! {
@@ -98,6 +102,48 @@ pub mod syncflow {
     }
 
     diesel::table! {
+        syncflow.project_sessions (id) {
+            id -> Uuid,
+            #[max_length = 50]
+            name -> Varchar,
+            comments -> Nullable<Text>,
+            empty_timeout -> Int4,
+            max_participants -> Int4,
+            #[max_length = 50]
+            livekit_room_name -> Varchar,
+            created_at -> Nullable<Timestamptz>,
+            updated_at -> Nullable<Timestamptz>,
+            project_id -> Uuid,
+        }
+    }
+
+    diesel::table! {
+        use diesel::sql_types::*;
+        use super::sql_types::StorageType;
+
+        syncflow.projects (id) {
+            id -> Uuid,
+            user_id -> Int4,
+            #[max_length = 50]
+            name -> Varchar,
+            description -> Nullable<Text>,
+            livekit_server_url -> Text,
+            livekit_server_api_key -> Text,
+            livekit_server_api_secret -> Text,
+            storage_type -> StorageType,
+            #[max_length = 50]
+            bucket_name -> Varchar,
+            endpoint -> Text,
+            access_key -> Text,
+            secret_key -> Text,
+            #[max_length = 50]
+            region -> Nullable<Varchar>,
+            created_at -> Nullable<Timestamptz>,
+            updated_at -> Nullable<Timestamptz>,
+        }
+    }
+
+    diesel::table! {
         syncflow.users (id) {
             id -> Int4,
             #[max_length = 255]
@@ -131,6 +177,8 @@ pub mod syncflow {
     diesel::joinable!(generate_token_actions -> users (user_id));
     diesel::joinable!(list_rooms_actions -> users (user_id));
     diesel::joinable!(login_sessions -> users (user_id));
+    diesel::joinable!(project_sessions -> projects (project_id));
+    diesel::joinable!(projects -> users (user_id));
 
     diesel::allow_tables_to_appear_in_same_query!(
         api_keys,
@@ -140,6 +188,8 @@ pub mod syncflow {
         generate_token_actions,
         list_rooms_actions,
         login_sessions,
+        project_sessions,
+        projects,
         users,
     );
 }

@@ -1,11 +1,11 @@
 use crate::schema::syncflow::{
     api_keys, create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
-    list_rooms_actions, login_sessions, users,
+    list_rooms_actions, login_sessions, project_sessions, projects, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
-use shared::user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, UserProfile};
+use shared::user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, UserProfile};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -246,4 +246,82 @@ pub struct NewApiKey {
     pub secret: String,
     pub valid: bool,
     pub comment: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, DbEnum, Clone)]
+#[ExistingTypePath = "crate::schema::syncflow::sql_types::StorageType"]
+#[DbValueStyle = "PascalCase"]
+pub enum StorageType {
+    S3,
+}
+
+#[derive(Debug, Serialize, Deserialize, Queryable, Insertable, AsChangeset, Clone, ToSchema)]
+#[diesel(table_name = projects)]
+pub struct Project {
+    pub id: Uuid,
+    pub user_id: i32,
+    pub name: String,
+    pub description: Option<String>,
+    pub livekit_server_url: String,
+    pub livekit_server_api_key: String,
+    pub livekit_server_api_secret: String,
+    pub storage_type: StorageType,
+    pub bucket_name: String,
+    pub endpoint: String,
+    pub access_key: String,
+    pub secret_key: String,
+    pub region: Option<String>,
+    pub created_at: Option<chrono::NaiveDateTime>,
+    pub updated_at: Option<chrono::NaiveDateTime>,
+}
+
+impl From<Project> for ProjectInfo {
+    fn from(value: Project) -> Self {
+        ProjectInfo {
+            id: value.id.to_string(),
+            name: value.name,
+            livekit_server_url: value.livekit_server_url,
+            bucket_name: value.bucket_name,
+            description: value.description,
+            endpoint: value.endpoint,
+            storage_type: match value.storage_type {
+                StorageType::S3 => "s3".to_string(),
+            },
+            last_updated: value
+                .updated_at
+                .map(|c| c.and_utc().timestamp() as usize)
+                .unwrap_or_default(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
+#[diesel(table_name = projects)]
+pub struct NewProject {
+    pub user_id: i32,
+    pub name: String,
+    pub description: Option<String>,
+    pub livekit_server_url: String,
+    pub livekit_server_api_key: String,
+    pub livekit_server_api_secret: String,
+    pub storage_type: StorageType,
+    pub bucket_name: String,
+    pub endpoint: String,
+    pub access_key: String,
+    pub secret_key: String,
+    pub region: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
+#[diesel(table_name = project_sessions)]
+pub struct ProjectSession {
+    pub id: Uuid,
+    pub name: String,
+    pub comments: Option<String>,
+    pub empty_timeout: i32,
+    pub max_participants: i32,
+    pub livekit_room_name: String,
+    pub created_at: Option<chrono::NaiveDateTime>,
+    pub updated_at: Option<chrono::NaiveDateTime>,
+    pub project_id: Uuid,
 }

@@ -19,7 +19,6 @@ export const SignUpSchema = z.object({
 });
 
 export type SignUpRequest = z.infer<typeof SignUpSchema>;
-
 export class AuthClient {
   auth_url: string;
 

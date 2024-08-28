@@ -7,8 +7,9 @@ use base64::{engine, Engine};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use std::fmt::Display;
 use std::string::String;
+use thiserror::Error;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Error)]
 pub enum SecretError {
     Base64DecodeError(String),
     EncryptionError(String),

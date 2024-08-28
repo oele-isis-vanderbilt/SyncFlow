@@ -1,9 +1,9 @@
 import { lusitana } from '@/app/ui/fonts';
 import type { Metadata } from 'next';
 import { CardsSkeleton } from '@/app/ui/skeletons';
-import { SummaryCards } from '@/app/ui/dashboard/summary-cards';
-import CreateRoom from '@/app/ui/dashboard/create-room';
-import RoomsTable from '@/app/ui/dashboard/rooms-table';
+import { UserSummaryCards } from '@/app/ui/dashboard/summary-cards';
+import CreateProject from '@/app/ui/dashboard/create-project';
+import ProjectCards from '../ui/dashboard/paged-project-cards';
 import { auth } from '@/auth';
 
 import { Suspense } from 'react';
@@ -20,11 +20,11 @@ export default async function Page() {
       <h1
         className={`${lusitana.className} mb-4 p-2 text-xl md:text-2xl dark:text-white`}
       >
-        SyncFlow Dashboard
+        Welcome to SyncFlow, {session?.user?.name ? session.user.name : 'User'}!
       </h1>
       <div className="grid gap-6 p-2 sm:grid-cols-2 lg:grid-cols-4">
         <Suspense fallback={<CardsSkeleton />}>
-          <SummaryCards />
+          <UserSummaryCards />
         </Suspense>
       </div>
       <div className="mt-8 flex items-center p-2">
@@ -32,13 +32,13 @@ export default async function Page() {
           <h1
             className={`${lusitana.className} mb-4 mt-4 text-xl md:text-2xl dark:text-white`}
           >
-            Rooms
+            Projects
           </h1>
         </div>
-        <CreateRoom />
+        <CreateProject />
       </div>
       <div className="mt-8 flex items-center p-2">
-        <RoomsTable navPath={'rooms'} />
+        <ProjectCards />
       </div>
     </main>
   );
