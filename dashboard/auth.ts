@@ -47,6 +47,7 @@ export const { handlers, auth, signOut, signIn } = NextAuth({
       if (refreshedTokens === null) {
         redirect('/login');
       }
+      return refreshedTokens;
     },
     async session({ session, token }) {
       if (token) {
