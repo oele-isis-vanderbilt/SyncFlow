@@ -15,6 +15,10 @@ pub mod syncflow {
         pub struct KeyType;
 
         #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+        #[diesel(postgres_type(name = "project_session_status", schema = "syncflow"))]
+        pub struct ProjectSessionStatus;
+
+        #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
         #[diesel(postgres_type(name = "StorageType", schema = "syncflow"))]
         pub struct StorageType;
     }
@@ -102,6 +106,9 @@ pub mod syncflow {
     }
 
     diesel::table! {
+        use diesel::sql_types::*;
+        use super::sql_types::ProjectSessionStatus;
+
         syncflow.project_sessions (id) {
             id -> Uuid,
             #[max_length = 50]
@@ -113,6 +120,7 @@ pub mod syncflow {
             livekit_room_name -> Varchar,
             created_at -> Nullable<Timestamptz>,
             updated_at -> Nullable<Timestamptz>,
+            status -> ProjectSessionStatus,
             project_id -> Uuid,
         }
     }

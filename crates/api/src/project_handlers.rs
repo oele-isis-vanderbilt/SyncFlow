@@ -7,7 +7,7 @@ use actix_web::{
     web::{self, ReqData},
     HttpResponse,
 };
-use application::users::{account_service::AccountService, tokens_manager::UserInfo};
+use application::{project::session_service::SessionService, users::{account_service::AccountService, tokens_manager::UserInfo}};
 use shared::user_models::ProjectRequest;
 
 #[utoipa::path(
@@ -111,9 +111,10 @@ async fn create_project(
         .unwrap_or_else(error_response)
 }
 
-pub fn init_routes(cfg: &mut web::ServiceConfig) {
+pub fn init_routes(cfg: &mut web::ServiceConfig, session_service: web::Data<SessionService>) {
     let projects_scope = web::scope("/projects")
         .wrap(ownership_middleware::Ownership)
+        .app_data(session_service.clone())
         .service(create_project)
         .service(list_projects)
         .service(get_project)
@@ -121,3 +122,4 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
 
     cfg.service(projects_scope);
 }
+

@@ -1,4 +1,5 @@
-use crate::users::secret::{encrypt_string, SecretError};
+use super::super::livekit::room::RoomService;
+use crate::users::secret::{decrypt_string, encrypt_string, SecretError};
 use diesel::{prelude::*, PgConnection};
 use domain::models::{NewProject, Project, StorageType};
 use shared::user_models::ProjectRequest;
@@ -21,7 +22,7 @@ pub enum ProjectError {
     EncryptionError(#[from] SecretError),
 }
 
-trait Encryptable<T = Self> {
+pub(crate) trait Encryptable<T = Self> {
     fn encrypt(&mut self, key: &str) -> Result<(), SecretError>;
 
     #[allow(unused)]
@@ -44,6 +45,21 @@ impl Encryptable for NewProject {
     }
 
     fn decrypt(&mut self, key: &str) -> Result<(), SecretError> {
+        let access_key = decrypt_string(&self.access_key, key)?;
+        let secret_key = decrypt_string(&self.secret_key, key)?;
+        let livekit_server_api_key = decrypt_string(&self.livekit_server_api_key, key)?;
+        let livekit_server_api_secret = decrypt_string(&self.livekit_server_api_secret, key)?;
+
+        self.access_key = access_key;
+        self.secret_key = secret_key;
+        self.livekit_server_api_key = livekit_server_api_key;
+        self.livekit_server_api_secret = livekit_server_api_secret;
+        Ok(())
+    }
+}
+
+impl Encryptable for Project {
+    fn encrypt(&mut self, key: &str) -> Result<(), SecretError> {
         let access_key = encrypt_string(&self.access_key, key)?;
         let secret_key = encrypt_string(&self.secret_key, key)?;
         let livekit_server_api_key = encrypt_string(&self.livekit_server_api_key, key)?;
@@ -53,8 +69,24 @@ impl Encryptable for NewProject {
         self.secret_key = secret_key;
         self.livekit_server_api_key = livekit_server_api_key;
         self.livekit_server_api_secret = livekit_server_api_secret;
+            
         Ok(())
     }
+
+    fn decrypt(&mut self, key: &str) -> Result<(), SecretError> {
+        let access_key = decrypt_string(&self.access_key, key)?;
+        let secret_key = decrypt_string(&self.secret_key, key)?;
+        let livekit_server_api_key = decrypt_string(&self.livekit_server_api_key, key)?;
+        let livekit_server_api_secret = decrypt_string(&self.livekit_server_api_secret, key)?;
+
+        self.access_key = access_key;
+        self.secret_key = secret_key;
+        self.livekit_server_api_key = livekit_server_api_key;
+        self.livekit_server_api_secret = livekit_server_api_secret;
+        Ok(())
+    }
+
+    
 }
 
 impl From<ProjectError> for shared::response_models::Response {
@@ -210,3 +242,20 @@ pub fn update_project(
 
     Ok(project)
 }
+
+
+pub(crate) fn get_project_by_id(proj_id: &str, conn: &mut PgConnection) -> Result<Project, ProjectError> {
+    use domain::schema::syncflow::projects::dsl::*;
+
+    let proj_uuid = Uuid::parse_str(proj_id)
+        .map_err(|_| ProjectError::ConfigurationError("Invalid project id".to_string()))?;
+
+    let project = projects.filter(id.eq(proj_uuid)).first::<Project>(conn).map_err(|err| match err {
+        diesel::result::Error::NotFound => {
+            ProjectError::ProjectNotFoundError("Project not found".to_string())
+        }
+        _ => ProjectError::DatabaseError(err),
+    })?;
+
+    Ok(project)
+} 

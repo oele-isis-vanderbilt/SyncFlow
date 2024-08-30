@@ -5,7 +5,7 @@ use crate::schema::syncflow::{
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
-use shared::user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, UserProfile};
+use shared::{project_models::NewSessionResponse, user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, UserProfile}};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -312,6 +312,35 @@ pub struct NewProject {
     pub region: Option<String>,
 }
 
+impl From<Project> for NewProject {
+    fn from(value: Project) -> Self {
+        NewProject {
+            user_id: value.user_id,
+            name: value.name,
+            description: value.description,
+            livekit_server_url: value.livekit_server_url,
+            livekit_server_api_key: value.livekit_server_api_key,
+            livekit_server_api_secret: value.livekit_server_api_secret,
+            storage_type: value.storage_type,
+            bucket_name: value.bucket_name,
+            endpoint: value.endpoint,
+            access_key: value.access_key,
+            secret_key: value.secret_key,
+            region: value.region,
+        }
+    }
+    
+}
+
+#[derive(Debug, Serialize, Deserialize, DbEnum, Clone)]
+#[ExistingTypePath = "crate::schema::syncflow::sql_types::ProjectSessionStatus"]
+#[DbValueStyle = "PascalCase"]
+pub enum ProjectSessionStatus {
+    Created,
+    Started,
+    Stopped,
+}
+
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name = project_sessions)]
 pub struct ProjectSession {
@@ -323,5 +352,32 @@ pub struct ProjectSession {
     pub livekit_room_name: String,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,
+    pub status: ProjectSessionStatus,
     pub project_id: Uuid,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
+#[diesel(table_name = project_sessions)]
+pub struct NewProjectSession {
+    pub name: String,
+    pub comments: Option<String>,
+    pub empty_timeout: i32,
+    pub max_participants: i32,
+    pub livekit_room_name: String,
+    pub status: ProjectSessionStatus,
+    pub project_id: Uuid,
+}
+
+
+impl From<NewProjectSession> for NewSessionResponse {
+    fn from(value: NewProjectSession) -> Self {
+        NewSessionResponse {
+            name: value.name,
+            comments: value.comments.unwrap_or_default(),
+            empty_timeout: value.empty_timeout,
+            max_participants: value.max_participants,
+            livekit_room_name: value.livekit_room_name,
+            project_id: value.project_id.to_string(),
+        }
+    }
 }

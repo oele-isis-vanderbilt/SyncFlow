@@ -12,6 +12,7 @@ envious = "0.2.2"
 livekit-api = {git="https://github.com/livekit/rust-sdks.git", package="livekit-api" }
 livekit-protocol = {git="https://github.com/livekit/rust-sdks.git", package="livekit-protocol" }
 log = "0.4.21"
+rand = "0.8.5"
 reqwest = "0.11.24"
 serde = { version = "1.0.197", features = ["derive"] }
 utoipa = { version = "4.2.0", features = ["actix_extras"] }

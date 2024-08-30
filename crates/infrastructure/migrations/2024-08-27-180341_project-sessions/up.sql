@@ -1,3 +1,5 @@
+CREATE TYPE syncflow.project_session_status AS ENUM ('Created', 'Started', 'Stopped');
+
 CREATE TABLE syncflow.project_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(50) NOT NULL,
@@ -7,6 +9,7 @@ CREATE TABLE syncflow.project_sessions (
     livekit_room_name VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    status "syncflow"."project_session_status" NOT NULL DEFAULT 'Created',
     project_id UUID NOT NULL REFERENCES syncflow.projects(id) ON DELETE CASCADE
 );
 

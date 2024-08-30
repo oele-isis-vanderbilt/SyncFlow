@@ -2825,6 +2825,7 @@ dependencies = [
  "livekit-api",
  "livekit-protocol",
  "log",
+ "rand",
  "reqwest 0.11.27",
  "serde",
  "utoipa",

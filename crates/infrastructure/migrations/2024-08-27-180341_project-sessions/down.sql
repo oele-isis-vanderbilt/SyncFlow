@@ -6,3 +6,6 @@ DROP FUNCTION IF EXISTS syncflow.update_updated_at_column();
 
 -- Drop the table
 DROP TABLE IF EXISTS syncflow.project_sessions;
+
+-- Drop the type
+DROP TYPE IF EXISTS "syncflow"."project_session_status";
