@@ -40,13 +40,14 @@ const randomRoomName = () => {
   return APP_NAME + '_' + Math.random().toString(36).substring(7);
 };
 
-export async function createRoom() {
+export async function createRoom(autoRecord: boolean) {
   const options: CreateRoomRequest = {
     name: randomRoomName(),
     options: {
       emptyTimeout: 60 * 10,
       maxParticipants: 10,
       metadata: 'SyncFlow Room',
+      autoRecording: autoRecord,
     },
   };
   await mmlaClient.createRoom(options);

@@ -34,6 +34,12 @@ export default function Room({
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL}
       token={token}
       className={`h-full w-full`}
+      options={{
+        adaptiveStream: false,
+        publishDefaults: {
+          videoCodec: 'h264',
+        },
+      }}
       onDisconnected={() => {
         redirectToDashboard();
       }}
