@@ -3,6 +3,7 @@ import { VideoGrant } from 'livekit-server-sdk';
 export interface CreateRoomRequest {
   name: string;
   options?: CreateRoomOptions;
+  autoRecording?: boolean;
 }
 
 export interface CreateRoomOptions {
