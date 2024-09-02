@@ -11,10 +11,10 @@ export default async function Home() {
       <div className={'p-2 text-center'}>
         <h1 className={'p-2 text-2xl'}>SyncFlow Demo/Test App</h1>
         <p>
-          This is a demo app for testing SyncFlow. It lists available rooms
-          and allows you to join a room. After you join a room, you will be able
-          to see share different video and audio devices and record them with
-          the <code>SyncFlow</code> Dashboard.
+          This is a demo app for testing SyncFlow. It lists available rooms and
+          allows you to join a room. After you join a room, you will be able to
+          see share different video and audio devices and record them with the{' '}
+          <code>SyncFlow</code> Dashboard.
         </p>
       </div>
       <RoomJoinForm roomNames={roomNames} />
