@@ -595,7 +595,6 @@ function ShreenSharer({ preset }: { preset: keyof typeof VideoPresets }) {
         {isSharing ? 'Stop Sharing your screen' : 'Start Sharing your screen'}
       </h2>
       <button
-        className={'w-full'}
         onClick={() => {
           if (isSharing) {
             // Stop sharing
@@ -605,7 +604,7 @@ function ShreenSharer({ preset }: { preset: keyof typeof VideoPresets }) {
           }
           // setIsSharing(!isSharing);
         }}
-        className={`${isSharing ? 'bg-red-900' : 'bg-blue-500'} rounded-md p-2 text-white`}
+        className={`${isSharing ? 'bg-red-900' : 'bg-blue-500'} rounded-md p-2 text-white w-full`}
       >
         {isSharing ? 'Stop Sharing' : 'Start Sharing'}
       </button>
