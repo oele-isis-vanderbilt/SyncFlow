@@ -94,8 +94,7 @@ impl RoomService {
                 StorageConfig::S3(s3_config) => Some(RoomEgress {
                     tracks: Some(AutoTrackEgress {
                         filepath: format!(
-                            "{}/{}/tracks/{}/{}/{}-{}-{}-{}",
-                            s3_config.bucket,
+                            "{}/tracks/{}/{}/{}-{}-{}-{}",
                             "{room_name}",
                             "{publisher_identity}",
                             "{time}",
