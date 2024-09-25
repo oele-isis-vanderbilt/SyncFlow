@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import {
   AudioPresets,
   createLocalAudioTrack,
+  createLocalScreenTracks,
   createLocalVideoTrack,
   LocalAudioTrack,
   LocalTrackPublication,
@@ -107,14 +108,19 @@ export default function LkRoom({
             <DataSender />
           </div>
           <div className="flex flex-grow flex-row">
-            <div className="h-full w-1/2">
+            <div className="h-full w-1/3">
               <VideoTracksPublisher
                 preset={roomOptions.videoPreset as keyof typeof VideoPresets}
               />
             </div>
-            <div className="h-full w-1/2">
+            <div className="h-full w-1/3">
               <AudioTracksPublisher
                 preset={roomOptions.audioPreset as keyof typeof AudioPresets}
+              />
+            </div>
+            <div className="h-full w-1/3">
+              <ShreenSharer
+                preset={roomOptions.videoPreset as keyof typeof VideoPresets}
               />
             </div>
           </div>
@@ -541,6 +547,90 @@ function DataSender() {
             )}
           </AutoSizer>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ShreenSharer({ preset }: { preset: keyof typeof VideoPresets }) {
+  const videoPreset = VideoPresets[preset as keyof typeof VideoPresets];
+  const participantInfo = useLocalParticipant();
+  const [publication, setPlublication] = useState<LocalTrackPublication | null>(
+    null,
+  );
+
+  const [isSharing, setIsSharing] = useState<boolean>(false);
+
+  const startSharing = async () => {
+    const screenTrack = await createLocalScreenTracks({
+      resolution: videoPreset.resolution,
+      audio: false,
+    });
+
+    const localTrackPublication =
+      await participantInfo.localParticipant.publishTrack(screenTrack[0], {
+        name: `${participantInfo.localParticipant.name}-ScreenShare`,
+      });
+    // console.log('localTrackPublication', localTrackPublication);
+    setPlublication(localTrackPublication);
+    setIsSharing(true);
+  };
+
+  const stopSharing = async () => {
+    if (publication && publication.track) {
+      publication.track.stop();
+      participantInfo.localParticipant
+        .unpublishTrack(publication.track)
+        .then(() => {
+          setPlublication(null);
+          setIsSharing(false);
+        })
+        .catch((error) => console.error('Error unpublishing track:', error));
+    }
+  };
+
+  return (
+    <div className={'flex h-full w-full flex-col justify-center p-2'}>
+      <h2 className={'text-xl'}>
+        {isSharing ? 'Stop Sharing your screen' : 'Start Sharing your screen'}
+      </h2>
+      <button
+        onClick={() => {
+          if (isSharing) {
+            // Stop sharing
+            stopSharing();
+          } else {
+            startSharing();
+          }
+          // setIsSharing(!isSharing);
+        }}
+        className={`${isSharing ? 'bg-red-900' : 'bg-blue-500'} rounded-md p-2 text-white w-full`}
+      >
+        {isSharing ? 'Stop Sharing' : 'Start Sharing'}
+      </button>
+      <div className="flex-1">
+        {publication && publication.track ? (
+          <div className={'flex flex-col items-center'}>
+            <VideoTrack
+              trackRef={{
+                participant: participantInfo.localParticipant,
+                publication: publication,
+                source: Track.Source.ScreenShare,
+              }}
+            />
+            <p>Screen-{publication.track?.sid?.slice(1, 5)}</p>
+            <p>
+              TrackId: {publication.track?.sid}.
+              <button
+                className={'text-red-700 hover:text-red-700'}
+                onClick={() => {}}
+              >
+                {' '}
+                &#8505;{' '}
+              </button>
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

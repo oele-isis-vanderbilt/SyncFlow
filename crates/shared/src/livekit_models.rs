@@ -23,6 +23,7 @@ pub struct RoomOptions {
     pub empty_timeout: u32,
     pub max_participants: u32,
     pub metadata: String,
+    pub auto_recording: bool,
 }
 
 impl Default for RoomOptions {
@@ -31,6 +32,7 @@ impl Default for RoomOptions {
             empty_timeout: 10 * 60,
             max_participants: 100,
             metadata: "".into(),
+            auto_recording: false,
         }
     }
 }

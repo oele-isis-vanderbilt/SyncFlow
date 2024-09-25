@@ -60,6 +60,7 @@ async fn main() -> std::io::Result<()> {
         config.livekit_server_url.clone(),
         config.livekit_api_key.clone(),
         config.livekit_api_secret.clone(),
+        config.storage_config.clone(),
     );
     let egress_service = EgressService::new(
         config.livekit_server_url.clone(),
