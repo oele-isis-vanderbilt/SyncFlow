@@ -45,7 +45,7 @@ jobs:
           '
       
       - name: Build and Deploy (syncflow.live)
-        if: github.event_name == 'release'
+        if: github.event_name == 'push'
         env:
           PRIVATE_KEY: ${{ secrets.JETSTREAM2_PRIV_KEY_PEM }}
           HOST: ${{ secrets.JETSTREAM2_HOST }}
@@ -59,8 +59,9 @@ jobs:
             mkdir SyncFlowDeploymentProd && cd SyncFlowDeploymentProd
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
-            latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-            git checkout $latest_tag
+            # latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # git checkout $latest_tag
+            git checkout -b 136-dev-prod-environment origin/136-dev-prod-environment
             cp $HOME/.deployment_config_prod_cloud.json  deployment_config_prod_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_prod_cloud.json --outfile-name .env.prod
