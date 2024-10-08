@@ -1,15 +1,24 @@
 import getConfig from '@/config';
-import { AuthHttpClient } from './auth-http-client';
-import type { Project } from '@/types/project';
+import { AuthHttpClient, ClientError } from './auth-http-client';
+import type {
+  LivekitSessionInfo,
+  ProjectSession,
+  Project,
+  ProjectsSummary,
+  ProjectSummary,
+} from '@/types/project';
 
 const PREFIXES = {
   CREATE_PROJECT: '/projects/create',
   LIST_PROJECTS: '/projects/list',
   DELETE_PROJECT: '/projects',
   GET_PROJECT: '/projects',
+  SUMMARIZE_USER_PROJECTS: '/projects/summarize',
 };
 
 import { z } from 'zod';
+import { TokenResponse } from '@/types/mmla';
+import { VideoGrant } from 'livekit-server-sdk';
 
 export const NewProjectSchema = z.object({
   name: z.string(),
@@ -27,7 +36,28 @@ export const NewProjectSchema = z.object({
   storageType: z.string().optional(),
 });
 
+export const NewSessionSchema = z.object({
+  name: z.string().optional(),
+  comments: z.string().optional(),
+  maxParticipants: z
+    .string()
+    .optional()
+    .default('100')
+    .transform((v) => parseInt(v)),
+  emptyTimeout: z
+    .string()
+    .optional()
+    .default('600')
+    .transform((v) => parseInt(v)),
+  autoRecording: z
+    .string()
+    .optional()
+    .default('off')
+    .transform((v) => v === 'on'),
+});
+
 export type NewProject = z.infer<typeof NewProjectSchema>;
+export type NewSession = z.infer<typeof NewSessionSchema>;
 
 export class ProjectClient extends AuthHttpClient {
   constructor(base_url: string) {
@@ -55,11 +85,70 @@ export class ProjectClient extends AuthHttpClient {
     );
   }
 
-  async startSession(projectId: string) {}
+  async summarizeUserProjects() {
+    return await this.authenticatedGet<ProjectsSummary>(
+      PREFIXES.SUMMARIZE_USER_PROJECTS,
+    );
+  }
 
-  async stopSession(projectId: string) {}
+  async summarizeProject(projectId: string) {
+    return await this.authenticatedGet<ProjectSummary>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/summarize`,
+    );
+  }
 
-  async getSessions(projectId: string) {}
+  async createSession(projectId: string, session: NewSession) {
+    return await this.authenticatedPost<ProjectSession, NewSession>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/create-session`,
+      session,
+    );
+  }
+
+  async getLivekitSessionInfo(projectId: string, sessionId: string) {
+    return await this.authenticatedGet<LivekitSessionInfo>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/livekit-session-info`,
+    );
+  }
+
+  async deleteSession(projectId: string, sessionId: string) {
+    return await this.authenticatedDelete<ProjectSession>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}`,
+    );
+  }
+
+  async stopSession(projectId: string, sessionId: string) {
+    return await this.authenticatedPost<ProjectSession, {}>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/stop`,
+      {},
+    );
+  }
+
+  async getSessions(projectId: string) {
+    return await this.authenticatedGet<ProjectSession[]>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/sessions`,
+    );
+  }
+
+  async getSession(projectId: string, sessionId: string) {
+    return await this.authenticatedGet<ProjectSession>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}`,
+    );
+  }
+
+  async getSessionToken(
+    projectId: string,
+    sessionId: string,
+    identity: string,
+    tokenRequest: VideoGrant,
+  ) {
+    return await this.authenticatedPost<
+      TokenResponse,
+      { identity: string; videoGrants: VideoGrant }
+    >(`${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/token`, {
+      identity: identity,
+      videoGrants: tokenRequest,
+    });
+  }
 }
 
 const deploymentConfig = getConfig();

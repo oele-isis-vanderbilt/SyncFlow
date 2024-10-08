@@ -60,6 +60,7 @@ async fn main() -> std::io::Result<()> {
         config.livekit_server_url.clone(),
         config.livekit_api_key.clone(),
         config.livekit_api_secret.clone(),
+        "recordings".to_string(),
         config.storage_config.clone(),
     );
     let egress_service = EgressService::new(
@@ -83,7 +84,7 @@ async fn main() -> std::io::Result<()> {
             .configure(lk_init_routes)
             .configure(login_init_routes)
             .configure(init_api_doc)
-            .configure(|cfg| project_init_routes(cfg, session_service.clone()));
+            .configure(|cfg| project_init_routes(cfg, web::Data::new(session_service.clone())));
 
         if config.github_client_id.is_some() && config.github_client_secret.is_some() {
             app = app.configure(init_github_oauth_routes);

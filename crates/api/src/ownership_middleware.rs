@@ -17,7 +17,6 @@ pub struct Ownership;
 
 fn extract_project_id(req: &ServiceRequest) -> Option<String> {
     let path = req.path();
-    println!("Path: {:?}", path);
     path.trim_start_matches("/projects/")
         .split("/")
         .next()

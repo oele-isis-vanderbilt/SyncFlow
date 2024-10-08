@@ -6,6 +6,7 @@ use crate::users::user::UserError;
 use domain::models::User;
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
+use shared::project_models::{ProjectSummary, ProjectsSummary};
 use shared::user_models::{
     ApiKeyRequest, ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, ProjectRequest,
     RefreshTokenRequest, TokenResponse, UserProfile,
@@ -168,6 +169,22 @@ impl AccountService {
         let project =
             project::project::delete_project(user_id, project_id, &mut self.pool.get().unwrap())?;
         Ok(project.into())
+    }
+
+    pub fn summarize_projects(&self, user_id: i32) -> Result<ProjectsSummary, UserError> {
+        let summary = project::project::summarize_projects(user_id, &mut self.pool.get().unwrap())?;
+        Ok(summary)
+    }
+
+    pub async fn summarize_project(&self, project_id: &str) -> Result<ProjectSummary, UserError> {
+        let summary = project::project::summarize_project(
+            project_id,
+            &mut self.pool.get().unwrap(),
+            &self.config.encryption_key,
+        )
+        .await?;
+
+        Ok(summary)
     }
 
     pub fn update_project(

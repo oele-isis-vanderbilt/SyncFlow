@@ -1,10 +1,16 @@
 'use server';
 import { z } from 'zod';
-import { NewProjectSchema, projectClient } from './project-client';
+import {
+  NewProjectSchema,
+  NewSession,
+  NewSessionSchema,
+  projectClient,
+} from './project-client';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { Project } from '@/types/project';
 import { ClientError } from './auth-http-client';
+import exp from 'constants';
 
 export type FormSubmissionState<T> = {
   errors?: string[];
@@ -75,4 +81,88 @@ export async function createProject(
       return state;
     }
   }
+}
+
+export async function createProjectSession(
+  projectId: string,
+  prevState: FormSubmissionState<NewSession> | null,
+  formData: FormData,
+) {
+  if (formData === null) {
+    return null;
+  }
+  const createSessionRequest = Object.fromEntries(formData.entries());
+  const result = NewSessionSchema.safeParse(createSessionRequest);
+  if (!result.success) {
+    revalidatePath(`/dashboard/projects/${projectId}`);
+    return {
+      success: false,
+      errors: result.error.issues.map((issue) => issue.message),
+    };
+  } else {
+    const sessionRequest = result.data;
+    const state = (await projectClient.createSession(projectId, sessionRequest))
+      .map((session) => {
+        revalidatePath(`/dashboard/projects/${projectId}`);
+        return {
+          success: true,
+          data: session,
+        };
+      })
+      .unwrapOrElse((error) => {
+        return {
+          success: false,
+          data: null as any,
+          errors: [
+            `An error occurred while creating the session. ${error.message} | Code: ${error.code}`,
+          ],
+        };
+      });
+
+    return state;
+  }
+}
+
+export async function stopSession(projectId: string, sessionId: string) {
+  let result = (await projectClient.stopSession(projectId, sessionId))
+    .map((session) => {
+      revalidatePath(`/dashboard/projects/${projectId}`);
+      return {
+        success: true,
+        data: session,
+      };
+    })
+    .unwrapOrElse((error) => {
+      return {
+        success: false,
+        error: JSON.stringify(error, null, 2),
+      };
+    });
+
+  return result;
+}
+
+export async function getSessionParticipants(
+  projectId: string,
+  sessionId: string,
+) {
+  return projectClient.listParticipants(projectId, sessionId);
+}
+
+export async function deleteSession(projectId: string, sessionId: string) {
+  let result = (await projectClient.deleteSession(projectId, sessionId))
+    .map((session) => {
+      revalidatePath(`/dashboard/projects/${projectId}`);
+      return {
+        success: true,
+        data: session,
+      };
+    })
+    .unwrapOrElse((error) => {
+      return {
+        success: false,
+        error: JSON.stringify(error, null, 2),
+      };
+    });
+  return result;
 }

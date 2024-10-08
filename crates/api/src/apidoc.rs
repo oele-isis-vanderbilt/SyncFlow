@@ -6,6 +6,8 @@ use shared::response_models::Response;
 use shared::user_models::{
     LoginRequest, ProjectInfo, ProjectRequest, RefreshTokenRequest, SignUpRequest,
 };
+
+use shared::project_models::ProjectsSummary;
 use utoipa::OpenApi;
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
@@ -33,9 +35,10 @@ pub fn init_api_doc(config: &mut ServiceConfig) {
             crate::project_handlers::get_project,
             crate::project_handlers::list_projects,
             crate::project_handlers::delete_project,
+            // crate::project_handlers::summarize_projects
         ),
         components(
-            schemas(Response, LoginRequest, RefreshTokenRequest, SignUpRequest, ProjectRequest, ProjectInfo,
+            schemas(Response, LoginRequest, RefreshTokenRequest, SignUpRequest, ProjectRequest, ProjectInfo, ProjectsSummary,
             TokenRequest, TokenResponse, VideoGrantsWrapper, CreateRoomRequest, RoomOptions, LivekitRoom)
         ),
         tags(

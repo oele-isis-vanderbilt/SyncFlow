@@ -19,7 +19,6 @@ export default async function Layout({
           activeClasses="dark:text-amber-500 underline text-blue-900"
           containerClasses="flex py-5 dark:bg-gray-900 dark:text-white bg-gray-200"
           listClasses="hover:underline mx-2 font-bold"
-          capitalizeLinks
         />
         <main className="flex-1 overflow-y-auto p-5">{children}</main>
         <div className="w-full text-center">

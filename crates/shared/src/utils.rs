@@ -41,12 +41,14 @@ pub async fn ping_livekit() -> bool {
 pub fn generate_random_session_name() -> String {
     let prefix = "session";
     let rng = thread_rng();
-    let session_name1: String = rng.clone()
+    let session_name1: String = rng
+        .clone()
         .sample_iter(&Alphanumeric)
         .take(4)
         .map(char::from)
         .collect();
-    let session_name2: String = rng.clone()
+    let session_name2: String = rng
+        .clone()
         .sample_iter(&Alphanumeric)
         .take(4)
         .map(char::from)

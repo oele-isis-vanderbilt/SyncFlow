@@ -52,12 +52,24 @@ export async function SummaryCards() {
   );
 }
 
-export async function UserSummaryCards({}) {
+export async function UserSummaryCards({
+  numProjects,
+  numSessions,
+  numActiveSessions,
+}: {
+  numProjects: number;
+  numSessions: number;
+  numActiveSessions: number;
+}) {
   return (
     <>
-      <Card title="Projects" value={1} type="projects" />
-      <Card title="Sessions" value={2} type="sessions" />
-      <Card title="Active Sessions" value={0} type="liveSessions" />
+      <Card title="Projects" value={numProjects} type="projects" />
+      <Card title="Sessions" value={numSessions} type="sessions" />
+      <Card
+        title="Active Sessions"
+        value={numActiveSessions}
+        type="liveSessions"
+      />
     </>
   );
 }

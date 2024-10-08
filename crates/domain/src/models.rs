@@ -5,7 +5,10 @@ use crate::schema::syncflow::{
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
-use shared::{project_models::NewSessionResponse, user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, UserProfile}};
+use shared::{
+    project_models::ProjectSessionResponse,
+    user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, UserProfile},
+};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -275,6 +278,12 @@ pub struct Project {
     pub updated_at: Option<chrono::NaiveDateTime>,
 }
 
+impl Project {
+    pub fn get_recording_root(&self) -> String {
+        format!("{}-{}", self.name, self.id,)
+    }
+}
+
 impl From<Project> for ProjectInfo {
     fn from(value: Project) -> Self {
         ProjectInfo {
@@ -329,16 +338,25 @@ impl From<Project> for NewProject {
             region: value.region,
         }
     }
-    
 }
 
-#[derive(Debug, Serialize, Deserialize, DbEnum, Clone)]
+#[derive(Debug, Serialize, Deserialize, DbEnum, Clone, Eq, PartialEq)]
 #[ExistingTypePath = "crate::schema::syncflow::sql_types::ProjectSessionStatus"]
 #[DbValueStyle = "PascalCase"]
 pub enum ProjectSessionStatus {
     Created,
     Started,
     Stopped,
+}
+
+impl ProjectSessionStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            ProjectSessionStatus::Created => "Created",
+            ProjectSessionStatus::Started => "Started",
+            ProjectSessionStatus::Stopped => "Stopped",
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
@@ -368,11 +386,16 @@ pub struct NewProjectSession {
     pub project_id: Uuid,
 }
 
-
-impl From<NewProjectSession> for NewSessionResponse {
-    fn from(value: NewProjectSession) -> Self {
-        NewSessionResponse {
+impl From<ProjectSession> for ProjectSessionResponse {
+    fn from(value: ProjectSession) -> Self {
+        ProjectSessionResponse {
+            id: value.id.to_string(),
             name: value.name,
+            started_at: value
+                .created_at
+                .map(|c| c.and_utc().timestamp() as usize)
+                .unwrap_or_default(),
+            status: value.status.as_str().to_string(),
             comments: value.comments.unwrap_or_default(),
             empty_timeout: value.empty_timeout,
             max_participants: value.max_participants,

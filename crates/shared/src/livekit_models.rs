@@ -121,14 +121,20 @@ impl Default for VideoGrantsWrapper {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct TokenResponse {
     token: String,
     identity: String,
+    livekit_server_url: Option<String>,
 }
 
 impl TokenResponse {
-    pub fn new(token: String, identity: String) -> Self {
-        TokenResponse { token, identity }
+    pub fn new(token: String, identity: String, livekit_server_url: Option<String>) -> Self {
+        TokenResponse {
+            token,
+            identity,
+            livekit_server_url,
+        }
     }
 }
 

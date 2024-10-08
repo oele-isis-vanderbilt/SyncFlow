@@ -7,6 +7,7 @@ import ProjectCards from '../ui/dashboard/paged-project-cards';
 import { auth } from '@/auth';
 
 import { Suspense } from 'react';
+import { projectClient } from '../lib/project-client';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -14,6 +15,11 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const session = await auth();
+  const summary = (await projectClient.summarizeUserProjects()).unwrapOr({
+    numProjects: 0,
+    numSessions: 0,
+    numActiveSessions: 0,
+  });
 
   return (
     <main className="dark:bg-gray-800">
@@ -24,7 +30,11 @@ export default async function Page() {
       </h1>
       <div className="grid gap-6 p-2 sm:grid-cols-2 lg:grid-cols-4">
         <Suspense fallback={<CardsSkeleton />}>
-          <UserSummaryCards />
+          <UserSummaryCards
+            numProjects={summary.numProjects}
+            numActiveSessions={summary.numActiveSessions}
+            numSessions={summary.numSessions}
+          />
         </Suspense>
       </div>
       <div className="mt-8 flex items-center p-2">

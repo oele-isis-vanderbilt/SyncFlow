@@ -7,3 +7,7 @@ export function lastUpdatedProjectComparator(a: Project, b: Project) {
 export function dateFromTimestamp(timestamp: number) {
   return new Date(timestamp * 1000).toLocaleString();
 }
+
+export function durationInMinutes(timestamp: number) {
+  return Math.round((Date.now() - timestamp) / 60000);
+}
