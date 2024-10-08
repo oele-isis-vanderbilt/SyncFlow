@@ -1,0 +1,59 @@
+services:
+  postgres-syncflow-dev-prod:
+    image: postgres:14-alpine
+    container_name: postgres-syncflow-dev-prod
+    ports:
+      - "15434:5432"
+    volumes:
+      - postgres-data-dev-prod:/var/lib/postgresql/data
+    env_file: ../crates/.env.dev.pgadmin
+
+  pgadmin-dev-prod:
+    image: dpage/pgadmin4
+    container_name: pgadmin-syncflow-dev-prod
+    ports:
+      - "5052:81"
+    env_file: ../crates/.env.dev.pgadmin
+    depends_on:
+      - postgres-syncflow-dev-prod
+
+  migrations-dev-prod:
+    build:
+      context: ../crates
+      dockerfile: ../docker/Dockerfile.migrations
+    image: syncflow-migrations:latest
+    container_name: syncflow-migrations-dev-prod
+    volumes:
+      - ../crates/.env.dev.migration:/migrations/.env
+    depends_on:
+      - postgres-syncflow-dev-prod
+
+  api-syncflow-dev-prod:
+    build:
+      context: ../crates
+      dockerfile: ../docker/Dockerfile.api
+    image: syncflow-api:latest
+    container_name: syncflow-api-dev-prod
+    ports:
+      - "8085:8085"
+    env_file: ../crates/.env.dev
+    depends_on:
+      - migrations-dev-prod
+
+  syncflow-dashboard-dev-prod:
+    build:
+      context: ../dashboard
+      dockerfile: ../docker/Dockerfile.next
+      args:
+        - BUILD_ENV=dev
+    image: syncflow-dashboard:latest
+    container_name: syncflow-dashboard-dev-prod
+    volumes:
+      - ~/deployment_dashboard_dev.json:/app/config/production.json
+    ports:
+      - "3002:3000"
+    depends_on:
+      - api-syncflow-dev-prod
+
+volumes:
+  postgres-data-dev-prod:
