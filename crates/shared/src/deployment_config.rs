@@ -90,6 +90,6 @@ mod tests {
         assert!(!config.jwt_secret.is_empty());
         assert!(!config.database_url.is_empty());
 
-        assert!(!config.login_token.is_none());
+        assert!(config.login_token.is_some());
     }
 }

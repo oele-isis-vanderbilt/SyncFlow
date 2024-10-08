@@ -1,16 +1,19 @@
 use super::{secret, tokens_manager, user};
+use crate::project;
 use crate::users::oauth::github::{fetch_github_user, verify_user_token, GithubUser};
 use crate::users::tokens_manager::{TokenTypes, UserInfo};
 use crate::users::user::UserError;
 use domain::models::User;
 use infrastructure::DbPool;
 use shared::deployment_config::DeploymentConfig;
+use shared::project_models::{ProjectSummary, ProjectsSummary};
 use shared::user_models::{
-    ApiKeyRequest, ApiKeyResponse, ApiKeyResponseWithoutSecret, RefreshTokenRequest, TokenResponse,
-    UserProfile,
+    ApiKeyRequest, ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, ProjectRequest,
+    RefreshTokenRequest, TokenResponse, UserProfile,
 };
 use shared::user_models::{LoginRequest, SignUpRequest};
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub struct AccountService {
     pool: Arc<DbPool>,
@@ -134,6 +137,70 @@ impl AccountService {
         key_id: &str,
     ) -> Result<ApiKeyResponseWithoutSecret, UserError> {
         user::delete_api_key(user_id, key_id, &mut self.pool.get().unwrap()).map(Into::into)
+    }
+
+    pub fn create_project(
+        &self,
+        user_id: i32,
+        new_project_request: &ProjectRequest,
+    ) -> Result<ProjectInfo, UserError> {
+        let project = project::project_crud::create_project(
+            user_id,
+            new_project_request,
+            &self.config.encryption_key,
+            &mut self.pool.get().unwrap(),
+        )?;
+
+        Ok(project.into())
+    }
+
+    pub fn get_projects(&self, user_id: i32) -> Result<Vec<ProjectInfo>, UserError> {
+        let projects = project::project_crud::list_projects(user_id, &mut self.pool.get().unwrap())?;
+        Ok(projects.into_iter().map(Into::into).collect())
+    }
+
+    pub fn get_project(&self, user_id: i32, project_id: &str) -> Result<ProjectInfo, UserError> {
+        let project =
+            project::project_crud::get_project(user_id, project_id, &mut self.pool.get().unwrap())?;
+        Ok(project.into())
+    }
+
+    pub fn delete_project(&self, user_id: i32, project_id: &str) -> Result<ProjectInfo, UserError> {
+        let project =
+            project::project_crud::delete_project(user_id, project_id, &mut self.pool.get().unwrap())?;
+        Ok(project.into())
+    }
+
+    pub fn summarize_projects(&self, user_id: i32) -> Result<ProjectsSummary, UserError> {
+        let summary = project::project_crud::summarize_projects(user_id, &mut self.pool.get().unwrap())?;
+        Ok(summary)
+    }
+
+    pub async fn summarize_project(&self, project_id: &str) -> Result<ProjectSummary, UserError> {
+        let summary = project::project_crud::summarize_project(
+            project_id,
+            &mut self.pool.get().unwrap(),
+            &self.config.encryption_key,
+        )
+        .await?;
+
+        Ok(summary)
+    }
+
+    pub fn update_project(
+        &self,
+        user_id: i32,
+        project_id: Uuid,
+        new_project_request: &ProjectRequest,
+    ) -> Result<ProjectInfo, UserError> {
+        let project = project::project_crud::update_project(
+            user_id,
+            project_id,
+            new_project_request,
+            &self.config.encryption_key,
+            &mut self.pool.get().unwrap(),
+        )?;
+        Ok(project.into())
     }
 
     pub fn create_user(

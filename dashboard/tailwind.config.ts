@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-const flowbite = require('flowbite-react/tailwind');
+import { plugin, content } from 'flowbite-react/tailwind';
 
 const config: Config = {
   darkMode: ['variant', '&:is(.dark *)&:not(.light *)'],
@@ -7,7 +7,7 @@ const config: Config = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
-    flowbite.content(),
+    content(),
   ],
   theme: {
     extend: {
@@ -18,6 +18,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [flowbite.plugin()],
+  plugins: [plugin()],
 };
 export default config;

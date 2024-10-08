@@ -160,7 +160,7 @@ impl MMLAService {
         }
 
         let token = create_token(&token_request, &api_key, &api_secret)
-            .map(|token| TokenResponse::new(token, token_request.identity.clone()))?;
+            .map(|token| TokenResponse::new(token, token_request.identity.clone(), None))?;
 
         let _ = self
             .user_actions

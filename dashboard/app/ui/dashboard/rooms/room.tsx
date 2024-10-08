@@ -15,7 +15,7 @@ import Link from 'next/link';
 import AudioStreams from '@/app/ui/dashboard/rooms/audio-streams';
 
 import { lusitana } from '@/app/ui/fonts';
-import { redirectToDashboard } from '@/app/lib/actions';
+import { redirectTo, redirectToDashboard } from '@/app/lib/actions';
 import { BsRecordBtn } from 'react-icons/bs';
 import type { SessionUser } from '@/types/next-auth';
 import TopicalMessages from '@/app/ui/dashboard/rooms/topical-messages';
@@ -23,15 +23,19 @@ import TopicalMessages from '@/app/ui/dashboard/rooms/topical-messages';
 export default function Room({
   token,
   user,
+  lkServerUrl,
+  disconnectRedirectUrl,
 }: {
   token: string;
   user: SessionUser | undefined;
+  lkServerUrl?: string;
+  disconnectRedirectUrl?: string;
 }) {
   return (
     <LiveKitRoom
       video={false}
       audio={false}
-      serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL}
+      serverUrl={lkServerUrl || process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL}
       token={token}
       className={`h-full w-full`}
       options={{
@@ -41,7 +45,9 @@ export default function Room({
         },
       }}
       onDisconnected={() => {
-        redirectToDashboard();
+        disconnectRedirectUrl
+          ? redirectTo(disconnectRedirectUrl)
+          : redirectToDashboard();
       }}
     >
       <div className="flex h-full w-full flex-col">

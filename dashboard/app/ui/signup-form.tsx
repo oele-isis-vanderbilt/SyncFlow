@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from './button';
 import Link from 'next/link';
+import { Input as SignUpInput } from '@/app/ui/input';
 
 export default function SignupForm() {
   const [messages, dispatch] = useFormState<SignUpState | undefined>(
@@ -134,47 +135,6 @@ export default function SignupForm() {
         </div>
       </div>
     </form>
-  );
-}
-
-function SignUpInput({
-  id,
-  label,
-  type,
-  placeholder,
-  required,
-  children,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  type: string;
-  placeholder: string;
-  required: boolean;
-  children?: React.ReactNode;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-  return (
-    <div>
-      <label
-        className="mb-3 mt-5 block text-xs font-medium dark:text-white"
-        htmlFor={id}
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm text-gray-900 outline-2 placeholder:text-gray-500"
-          id={id}
-          type={type}
-          name={id}
-          placeholder={placeholder}
-          required={required}
-          onChange={onChange}
-        />
-        {children}
-      </div>
-    </div>
   );
 }
 

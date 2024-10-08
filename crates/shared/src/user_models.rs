@@ -85,3 +85,32 @@ pub struct UserProfile {
     pub organization: Option<String>,
     pub job_role: Option<String>,
 }
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectRequest {
+    pub name: String,
+    pub description: Option<String>,
+    pub livekit_server_url: String,
+    pub livekit_server_api_key: String,
+    pub livekit_server_api_secret: String,
+    pub storage_type: String,
+    pub bucket_name: String,
+    pub endpoint: String,
+    pub access_key: String,
+    pub secret_key: String,
+    pub region: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectInfo {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub livekit_server_url: String,
+    pub storage_type: String,
+    pub bucket_name: String,
+    pub endpoint: String,
+    pub last_updated: usize,
+}

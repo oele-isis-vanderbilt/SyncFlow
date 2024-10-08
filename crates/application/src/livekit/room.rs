@@ -10,6 +10,7 @@ pub struct RoomService {
     server_url: String,
     api_key: String,
     api_secret: String,
+    recording_root: String,
     storage_config: StorageConfig,
 }
 
@@ -18,6 +19,7 @@ impl RoomService {
         server_url: String,
         api_key: String,
         api_secret: String,
+        recording_root: String,
         storage_config: StorageConfig,
     ) -> Self {
         let server_url = server_url.to_string().replace("ws", "http");
@@ -27,6 +29,7 @@ impl RoomService {
             server_url,
             api_key,
             api_secret,
+            recording_root,
             storage_config,
         }
     }
@@ -45,6 +48,14 @@ impl RoomService {
         };
 
         self.client.create_room(name, create_options).await
+    }
+
+    pub async fn update_room_metadata(
+        &self,
+        name: &str,
+        metadata: &str,
+    ) -> ServiceResult<proto::Room> {
+        self.client.update_room_metadata(name, metadata).await
     }
 
     pub async fn delete_room(&self, name: &str) -> ServiceResult<()> {
@@ -76,8 +87,9 @@ impl RoomService {
                 StorageConfig::Local(local_config) => Some(RoomEgress {
                     tracks: Some(AutoTrackEgress {
                         filepath: format!(
-                            "{}/{}/tracks/{}/{}/{}-{}-{}-{}",
+                            "{}/{}/{}/tracks/{}/{}/{}-{}-{}-{}",
                             local_config.recording_root_path,
+                            self.recording_root,
                             "{room_name}",
                             "{publisher_identity}",
                             "{time}",
@@ -94,7 +106,8 @@ impl RoomService {
                 StorageConfig::S3(s3_config) => Some(RoomEgress {
                     tracks: Some(AutoTrackEgress {
                         filepath: format!(
-                            "{}/tracks/{}/{}/{}-{}-{}-{}",
+                            "{}/{}/tracks/{}/{}/{}-{}-{}-{}",
+                            self.recording_root,
                             "{room_name}",
                             "{publisher_identity}",
                             "{time}",
@@ -133,6 +146,7 @@ impl Clone for RoomService {
             api_key: self.api_key.clone(),
             api_secret: self.api_secret.clone(),
             storage_config: self.storage_config.clone(),
+            recording_root: self.recording_root.clone(),
         }
     }
 }

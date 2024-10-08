@@ -5,6 +5,7 @@ use diesel::PgConnection;
 use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, User};
 
 use super::oauth::github::{GithubOAuthError, GithubUser};
+use crate::project::project_crud::ProjectError;
 use crate::users::secret::{encrypt_string, key_secret_pair};
 use serde::{Deserialize, Serialize};
 use shared::response_models::Response;
@@ -19,7 +20,7 @@ pub struct LoginSessionInfo {
     pub user_name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Error)]
+#[derive(Debug, Error)]
 pub enum UserError {
     #[error("User not found: {0}")]
     UserNotFound(String),
@@ -43,6 +44,8 @@ pub enum UserError {
     HashError(String),
     #[error("OAuth error: {0}")]
     GithubOAuthError(#[from] GithubOAuthError),
+    #[error("Project error: {0}")]
+    ProjectError(#[from] ProjectError),
 }
 
 impl From<UserError> for Response {
@@ -92,6 +95,7 @@ impl From<UserError> for Response {
                 status: 500,
                 message: e.to_string(),
             },
+            UserError::ProjectError(e) => e.into(),
         }
     }
 }

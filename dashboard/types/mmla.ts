@@ -15,4 +15,5 @@ export interface CreateRoomOptions {
 export interface TokenResponse {
   token: string;
   identity: string;
+  livekitServerUrl?: string;
 }

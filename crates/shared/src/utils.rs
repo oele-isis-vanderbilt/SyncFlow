@@ -1,5 +1,7 @@
 use dotenvy::dotenv;
 use log;
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
 use reqwest;
 
 pub fn load_env() {
@@ -34,4 +36,23 @@ pub async fn ping_livekit() -> bool {
         Ok(resp) => resp.status().is_success(),
         Err(_) => false,
     }
+}
+
+pub fn generate_random_session_name() -> String {
+    let prefix = "session";
+    let rng = thread_rng();
+    let session_name1: String = rng
+        .clone()
+        .sample_iter(&Alphanumeric)
+        .take(4)
+        .map(char::from)
+        .collect();
+    let session_name2: String = rng
+        .clone()
+        .sample_iter(&Alphanumeric)
+        .take(4)
+        .map(char::from)
+        .collect();
+
+    format!("{}-{}-{}", prefix, session_name1, session_name2)
 }

@@ -6,9 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-livekit-api = { git="https://github.com/livekit/rust-sdks.git", package="livekit-api" }
-livekit-protocol = { git="https://github.com/livekit/rust-sdks.git", package="livekit-protocol" }
-livekit-runtime = { git="https://github.com/livekit/rust-sdks.git", package="livekit-runtime", features = ["tokio"] }
+
 shared = { path = "../shared" }
 domain = { path = "../domain" }
 infrastructure = { path = "../infrastructure" }
@@ -27,3 +25,8 @@ reqwest = { version = "0.12.5", features = ["json"] }
 serde_json = "1.0.118"
 thiserror = "1.0.63"
 futures = "0.3.30"
+tokio = { version = "1", features = ["full"] }
+livekit-client = { package="livekit", version = "0.6.0", features = ["rustls-tls-native-roots"] }
+livekit-api = "0.4.0"
+livekit-protocol = "0.3.5"
+livekit-runtime = { version = "0.3.0", features = ["tokio"] }
