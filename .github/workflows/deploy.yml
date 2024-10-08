@@ -4,18 +4,23 @@ on:
   push:
     branches:
       - main
+      - 136-dev-prod-environment
+  
+  release: # Trigger the workflow on release events
+    types: [published]
 
   schedule:
     - cron: '0 0 * * *' # Run every day at 00:00 UTC
 
 jobs:
   DeployToEC2:
-    name: Deploy API to JetStream2
+    name: Deploy API to JetStream2 (Dev/Prod)
     runs-on: "ubuntu-latest"
 
     steps:
       - uses: actions/checkout@v4
-      - name: Build and Deploy
+      - name: Build and Deploy (dev.syncflow.live)
+        if: github.event_name == 'push'
         env:
           PRIVATE_KEY: ${{ secrets.JETSTREAM2_PRIV_KEY_PEM }}
           HOST: ${{ secrets.JETSTREAM2_HOST }}
@@ -25,10 +30,36 @@ jobs:
           openssl rsa -in private_key -check
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             echo "Pulling latest changes from GitHub"
-            rm -rf $HOME/SyncFlowDeployment && cd $HOME
-            mkdir SyncFlowDeployment && cd SyncFlowDeployment
+            rm -rf $HOME/SyncFlowDeploymentDev && cd $HOME
+            mkdir SyncFlowDeploymentDev && cd SyncFlowDeploymentDev
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
+            cp $HOME/.deployment_config_dev_cloud.json  deployment_config_dev_cloud.json
+            chmod +x docker/generate-prod-config
+            ./docker/generate-prod-config --config-file deployment_config_dev_cloud.json --outfile-name .env.dev
+            sudo chmod 666 /var/run/docker.sock
+            docker compose -p syncflow-dev-prod --file docker/docker-compose.dev.yaml build migrations-dev-prod api-syncflow-dev-prod syncflow-dashboard-dev-prod 
+            docker compose -p syncflow-dev-prod --file docker/docker-compose.dev.yaml down api-syncflow-dev-prod syncflow-dashboard-dev-prod
+            docker compose -p syncflow-dev-prod --file docker/docker-compose.dev.yaml up -d
+          '
+      
+      - name: Build and Deploy (syncflow.live)
+        if: github.event_name == 'release'
+        env:
+          PRIVATE_KEY: ${{ secrets.JETSTREAM2_PRIV_KEY_PEM }}
+          HOST: ${{ secrets.JETSTREAM2_HOST }}
+          USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          openssl rsa -in private_key -check
+          ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
+            echo "Pulling latest changes from GitHub"
+            rm -rf $HOME/SyncFlowDeploymentProd && cd $HOME
+            mkdir SyncFlowDeploymentProd && cd SyncFlowDeploymentProd
+            git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
+            cd SyncFlow
+            latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+            git checkout $latest_tag
             cp $HOME/.deployment_config_prod_cloud.json  deployment_config_prod_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_prod_cloud.json --outfile-name .env.prod

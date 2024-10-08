@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres-syncflow-prod:
     image: postgres:14-alpine
@@ -23,7 +21,7 @@ services:
     build:
       context: ../crates
       dockerfile: ../docker/Dockerfile.migrations
-    image: syncflow-migrations:latest
+    image: syncflow-migrations:stable
     container_name: syncflow-migrations-prod
     volumes:
       - ../crates/.env.prod.migration:/migrations/.env
@@ -34,7 +32,7 @@ services:
     build:
       context: ../crates
       dockerfile: ../docker/Dockerfile.api
-    image: syncflow-api:latest
+    image: syncflow-api:stable
     container_name: syncflow-api-prod
     ports:
       - "8082:8082"
@@ -46,7 +44,7 @@ services:
     build:
       context: ../dashboard
       dockerfile: ../docker/Dockerfile.next
-    image: syncflow-dashboard:latest
+    image: syncflow-dashboard:stable
     container_name: syncflow-dashboard-prod
     volumes:
       - ~/deployment_dashboard_prod.json:/app/config/production.json
@@ -59,7 +57,7 @@ services:
     build:
       context: ../examples/syncflow-demo-client
       dockerfile: ../../docker/Dockerfile.next
-    image: syncflow-example-app:latest
+    image: syncflow-example-app:stable
     container_name: syncflow-example-app-prod
     ports:
       - "3001:3000"
