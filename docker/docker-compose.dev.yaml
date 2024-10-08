@@ -8,7 +8,7 @@ services:
       - postgres-data-dev-prod:/var/lib/postgresql/data
     env_file: ../crates/.env.dev.pgadmin
 
-  pgadmin-prod:
+  pgadmin-dev-prod:
     image: dpage/pgadmin4
     container_name: pgadmin-syncflow-dev-prod
     ports:
@@ -47,7 +47,7 @@ services:
       args:
         - BUILD_ENV=dev
     image: syncflow-dashboard:latest
-    container_name: syncflow-dashboard-prod
+    container_name: syncflow-dashboard-dev-prod
     volumes:
       - ~/deployment_dashboard_prod.json:/app/config/production.json
     ports:
