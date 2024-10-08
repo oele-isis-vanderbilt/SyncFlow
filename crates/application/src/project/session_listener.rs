@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use domain::models::{Project, ProjectSessionStatus};
 
 use diesel::prelude::PgConnection;
@@ -5,7 +7,7 @@ use uuid::Uuid;
 
 use crate::livekit::room::RoomService;
 
-use super::session::{self, RoomMetadata, SessionError};
+use super::session_crud::{self, RoomMetadata, SessionError};
 
 fn match_session_id_from_metadata(metadata: &str, session_id: &Uuid) -> Result<bool, SessionError> {
     let metadata = RoomMetadata::from_str(metadata)?;
@@ -42,7 +44,7 @@ pub async fn session_listener(
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
     }
 
-    session::update_session_status(session_id, ProjectSessionStatus::Stopped, conn)?;
+    session_crud::update_session_status(session_id, ProjectSessionStatus::Stopped, conn)?;
 
     Ok(())
 }

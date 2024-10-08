@@ -1,22 +1,22 @@
+use std::fmt::Display;
+use std::str::FromStr;
+
 use crate::livekit::room::RoomService;
-use crate::project::project::Encryptable;
+use crate::project::project_crud::Encryptable;
 use crate::users::secret::SecretError;
 use crate::{livekit, project};
 
-use aes_gcm::aead::rand_core::le;
 use diesel::{prelude::*, PgConnection};
 use domain::models::{NewProjectSession, ProjectSession, ProjectSessionStatus};
-use domain::schema::syncflow::api_keys::id;
 use livekit_api::services::ServiceError;
 use livekit_client::RoomError;
 use livekit_protocol::ParticipantInfo;
-use log::info;
-use shared::livekit_models::{LivekitRoom, RoomOptions, TokenRequest, TokenResponse};
+use shared::livekit_models::{RoomOptions, TokenRequest, TokenResponse};
 use shared::project_models::NewSessionRequest;
 use thiserror::Error;
 use uuid::Uuid;
 
-use super::project::ProjectError;
+use super::project_crud::ProjectError;
 
 #[derive(Debug, Error)]
 pub enum SessionError {
@@ -52,26 +52,28 @@ pub struct RoomMetadata {
     pub comments: Option<String>,
 }
 
-impl RoomMetadata {
-    pub fn to_string(&self) -> String {
-        format!(
+impl Display for RoomMetadata {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
             "|session_id:{}|project_id:{}|comments:{}|",
             self.session_id,
             self.project_id,
-            self.comments
-                .as_ref()
-                .map(|c| c.clone())
-                .unwrap_or_default()
+            self.comments.clone().unwrap_or_default()
         )
     }
+}
 
-    pub fn from_str(metadata: &str) -> Result<Self, SessionError> {
+impl FromStr for RoomMetadata {
+    type Err = SessionError;
+
+    fn from_str(metadata: &str) -> Result<Self, SessionError> {
         let metadata = metadata.trim_matches('|');
         let metadata: Vec<&str> = metadata.split('|').collect();
         if metadata.len() != 3 {
-            return Err(SessionError::ConfigurationError(
+            Err(SessionError::ConfigurationError(
                 "Invalid metadata format".to_string(),
-            ));
+            ))
         } else {
             let session_id = metadata[0].split(":").last().unwrap_or_default();
             let project_id = metadata[1].split(":").last().unwrap_or_default();
@@ -135,9 +137,9 @@ pub async fn create_session(
 ) -> Result<ProjectSession, SessionError> {
     use domain::schema::syncflow::project_sessions::dsl::*;
 
-    let mut project = project::project::get_project_by_id(proj_id, conn)?;
+    let mut project = project::project_crud::get_project_by_id(proj_id, conn)?;
     project.decrypt(encryption_key)?;
-    let project_uuid = project.id.clone();
+    let project_uuid = project.id;
 
     let room_service: RoomService = (&project).into();
     let room_opts: RoomOptions = session.clone().into();
@@ -159,7 +161,7 @@ pub async fn create_session(
         .get_result::<ProjectSession>(conn)?;
 
     let room_metadata = RoomMetadata {
-        session_id: session.id.clone(),
+        session_id: session.id,
         project_id: project_uuid,
         comments: session.comments.clone(),
     };
@@ -213,16 +215,16 @@ pub fn get_session_token(
     conn: &mut PgConnection,
 ) -> Result<TokenResponse, SessionError> {
     let session = get_session_if_active(proj_id, session_id, conn)?;
-    let mut project = project::project::get_project_by_id(proj_id, conn)?;
+    let mut project = project::project_crud::get_project_by_id(proj_id, conn)?;
     if project.id != session.project_id {
-        return Err(SessionError::ConfigurationError(
+        Err(SessionError::ConfigurationError(
             "Invalid project id".to_string(),
-        ));
+        ))?
     } else {
-        if !(token_request.video_grants.room == session.livekit_room_name) {
-            return Err(SessionError::ConfigurationError(
+        if token_request.video_grants.room != session.livekit_room_name {
+            Err(SessionError::ConfigurationError(
                 "Invalid room name(mismatch between room and livekit room name)".to_string(),
-            ));
+            ))?
         }
         project.decrypt(encryption_key)?;
         let server_url = project.livekit_server_url.clone();
@@ -252,7 +254,7 @@ pub async fn delete_session(
         .get_result::<ProjectSession>(conn)?;
 
     if session.status != ProjectSessionStatus::Stopped {
-        let mut project = project::project::get_project_by_id(proj_id, conn)?;
+        let mut project = project::project_crud::get_project_by_id(proj_id, conn)?;
         project.decrypt(encryption_key)?;
 
         let room_service: RoomService = (&project).into();
@@ -289,7 +291,7 @@ pub async fn get_participants(
 ) -> Result<Vec<ParticipantInfo>, SessionError> {
     let project_session = get_session_if_active(proj_id, session_id, conn)?;
 
-    let mut project = project::project::get_project_by_id(proj_id, conn)?;
+    let mut project = project::project_crud::get_project_by_id(proj_id, conn)?;
     if project.id != project_session.project_id {
         return Err(SessionError::ConfigurationError(
             "Invalid project id".to_string(),
@@ -315,11 +317,11 @@ pub async fn stop_session(
 ) -> Result<ProjectSession, SessionError> {
     use domain::schema::syncflow::project_sessions::dsl::*;
 
-    let mut project = project::project::get_project_by_id(proj_id, conn)?;
+    let mut project = project::project_crud::get_project_by_id(proj_id, conn)?;
     project.decrypt(encryption_key)?;
     let room_service: RoomService = (&project).into();
 
-    let session = project::session::get_session(proj_id, session_id, conn)?;
+    let session = project::session_crud::get_session(proj_id, session_id, conn)?;
 
     if session.status != ProjectSessionStatus::Started {
         return Err(SessionError::InactiveSessionError(

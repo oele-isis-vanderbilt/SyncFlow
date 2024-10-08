@@ -144,7 +144,7 @@ impl AccountService {
         user_id: i32,
         new_project_request: &ProjectRequest,
     ) -> Result<ProjectInfo, UserError> {
-        let project = project::project::create_project(
+        let project = project::project_crud::create_project(
             user_id,
             new_project_request,
             &self.config.encryption_key,
@@ -155,29 +155,29 @@ impl AccountService {
     }
 
     pub fn get_projects(&self, user_id: i32) -> Result<Vec<ProjectInfo>, UserError> {
-        let projects = project::project::list_projects(user_id, &mut self.pool.get().unwrap())?;
+        let projects = project::project_crud::list_projects(user_id, &mut self.pool.get().unwrap())?;
         Ok(projects.into_iter().map(Into::into).collect())
     }
 
     pub fn get_project(&self, user_id: i32, project_id: &str) -> Result<ProjectInfo, UserError> {
         let project =
-            project::project::get_project(user_id, project_id, &mut self.pool.get().unwrap())?;
+            project::project_crud::get_project(user_id, project_id, &mut self.pool.get().unwrap())?;
         Ok(project.into())
     }
 
     pub fn delete_project(&self, user_id: i32, project_id: &str) -> Result<ProjectInfo, UserError> {
         let project =
-            project::project::delete_project(user_id, project_id, &mut self.pool.get().unwrap())?;
+            project::project_crud::delete_project(user_id, project_id, &mut self.pool.get().unwrap())?;
         Ok(project.into())
     }
 
     pub fn summarize_projects(&self, user_id: i32) -> Result<ProjectsSummary, UserError> {
-        let summary = project::project::summarize_projects(user_id, &mut self.pool.get().unwrap())?;
+        let summary = project::project_crud::summarize_projects(user_id, &mut self.pool.get().unwrap())?;
         Ok(summary)
     }
 
     pub async fn summarize_project(&self, project_id: &str) -> Result<ProjectSummary, UserError> {
-        let summary = project::project::summarize_project(
+        let summary = project::project_crud::summarize_project(
             project_id,
             &mut self.pool.get().unwrap(),
             &self.config.encryption_key,
@@ -193,7 +193,7 @@ impl AccountService {
         project_id: Uuid,
         new_project_request: &ProjectRequest,
     ) -> Result<ProjectInfo, UserError> {
-        let project = project::project::update_project(
+        let project = project::project_crud::update_project(
             user_id,
             project_id,
             new_project_request,

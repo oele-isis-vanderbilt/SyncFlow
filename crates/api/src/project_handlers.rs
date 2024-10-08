@@ -1,5 +1,3 @@
-use std::path;
-
 use crate::{
     helpers::{error_response, json_ok_response},
     ownership_middleware,
@@ -10,7 +8,7 @@ use actix_web::{
     HttpResponse,
 };
 use application::{
-    project::{session, session_service::SessionService},
+    project::session_service::SessionService,
     users::{account_service::AccountService, tokens_manager::UserInfo},
 };
 use shared::{

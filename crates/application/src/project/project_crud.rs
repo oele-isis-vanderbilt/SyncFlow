@@ -1,17 +1,10 @@
-use super::{super::livekit::room::RoomService, session};
+use super::super::livekit::room::RoomService;
 use crate::{
     livekit::egress::EgressService,
-    project,
-    users::{
-        secret::{decrypt_string, encrypt_string, SecretError},
-        user,
-    },
+    users::secret::{decrypt_string, encrypt_string, SecretError},
 };
 use diesel::{prelude::*, PgConnection};
-use domain::{
-    models::{NewProject, Project, ProjectSession, ProjectSessionStatus, StorageType},
-    schema::syncflow::projects::bucket_name,
-};
+use domain::models::{NewProject, Project, ProjectSession, ProjectSessionStatus, StorageType};
 use livekit_api::services::ServiceError;
 use shared::{
     deployment_config::{S3Config, StorageConfig},

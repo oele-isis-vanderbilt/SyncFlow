@@ -5,7 +5,7 @@ use diesel::PgConnection;
 use domain::models::{ApiKey, KeyType, LoginSession, NewApiKey, NewLoginSession, NewUser, User};
 
 use super::oauth::github::{GithubOAuthError, GithubUser};
-use crate::project::project::ProjectError;
+use crate::project::project_crud::ProjectError;
 use crate::users::secret::{encrypt_string, key_secret_pair};
 use serde::{Deserialize, Serialize};
 use shared::response_models::Response;

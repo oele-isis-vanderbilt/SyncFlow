@@ -1,16 +1,11 @@
-use std::{f64::consts::E, sync::Arc};
+use std::sync::Arc;
 
 use infrastructure::DbPool;
-use livekit_api::services::ServiceError;
-use livekit_client::RoomError;
 use livekit_protocol::ParticipantInfo;
 
 use crate::{
-    livekit::{
-        egress::EgressService,
-        room::{self, RoomService},
-    },
-    project::session::{self, SessionError},
+    livekit::{egress::EgressService, room::RoomService},
+    project::session_crud::{self, SessionError},
 };
 use shared::{
     livekit_models::{TokenRequest, TokenResponse},
@@ -18,7 +13,7 @@ use shared::{
 };
 
 use super::{
-    project::{self, Encryptable},
+    project_crud::{self, Encryptable},
     session_listener::session_listener,
 };
 
@@ -44,7 +39,7 @@ impl SessionService {
         project_id: &str,
         session: NewSessionRequest,
     ) -> Result<ProjectSessionResponse, SessionError> {
-        let new_session = session::create_session(
+        let new_session = session_crud::create_session(
             project_id,
             &session,
             &self.encryption_key,
@@ -52,10 +47,10 @@ impl SessionService {
         )
         .await?;
 
-        let mut project = project::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
+        let mut project = project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
         project.decrypt(&self.encryption_key)?;
 
-        let session_id = new_session.id.clone();
+        let session_id = new_session.id;
         let livekit_room_name = new_session.livekit_room_name.clone();
         let pool = self.pool.clone();
 
@@ -71,7 +66,7 @@ impl SessionService {
         &self,
         project_id: &str,
     ) -> Result<Vec<ProjectSessionResponse>, SessionError> {
-        let sessions = session::get_sessions(project_id, &mut self.pool.get().unwrap())?;
+        let sessions = session_crud::get_sessions(project_id, &mut self.pool.get().unwrap())?;
         Ok(sessions.into_iter().map(Into::into).collect())
     }
 
@@ -80,7 +75,7 @@ impl SessionService {
         project_id: &str,
         session_id: &str,
     ) -> Result<Vec<ParticipantInfo>, SessionError> {
-        let participants = session::get_participants(
+        let participants = session_crud::get_participants(
             project_id,
             session_id,
             &self.encryption_key,
@@ -97,9 +92,9 @@ impl SessionService {
         session_id: &str,
     ) -> Result<LivekitSessionInfo, SessionError> {
         let session =
-            session::get_session_if_active(project_id, session_id, &mut self.pool.get().unwrap())?;
+            session_crud::get_session_if_active(project_id, session_id, &mut self.pool.get().unwrap())?;
 
-        let mut project = project::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
+        let mut project = project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
         project.decrypt(&self.encryption_key)?;
 
         let room_service: RoomService = (&project).into();
@@ -129,7 +124,7 @@ impl SessionService {
         project_id: &str,
         session_id: &str,
     ) -> Result<ProjectSessionResponse, SessionError> {
-        let session = session::get_session(project_id, session_id, &mut self.pool.get().unwrap());
+        let session = session_crud::get_session(project_id, session_id, &mut self.pool.get().unwrap());
         Ok(session?.into())
     }
 
@@ -139,7 +134,7 @@ impl SessionService {
         session_id: &str,
         token_request: &TokenRequest,
     ) -> Result<TokenResponse, SessionError> {
-        session::get_session_token(
+        session_crud::get_session_token(
             project_id,
             session_id,
             token_request,
@@ -153,7 +148,7 @@ impl SessionService {
         project_id: &str,
         session_id: &str,
     ) -> Result<ProjectSessionResponse, SessionError> {
-        let session = session::stop_session(
+        let session = session_crud::stop_session(
             project_id,
             session_id,
             &self.encryption_key,
@@ -169,7 +164,7 @@ impl SessionService {
         project_id: &str,
         session_id: &str,
     ) -> Result<ProjectSessionResponse, SessionError> {
-        let session = session::delete_session(
+        let session = session_crud::delete_session(
             project_id,
             session_id,
             &self.encryption_key,

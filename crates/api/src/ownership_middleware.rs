@@ -70,36 +70,34 @@ where
                 .any(|ignore_route| req.path().starts_with(ignore_route))
         {
             OwnershipStatus::Ignored
-        } else {
-            if let Some(user_info) = req.extensions().get::<UserInfo>() {
-                let account_service = req.app_data::<Data<AccountService>>();
+        } else if let Some(user_info) = req.extensions().get::<UserInfo>() {
+            let account_service = req.app_data::<Data<AccountService>>();
 
-                account_service
-                    .map(|svc| {
-                        let project_id = extract_project_id(&req);
-                        if let Some(project_id) = project_id {
-                            let user_id = user_info.user_id;
-                            svc.get_project(user_id, &project_id)
-                                .map(|_| OwnershipStatus::Authorized)
-                                .unwrap_or_else(|e: application::users::user::UserError| {
-                                    OwnershipStatus::ApplicationError(Response::from(e).into())
-                                })
-                        } else {
-                            return OwnershipStatus::ApplicationError(
-                                HttpResponse::BadRequest().body("Project ID Not Found"),
-                            );
-                        }
-                    })
-                    .unwrap_or_else(|| {
+            account_service
+                .map(|svc| {
+                    let project_id = extract_project_id(&req);
+                    if let Some(project_id) = project_id {
+                        let user_id = user_info.user_id;
+                        svc.get_project(user_id, &project_id)
+                            .map(|_| OwnershipStatus::Authorized)
+                            .unwrap_or_else(|e: application::users::user::UserError| {
+                                OwnershipStatus::ApplicationError(Response::from(e).into())
+                            })
+                    } else {
                         OwnershipStatus::ApplicationError(
-                            HttpResponse::Unauthorized().body("Account Service Not Found"),
+                            HttpResponse::BadRequest().body("Project ID Not Found"),
                         )
-                    })
-            } else {
-                OwnershipStatus::ApplicationError(
-                    HttpResponse::Unauthorized().body("User Info Not Found"),
-                )
-            }
+                    }
+                })
+                .unwrap_or_else(|| {
+                    OwnershipStatus::ApplicationError(
+                        HttpResponse::Unauthorized().body("Account Service Not Found"),
+                    )
+                })
+        } else {
+            OwnershipStatus::ApplicationError(
+                HttpResponse::Unauthorized().body("User Info Not Found"),
+            )
         };
 
         match status {

@@ -19,7 +19,6 @@ impl NewSessionRequest {
     pub fn get_name(&self) -> String {
         self.name
             .as_ref()
-            .take()
             .map(|name| {
                 if name.is_empty() {
                     generate_random_session_name()
@@ -27,7 +26,7 @@ impl NewSessionRequest {
                     name.clone()
                 }
             })
-            .unwrap_or_else(|| generate_random_session_name())
+            .unwrap_or_else(generate_random_session_name)
     }
 }
 
