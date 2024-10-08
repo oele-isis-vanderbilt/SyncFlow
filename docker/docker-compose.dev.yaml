@@ -36,7 +36,7 @@ services:
     container_name: syncflow-api-dev-prod
     ports:
       - "8083:8083"
-    env_file: ../crates/.env.prod
+    env_file: ../crates/.env.dev
     depends_on:
       - migrations-dev-prod
 
