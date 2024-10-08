@@ -49,7 +49,7 @@ services:
     image: syncflow-dashboard:latest
     container_name: syncflow-dashboard-dev-prod
     volumes:
-      - ~/deployment_dashboard_prod.json:/app/config/production.json
+      - ~/deployment_dashboard_dev.json:/app/config/production.json
     ports:
       - "3002:3000"
     depends_on:
