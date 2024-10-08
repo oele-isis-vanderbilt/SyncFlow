@@ -44,6 +44,8 @@ services:
     build:
       context: ../dashboard
       dockerfile: ../docker/Dockerfile.next
+      args:
+        - BUILD_ENV=prod
     image: syncflow-dashboard:stable
     container_name: syncflow-dashboard-prod
     volumes:
