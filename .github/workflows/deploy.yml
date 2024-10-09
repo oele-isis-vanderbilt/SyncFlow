@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - 139-api-dockerfile-fix
   
   release: # Trigger the workflow on release events
     types: [published]
@@ -34,7 +33,6 @@ jobs:
             mkdir SyncFlowDeploymentDev && cd SyncFlowDeploymentDev
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
-            git checkout -b 139-api-dockerfile-fix origin/139-api-dockerfile-fix
             cp $HOME/.deployment_config_dev_cloud.json  deployment_config_dev_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_dev_cloud.json --outfile-name .env.dev
