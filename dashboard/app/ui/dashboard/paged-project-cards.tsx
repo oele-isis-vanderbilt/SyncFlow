@@ -8,11 +8,11 @@ export default async function ProjectCards() {
   return projectsResult
     .map((projects) => {
       if (projects.length === 0) {
-        return <div className="dark:text-white">No projects found.</div>;
+        return <div className="dark:text-white" key="projects">No projects found.</div>;
       }
 
       return (
-        <div className="grid h-full w-full grid-cols-1 gap-5 p-2 md:grid-cols-4">
+        <div className="grid h-full w-full grid-cols-1 gap-5 p-2 md:grid-cols-4" key="projects">
           {projects.sort(lastUpdatedProjectComparator).map((project) => {
             return <ProjectCard key={project.id} project={project} />;
           })}

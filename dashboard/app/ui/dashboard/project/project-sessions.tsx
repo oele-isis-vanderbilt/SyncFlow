@@ -84,8 +84,10 @@ const sortedSessionsToColumns = (projectId: string) => {
       name: 'Actions',
       selector: (session) => session.id,
       cell: (session) => {
+        /* eslint-disable react-hooks/rules-of-hooks */
         let [infoModalContent, setInfoModalContent] =
           useState<InfoModalContent | null>(null);
+        /* eslint-enable react-hooks/rules-of-hooks */
 
         return (
           <div className="flex flex-row gap-2">

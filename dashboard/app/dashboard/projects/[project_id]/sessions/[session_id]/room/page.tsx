@@ -63,6 +63,7 @@ export default async function Page({
         .map((sessionToken) => {
           return (
             <Room
+              key={`${projectId}-${sessionId}`}
               token={sessionToken.token}
               user={session?.user}
               lkServerUrl={sessionToken.livekitServerUrl}
