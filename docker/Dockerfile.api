@@ -1,10 +1,10 @@
-FROM rust:slim as builder
+FROM rust:slim AS builder
 
-WORKDIR ./app
+WORKDIR /app
 
 COPY . .
 
-RUN apt-get update && apt-get install libpq-dev pkg-config -y && cargo build --bin api --release --package api
+RUN apt-get update && apt-get install libpq-dev pkg-config g++ libx11-dev libxext-dev libgl1-mesa-dev -y && cargo build --bin api --release --package api
 
 FROM ubuntu:latest
 

@@ -58,6 +58,7 @@ export default async function Project({
                 }
                 return (
                   <ProjectSessions
+                    key={project.id}
                     sessions={activeSessions}
                     projectId={project.id}
                     livekitSessionInfo={participantsCount}
@@ -93,6 +94,7 @@ export default async function Project({
                 );
                 return (
                   <ProjectSessions
+                    key={project.id}
                     sessions={stoppedSessions}
                     projectId={project.id}
                     livekitSessionInfo={{}}
