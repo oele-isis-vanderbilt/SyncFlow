@@ -3,6 +3,7 @@ export interface ApiKeyRequest {
 }
 
 export interface ApiKeyResponse {
+  id: number;
   key: string;
   comment: string;
   createdAt: number;

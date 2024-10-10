@@ -1,3 +1,4 @@
+use crate::project::project_crud;
 use crate::users::secret::decrypt_string;
 use crate::users::signed_token::{decode_jwt_unsafe, generate_and_sign_jwt, verify_and_decode_jwt};
 use crate::users::user;
@@ -21,6 +22,7 @@ pub enum TokenTypes {
     LoginToken(LoginToken),
     ApiToken(ApiToken),
     RefreshToken(RefreshToken),
+    ProjectToken(ProjectToken),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -56,6 +58,17 @@ pub struct ApiToken {
 
     // Data
     pub project: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectToken {
+    pub iat: usize,
+    pub exp: usize,
+    pub iss: String,
+
+    // Data
+    pub project_id: String,
 }
 
 pub struct JWTTokensManager {
@@ -149,8 +162,8 @@ impl JWTTokensManager {
             Ok(TokenTypes::LoginToken(token_data))
         } else if let Ok(token_data) = decode_jwt_unsafe::<RefreshToken>(token) {
             Ok(TokenTypes::RefreshToken(token_data))
-        } else if let Ok(token_data) = decode_jwt_unsafe::<ApiToken>(token) {
-            Ok(TokenTypes::ApiToken(token_data))
+        } else if let Ok(token_data) = decode_jwt_unsafe::<ProjectToken>(token) {
+            Ok(TokenTypes::ProjectToken(token_data))
         } else {
             return Err(UserError::TokenError("Invalid token".to_string()));
         }
@@ -236,6 +249,37 @@ impl JWTTokensManager {
                     login_session: None,
                 })
             }
+
+            TokenTypes::ProjectToken(token_data) => {
+                let api_key = project_crud::fetch_api_key_by_key(
+                    token_data.iss.as_str(),
+                    &token_data.project_id,
+                    conn,
+                )
+                .map_err(|e| UserError::TokenError(e.to_string()))?;
+
+                let encrypted_secret = api_key.api_secret;
+                let decrypted_secret = decrypt_string(&encrypted_secret, &self.encryption_key)
+                    .map_err(|e| UserError::SecretError(e.to_string()))?;
+
+                let token_data = verify_and_decode_jwt::<ProjectToken>(token, &decrypted_secret)
+                    .map_err(|e| UserError::TokenError(e.to_string()))?;
+
+                if token_data.iss != api_key.api_key {
+                    return Err(UserError::TokenError("Invalid token".to_string()));
+                }
+
+                if !self.is_project_token_valid(&token_data) {
+                    return Err(UserError::TokenError("Invalid token".to_string()));
+                }
+
+                let user = user::get_user(api_key.user_id, conn)?;
+                Ok(UserInfo {
+                    user_id: user.id,
+                    user_name: user.username.to_owned(),
+                    login_session: None,
+                })
+            }
         }
     }
 
@@ -270,6 +314,14 @@ impl JWTTokensManager {
 
     pub fn is_api_token_valid(&self, token_data: &ApiToken) -> bool {
         // Verify that the token is not expired
+        if token_data.exp < (chrono::Utc::now().timestamp() as usize) {
+            return false;
+        }
+
+        true
+    }
+
+    pub fn is_project_token_valid(&self, token_data: &ProjectToken) -> bool {
         if token_data.exp < (chrono::Utc::now().timestamp() as usize) {
             return false;
         }

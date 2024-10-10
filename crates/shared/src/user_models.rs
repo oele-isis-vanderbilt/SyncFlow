@@ -51,6 +51,7 @@ pub struct ApiKeyResponse {
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ApiKeyResponseWithoutSecret {
+    pub id: i32,
     pub key: String,
     pub comment: String,
     pub created_at: usize,

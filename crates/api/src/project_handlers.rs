@@ -12,7 +12,9 @@ use application::{
     users::{account_service::AccountService, tokens_manager::UserInfo},
 };
 use shared::{
-    livekit_models::TokenRequest, project_models::NewSessionRequest, user_models::ProjectRequest,
+    livekit_models::TokenRequest,
+    project_models::NewSessionRequest,
+    user_models::{ApiKeyRequest, ProjectRequest},
 };
 
 #[utoipa::path(
@@ -293,6 +295,47 @@ async fn stop_session(
         .unwrap_or_else(error_response)
 }
 
+#[post("/{project_id}/settings/create-api-key")]
+async fn create_api_key(
+    project_id: web::Path<String>,
+    user_info: ReqData<UserInfo>,
+    account_service: web::Data<AccountService>,
+    request: web::Json<ApiKeyRequest>,
+) -> HttpResponse {
+    let user_id = user_info.into_inner().user_id;
+    account_service
+        .create_project_api_key(user_id, &project_id, &request)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+#[get("{project_id}/settings/api-keys")]
+async fn get_all_api_keys(
+    project_id: web::Path<String>,
+    user_info: ReqData<UserInfo>,
+    account_service: web::Data<AccountService>,
+) -> HttpResponse {
+    let user_id = user_info.into_inner().user_id;
+    account_service
+        .list_project_api_keys(user_id, &project_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+#[delete("{project_id}/settings/api-keys/{api_key_id}")]
+async fn delete_api_key(
+    path: web::Path<(String, i32)>,
+    user_info: ReqData<UserInfo>,
+    account_service: web::Data<AccountService>,
+) -> HttpResponse {
+    let (project_id, api_key_id) = path.into_inner();
+    let user_id = user_info.into_inner().user_id;
+    account_service
+        .delete_project_api_key(user_id, &project_id, api_key_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
 pub fn init_routes(cfg: &mut web::ServiceConfig, session_service: web::Data<SessionService>) {
     let projects_scope = web::scope("/projects")
         .wrap(ownership_middleware::Ownership)
@@ -310,7 +353,10 @@ pub fn init_routes(cfg: &mut web::ServiceConfig, session_service: web::Data<Sess
         .service(get_sessions)
         .service(get_session)
         .service(stop_session)
-        .service(get_livekit_session_info);
+        .service(get_livekit_session_info)
+        .service(create_api_key)
+        .service(get_all_api_keys)
+        .service(delete_api_key);
 
     cfg.service(projects_scope);
 }

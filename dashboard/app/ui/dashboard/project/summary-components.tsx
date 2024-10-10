@@ -9,7 +9,10 @@ export async function ProjectSummaryComponent({
   return (await projectClient.summarizeProject(projectId))
     .map((summary: ProjectSummary) => {
       return (
-        <div className="gap:20 flex w-full flex-row items-center justify-center md:gap-40" key={projectId}>
+        <div
+          className="gap:20 flex w-full flex-row items-center justify-center md:gap-40"
+          key={projectId}
+        >
           <div className="grid grid-cols-1 gap-10 md:grid-cols-4 md:gap-40">
             <div className="flex flex-col items-center justify-center p-5 ring">
               <h2 className="text-2xl font-bold md:text-6xl">

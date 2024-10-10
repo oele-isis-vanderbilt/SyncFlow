@@ -106,6 +106,18 @@ pub mod syncflow {
     }
 
     diesel::table! {
+        syncflow.project_api_keys (id) {
+            id -> Int4,
+            api_key -> Text,
+            api_secret -> Text,
+            comments -> Nullable<Text>,
+            created_at -> Timestamp,
+            user_id -> Int4,
+            project_id -> Uuid,
+        }
+    }
+
+    diesel::table! {
         use diesel::sql_types::*;
         use super::sql_types::ProjectSessionStatus;
 
@@ -185,6 +197,8 @@ pub mod syncflow {
     diesel::joinable!(generate_token_actions -> users (user_id));
     diesel::joinable!(list_rooms_actions -> users (user_id));
     diesel::joinable!(login_sessions -> users (user_id));
+    diesel::joinable!(project_api_keys -> projects (project_id));
+    diesel::joinable!(project_api_keys -> users (user_id));
     diesel::joinable!(project_sessions -> projects (project_id));
     diesel::joinable!(projects -> users (user_id));
 
@@ -196,6 +210,7 @@ pub mod syncflow {
         generate_token_actions,
         list_rooms_actions,
         login_sessions,
+        project_api_keys,
         project_sessions,
         projects,
         users,

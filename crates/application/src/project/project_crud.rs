@@ -1,10 +1,13 @@
 use super::super::livekit::room::RoomService;
 use crate::{
     livekit::egress::EgressService,
-    users::secret::{decrypt_string, encrypt_string, SecretError},
+    users::secret::{decrypt_string, encrypt_string, key_secret_pair, SecretError},
 };
 use diesel::{prelude::*, PgConnection};
-use domain::models::{NewProject, Project, ProjectSession, ProjectSessionStatus, StorageType};
+use domain::models::{
+    NewProject, NewProjectAPIKey, Project, ProjectAPIKey, ProjectSession, ProjectSessionStatus,
+    StorageType,
+};
 use livekit_api::services::ServiceError;
 use shared::{
     deployment_config::{S3Config, StorageConfig},
@@ -94,6 +97,42 @@ impl Encryptable for Project {
         self.secret_key = secret_key;
         self.livekit_server_api_key = livekit_server_api_key;
         self.livekit_server_api_secret = livekit_server_api_secret;
+        Ok(())
+    }
+}
+
+impl Encryptable for NewProjectAPIKey {
+    fn encrypt(&mut self, key: &str) -> Result<(), SecretError> {
+        let api_secret = encrypt_string(&self.api_secret, key)?;
+
+        self.api_secret = api_secret;
+
+        Ok(())
+    }
+
+    fn decrypt(&mut self, key: &str) -> Result<(), SecretError> {
+        let api_secret = decrypt_string(&self.api_secret, key)?;
+
+        self.api_secret = api_secret;
+
+        Ok(())
+    }
+}
+
+impl Encryptable for ProjectAPIKey {
+    fn encrypt(&mut self, key: &str) -> Result<(), SecretError> {
+        let api_secret = encrypt_string(&self.api_key, key)?;
+
+        self.api_secret = api_secret;
+
+        Ok(())
+    }
+
+    fn decrypt(&mut self, key: &str) -> Result<(), SecretError> {
+        let api_secret = decrypt_string(&self.api_secret, key)?;
+
+        self.api_secret = api_secret;
+
         Ok(())
     }
 }
@@ -396,4 +435,96 @@ impl From<&Project> for EgressService {
             config,
         )
     }
+}
+
+pub fn create_api_key(
+    uid: i32,
+    proj_id: &str,
+    key_comments: Option<String>,
+    encryption_secret: &str,
+    conn: &mut PgConnection,
+) -> Result<ProjectAPIKey, ProjectError> {
+    use domain::schema::syncflow::project_api_keys::dsl::*;
+
+    let key_pair = key_secret_pair();
+
+    let proj_uuid = Uuid::parse_str(proj_id)
+        .map_err(|_| ProjectError::ConfigurationError("Invalid project id".to_string()))?;
+
+    let mut new_key = NewProjectAPIKey {
+        project_id: proj_uuid,
+        user_id: uid,
+        api_key: key_pair.key.clone(),
+        api_secret: key_pair.secret.clone(),
+        comments: key_comments.clone(),
+    };
+
+    new_key.encrypt(encryption_secret)?;
+
+    diesel::insert_into(project_api_keys)
+        .values(&new_key)
+        .get_result::<ProjectAPIKey>(conn)
+        .map_err(ProjectError::DatabaseError)
+}
+
+pub fn list_all_api_keys(
+    uid: i32,
+    proj_id: &str,
+    conn: &mut PgConnection,
+) -> Result<Vec<ProjectAPIKey>, ProjectError> {
+    use domain::schema::syncflow::project_api_keys::dsl::*;
+
+    let proj_uuid = Uuid::parse_str(proj_id)
+        .map_err(|_| ProjectError::ConfigurationError("Invalid project id".to_string()))?;
+    let keys = project_api_keys
+        .filter(user_id.eq(uid).and(project_id.eq(proj_uuid)))
+        .load::<ProjectAPIKey>(conn)?;
+
+    Ok(keys)
+}
+
+pub fn delete_api_key(
+    uid: i32,
+    proj_id: &str,
+    key_id: i32,
+    conn: &mut PgConnection,
+) -> Result<ProjectAPIKey, ProjectError> {
+    use domain::schema::syncflow::project_api_keys::dsl::*;
+
+    let proj_uuid = Uuid::parse_str(proj_id)
+        .map_err(|_| ProjectError::ConfigurationError("Invalid project id".to_string()))?;
+
+    let key = diesel::delete(
+        project_api_keys.filter(
+            user_id
+                .eq(uid)
+                .and(project_id.eq(proj_uuid))
+                .and(id.eq(key_id)),
+        ),
+    )
+    .get_result::<ProjectAPIKey>(conn)?;
+
+    Ok(key)
+}
+
+pub fn fetch_api_key_by_key(
+    key: &str,
+    proj_id: &str,
+    conn: &mut PgConnection,
+) -> Result<ProjectAPIKey, ProjectError> {
+    use domain::schema::syncflow::project_api_keys::dsl::*;
+    let proj_uuid = Uuid::parse_str(proj_id)
+        .map_err(|_| ProjectError::ConfigurationError("Invalid project id".to_string()))?;
+
+    let key = project_api_keys
+        .filter(api_key.eq(key).and(project_id.eq(proj_uuid)))
+        .first::<ProjectAPIKey>(conn)
+        .map_err(|err| match err {
+            diesel::result::Error::NotFound => {
+                ProjectError::ProjectNotFoundError("API Key not found".to_string())
+            }
+            _ => ProjectError::DatabaseError(err),
+        })?;
+
+    Ok(key)
 }

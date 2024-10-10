@@ -5,7 +5,6 @@ import { CustomDataTable } from './data-table';
 import { getTimeDifferenceInMinutes } from '../utils';
 import { Tooltip } from 'flowbite-react';
 import { MdDelete } from 'react-icons/md';
-import { ParticipantInfo_Kind } from '@livekit/protocol';
 
 const participantsToColumns = (partcipants: ParticipantInfo[]) => {
   return [

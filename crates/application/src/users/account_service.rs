@@ -1,5 +1,5 @@
 use super::{secret, tokens_manager, user};
-use crate::project;
+use crate::project::{self, project_crud};
 use crate::users::oauth::github::{fetch_github_user, verify_user_token, GithubUser};
 use crate::users::tokens_manager::{TokenTypes, UserInfo};
 use crate::users::user::UserError;
@@ -139,6 +139,53 @@ impl AccountService {
         user::delete_api_key(user_id, key_id, &mut self.pool.get().unwrap()).map(Into::into)
     }
 
+    pub fn create_project_api_key(
+        &self,
+        user_id: i32,
+        project_id: &str,
+        request: &ApiKeyRequest,
+    ) -> Result<ApiKeyResponse, UserError> {
+        use project_crud::Encryptable;
+        let mut api_key = project_crud::create_api_key(
+            user_id,
+            project_id,
+            Some(request.comment.clone()),
+            &self.config.encryption_key,
+            &mut self.pool.get().unwrap(),
+        )?;
+
+        api_key
+            .decrypt(&self.config.encryption_key)
+            .map_err(|e| UserError::SecretError(e.to_string()))?;
+
+        Ok(api_key.into())
+    }
+
+    pub fn list_project_api_keys(
+        &self,
+        user_id: i32,
+        project_id: &str,
+    ) -> Result<Vec<ApiKeyResponseWithoutSecret>, UserError> {
+        let keys =
+            project_crud::list_all_api_keys(user_id, project_id, &mut self.pool.get().unwrap())?;
+        Ok(keys.into_iter().map(Into::into).collect())
+    }
+
+    pub fn delete_project_api_key(
+        &self,
+        user_id: i32,
+        project_id: &str,
+        key_id: i32,
+    ) -> Result<ApiKeyResponseWithoutSecret, UserError> {
+        let key = project_crud::delete_api_key(
+            user_id,
+            project_id,
+            key_id,
+            &mut self.pool.get().unwrap(),
+        )?;
+        Ok(key.into())
+    }
+
     pub fn create_project(
         &self,
         user_id: i32,
@@ -155,7 +202,8 @@ impl AccountService {
     }
 
     pub fn get_projects(&self, user_id: i32) -> Result<Vec<ProjectInfo>, UserError> {
-        let projects = project::project_crud::list_projects(user_id, &mut self.pool.get().unwrap())?;
+        let projects =
+            project::project_crud::list_projects(user_id, &mut self.pool.get().unwrap())?;
         Ok(projects.into_iter().map(Into::into).collect())
     }
 
@@ -166,13 +214,17 @@ impl AccountService {
     }
 
     pub fn delete_project(&self, user_id: i32, project_id: &str) -> Result<ProjectInfo, UserError> {
-        let project =
-            project::project_crud::delete_project(user_id, project_id, &mut self.pool.get().unwrap())?;
+        let project = project::project_crud::delete_project(
+            user_id,
+            project_id,
+            &mut self.pool.get().unwrap(),
+        )?;
         Ok(project.into())
     }
 
     pub fn summarize_projects(&self, user_id: i32) -> Result<ProjectsSummary, UserError> {
-        let summary = project::project_crud::summarize_projects(user_id, &mut self.pool.get().unwrap())?;
+        let summary =
+            project::project_crud::summarize_projects(user_id, &mut self.pool.get().unwrap())?;
         Ok(summary)
     }
 
