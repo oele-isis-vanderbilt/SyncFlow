@@ -19,6 +19,7 @@ const PREFIXES = {
 import { z } from 'zod';
 import { TokenResponse } from '@/types/mmla';
 import { VideoGrant } from 'livekit-server-sdk';
+import { ApiKeyResponse } from '@/types/api';
 
 export const NewProjectSchema = z.object({
   name: z.string(),
@@ -55,6 +56,12 @@ export const NewSessionSchema = z.object({
     .default('off')
     .transform((v) => v === 'on'),
 });
+
+export const NewApiKeySchema = z.object({
+  comment: z.string().optional(),
+});
+
+export type NewApiKeyRequest = z.infer<typeof NewApiKeySchema>;
 
 export type NewProject = z.infer<typeof NewProjectSchema>;
 export type NewSession = z.infer<typeof NewSessionSchema>;
@@ -148,6 +155,25 @@ export class ProjectClient extends AuthHttpClient {
       identity: identity,
       videoGrants: tokenRequest,
     });
+  }
+
+  async createApiKeys(projectId: string, request: NewApiKeyRequest) {
+    return await this.authenticatedPost<ApiKeyResponse, NewApiKeyRequest>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/settings/create-api-key`,
+      request,
+    );
+  }
+
+  async listApiKeys(projectId: string) {
+    return await this.authenticatedGet<ApiKeyResponse[]>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/settings/api-keys`,
+    );
+  }
+
+  async deleteApiKey(projectId: string, apiKeyId: string) {
+    return await this.authenticatedDelete<ApiKeyResponse>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/settings/api-keys/${apiKeyId}`,
+    );
   }
 }
 

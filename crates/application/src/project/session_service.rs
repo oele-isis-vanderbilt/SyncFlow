@@ -47,7 +47,8 @@ impl SessionService {
         )
         .await?;
 
-        let mut project = project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
+        let mut project =
+            project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
         project.decrypt(&self.encryption_key)?;
 
         let session_id = new_session.id;
@@ -91,10 +92,14 @@ impl SessionService {
         project_id: &str,
         session_id: &str,
     ) -> Result<LivekitSessionInfo, SessionError> {
-        let session =
-            session_crud::get_session_if_active(project_id, session_id, &mut self.pool.get().unwrap())?;
+        let session = session_crud::get_session_if_active(
+            project_id,
+            session_id,
+            &mut self.pool.get().unwrap(),
+        )?;
 
-        let mut project = project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
+        let mut project =
+            project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
         project.decrypt(&self.encryption_key)?;
 
         let room_service: RoomService = (&project).into();
@@ -124,7 +129,8 @@ impl SessionService {
         project_id: &str,
         session_id: &str,
     ) -> Result<ProjectSessionResponse, SessionError> {
-        let session = session_crud::get_session(project_id, session_id, &mut self.pool.get().unwrap());
+        let session =
+            session_crud::get_session(project_id, session_id, &mut self.pool.get().unwrap());
         Ok(session?.into())
     }
 

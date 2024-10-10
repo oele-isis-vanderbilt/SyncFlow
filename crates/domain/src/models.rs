@@ -1,6 +1,6 @@
 use crate::schema::syncflow::{
     api_keys, create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
-    list_rooms_actions, login_sessions, project_sessions, projects, users,
+    list_rooms_actions, login_sessions, project_api_keys, project_sessions, projects, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
@@ -230,6 +230,7 @@ impl From<ApiKey> for ApiKeyResponse {
 impl From<ApiKey> for ApiKeyResponseWithoutSecret {
     fn from(value: ApiKey) -> Self {
         ApiKeyResponseWithoutSecret {
+            id: value.id,
             key: value.key,
             comment: value.comment.unwrap_or_default(),
             created_at: value
@@ -403,4 +404,48 @@ impl From<ProjectSession> for ProjectSessionResponse {
             project_id: value.project_id.to_string(),
         }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable)]
+#[diesel(table_name = project_api_keys)]
+pub struct ProjectAPIKey {
+    pub id: i32,
+    pub api_key: String,
+    pub api_secret: String,
+    pub comments: Option<String>,
+    pub created_at: chrono::NaiveDateTime,
+    pub user_id: i32,
+    pub project_id: Uuid,
+}
+
+impl From<ProjectAPIKey> for ApiKeyResponse {
+    fn from(value: ProjectAPIKey) -> Self {
+        ApiKeyResponse {
+            key: value.api_key,
+            secret: value.api_secret,
+            comment: value.comments.unwrap_or_default(),
+            created_at: value.created_at.and_utc().timestamp() as usize,
+        }
+    }
+}
+
+impl From<ProjectAPIKey> for ApiKeyResponseWithoutSecret {
+    fn from(value: ProjectAPIKey) -> Self {
+        ApiKeyResponseWithoutSecret {
+            id: value.id,
+            key: value.api_key,
+            comment: value.comments.unwrap_or_default(),
+            created_at: value.created_at.and_utc().timestamp() as usize,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable)]
+#[diesel(table_name = project_api_keys)]
+pub struct NewProjectAPIKey {
+    pub api_key: String,
+    pub api_secret: String,
+    pub comments: Option<String>,
+    pub user_id: i32,
+    pub project_id: Uuid,
 }

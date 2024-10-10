@@ -1,6 +1,8 @@
 'use server';
 import { z } from 'zod';
 import {
+  NewApiKeyRequest,
+  NewApiKeySchema,
   NewProjectSchema,
   NewSession,
   NewSessionSchema,
@@ -9,8 +11,6 @@ import {
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { Project } from '@/types/project';
-import { ClientError } from './auth-http-client';
-import exp from 'constants';
 
 export type FormSubmissionState<T> = {
   errors?: string[];
@@ -164,5 +164,65 @@ export async function deleteSession(projectId: string, sessionId: string) {
         error: JSON.stringify(error, null, 2),
       };
     });
+  return result;
+}
+
+export async function createApiKey(
+  projectId: string,
+  prevState: FormSubmissionState<NewApiKeyRequest> | null,
+  formData: FormData,
+) {
+  if (formData === null) {
+    return null;
+  }
+  const createApiKeyRequest = Object.fromEntries(formData.entries());
+  const result = NewApiKeySchema.safeParse(createApiKeyRequest);
+
+  if (!result.success) {
+    revalidatePath(`/dashboard/projects/${projectId}`);
+    return {
+      success: false,
+      errors: result.error.issues.map((issue) => issue.message),
+    };
+  } else {
+    const apiKeyRequest = result.data;
+    const state = (await projectClient.createApiKeys(projectId, apiKeyRequest))
+      .map((apiKey) => {
+        revalidatePath(`/dashboard/projects/${projectId}`);
+        return {
+          success: true,
+          data: apiKey,
+        };
+      })
+      .unwrapOrElse((error) => {
+        return {
+          success: false,
+          data: null as any,
+          errors: [
+            `An error occurred while creating the API key. ${error.message} | Code: ${error.code}`,
+          ],
+        };
+      });
+
+    return state;
+  }
+}
+
+export async function deleteApiKey(projectId: string, apiKeyId: string) {
+  let result = (await projectClient.deleteApiKey(projectId, apiKeyId))
+    .map((apiKey) => {
+      revalidatePath(`/dashboard/projects/${projectId}`);
+      return {
+        success: true,
+        data: apiKey,
+      };
+    })
+    .unwrapOrElse((error) => {
+      return {
+        success: false,
+        error: JSON.stringify(error, null, 2),
+      };
+    });
+
   return result;
 }

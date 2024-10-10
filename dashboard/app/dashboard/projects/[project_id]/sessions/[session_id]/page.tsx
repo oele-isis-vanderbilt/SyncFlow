@@ -44,7 +44,10 @@ export default async function Page({
         sessionId,
       );
       return (
-        <div className="flex h-full w-full flex-col p-2 dark:text-white" key={`${projectId}-${sessionId}`}>
+        <div
+          className="flex h-full w-full flex-col p-2 dark:text-white"
+          key={`${projectId}-${sessionId}`}
+        >
           <div className="flex flex-row gap-2">
             <h2 className={`text-4xl font-bold ${lusitana.className}`}>
               {projectName} / {sessionInfo.name}
@@ -118,7 +121,10 @@ export default async function Page({
                   {lkSessionInfoResult
                     .map((lkSessionInfo) => {
                       return (
-                        <TracksInfo participants={lkSessionInfo.participants} key={`${projectId}-${sessionId}`}/>
+                        <TracksInfo
+                          participants={lkSessionInfo.participants}
+                          key={`${projectId}-${sessionId}`}
+                        />
                       );
                     })
                     .unwrapOrElse((error) => {
