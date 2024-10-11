@@ -1,6 +1,7 @@
 import { projectClient } from '@/app/lib/project-client';
 import ApiKeysTable from '@/app/ui/dashboard/project/api-keys';
 import CreateApiKeys from '@/app/ui/dashboard/project/create-api-keys';
+import { ProjectDevices } from '@/app/ui/dashboard/project/devices';
 import ErrorComponent from '@/app/ui/dashboard/project/error-component';
 import { lusitana } from '@/app/ui/fonts';
 
@@ -12,6 +13,7 @@ export default async function Page({
   let projectId = params.project_id;
 
   let projectApiKeysResult = await projectClient.listApiKeys(projectId);
+  let projectDevicesResult = await projectClient.listDevices(projectId);
 
   return (
     <div className="flex flex-col p-2 dark:text-white">
@@ -44,6 +46,34 @@ export default async function Page({
             return (
               <ErrorComponent
                 title="An error occurred while fetching the project's API keys"
+                error={error}
+                projectId={projectId}
+              />
+            );
+          })}
+      </div>
+      <div className="mt-4 flex flex-row items-center text-center">
+        <div>
+          <h3 className={`text-3xl font-semibold ${lusitana.className}`}>
+            Devices
+          </h3>
+        </div>
+      </div>
+      <div>
+        {projectDevicesResult
+          .map((projectDevices) => {
+            return (
+              <ProjectDevices
+                devices={projectDevices}
+                key={projectId}
+                projectId={projectId}
+              />
+            );
+          })
+          .unwrapOrElse((error) => {
+            return (
+              <ErrorComponent
+                title="An error occurred while fetching the project's Registered Devices"
                 error={error}
                 projectId={projectId}
               />

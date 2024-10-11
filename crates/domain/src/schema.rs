@@ -118,6 +118,20 @@ pub mod syncflow {
     }
 
     diesel::table! {
+        syncflow.project_devices (id) {
+            id -> Uuid,
+            #[max_length = 50]
+            device_name -> Varchar,
+            #[max_length = 50]
+            device_group -> Varchar,
+            comments -> Nullable<Text>,
+            registered_at -> Timestamp,
+            project_id -> Uuid,
+            registered_by -> Int4,
+        }
+    }
+
+    diesel::table! {
         use diesel::sql_types::*;
         use super::sql_types::ProjectSessionStatus;
 
@@ -199,6 +213,8 @@ pub mod syncflow {
     diesel::joinable!(login_sessions -> users (user_id));
     diesel::joinable!(project_api_keys -> projects (project_id));
     diesel::joinable!(project_api_keys -> users (user_id));
+    diesel::joinable!(project_devices -> projects (project_id));
+    diesel::joinable!(project_devices -> users (registered_by));
     diesel::joinable!(project_sessions -> projects (project_id));
     diesel::joinable!(projects -> users (user_id));
 
@@ -211,6 +227,7 @@ pub mod syncflow {
         list_rooms_actions,
         login_sessions,
         project_api_keys,
+        project_devices,
         project_sessions,
         projects,
         users,

@@ -56,3 +56,13 @@ export interface LivekitSessionInfo {
   recordings: EgressInfo[];
   duration: number;
 }
+
+export interface ProjectDevice {
+  id: string;
+  name: string;
+  group: string;
+  comments: string;
+  registeredAt: number;
+  registeredBy: number;
+  projectId: string;
+}

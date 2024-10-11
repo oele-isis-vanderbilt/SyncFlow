@@ -226,3 +226,22 @@ export async function deleteApiKey(projectId: string, apiKeyId: string) {
 
   return result;
 }
+
+export async function deleteDevice(projectId: string, deviceId: string) {
+  let result = (await projectClient.deleteDevice(projectId, deviceId))
+    .map((device) => {
+      revalidatePath(`/dashboard/projects/${projectId}`);
+      return {
+        success: true,
+        data: device,
+      };
+    })
+    .unwrapOrElse((error) => {
+      return {
+        success: false,
+        error: JSON.stringify(error, null, 2),
+      };
+    });
+
+  return result;
+}

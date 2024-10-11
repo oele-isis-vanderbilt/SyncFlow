@@ -1,11 +1,12 @@
 import getConfig from '@/config';
 import { AuthHttpClient, ClientError } from './auth-http-client';
-import type {
-  LivekitSessionInfo,
-  ProjectSession,
-  Project,
-  ProjectsSummary,
-  ProjectSummary,
+import {
+  type LivekitSessionInfo,
+  type ProjectSession,
+  type Project,
+  type ProjectsSummary,
+  type ProjectSummary,
+  ProjectDevice,
 } from '@/types/project';
 
 const PREFIXES = {
@@ -173,6 +174,18 @@ export class ProjectClient extends AuthHttpClient {
   async deleteApiKey(projectId: string, apiKeyId: string) {
     return await this.authenticatedDelete<ApiKeyResponse>(
       `${PREFIXES.GET_PROJECT}/${projectId}/settings/api-keys/${apiKeyId}`,
+    );
+  }
+
+  async listDevices(projectId: string) {
+    return await this.authenticatedGet<ProjectDevice[]>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/devices`,
+    );
+  }
+
+  async deleteDevice(projectId: string, deviceId: string) {
+    return await this.authenticatedDelete<ProjectDevice>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/devices/${deviceId}`,
     );
   }
 }

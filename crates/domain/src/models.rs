@@ -1,11 +1,13 @@
 use crate::schema::syncflow::{
     api_keys, create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
-    list_rooms_actions, login_sessions, project_api_keys, project_sessions, projects, users,
+    list_rooms_actions, login_sessions, project_api_keys, project_devices, project_sessions,
+    projects, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
 use shared::{
+    device_models::DeviceResponse,
     project_models::ProjectSessionResponse,
     user_models::{ApiKeyResponse, ApiKeyResponseWithoutSecret, ProjectInfo, UserProfile},
 };
@@ -448,4 +450,40 @@ pub struct NewProjectAPIKey {
     pub comments: Option<String>,
     pub user_id: i32,
     pub project_id: Uuid,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
+#[diesel(table_name = project_devices)]
+pub struct ProjectDevice {
+    pub id: Uuid,
+    pub device_name: String,
+    pub device_group: String,
+    pub comments: Option<String>,
+    pub registered_at: chrono::NaiveDateTime,
+    pub project_id: Uuid,
+    pub registered_by: i32,
+}
+
+impl From<ProjectDevice> for DeviceResponse {
+    fn from(value: ProjectDevice) -> Self {
+        DeviceResponse {
+            id: value.id.to_string(),
+            group: value.device_group,
+            comments: value.comments,
+            name: value.device_name,
+            registered_at: value.registered_at.and_utc().timestamp() as usize,
+            registered_by: value.registered_by,
+            project_id: value.project_id.to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
+#[diesel(table_name = project_devices)]
+pub struct NewProjectDevice {
+    pub device_name: String,
+    pub device_group: String,
+    pub comments: Option<String>,
+    pub project_id: Uuid,
+    pub registered_by: i32,
 }
