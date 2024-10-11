@@ -1,6 +1,6 @@
 -- Your SQL goes here
-ALTER TABLE users 
-ADD COLUMN oauth_provider VARCHAR(255), 
+ALTER TABLE users
+ADD COLUMN oauth_provider VARCHAR(255),
 ADD COLUMN oauth_provider_user_id VARCHAR(255);
 
 -- Make the password column nullable

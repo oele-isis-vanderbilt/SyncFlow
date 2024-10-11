@@ -2,7 +2,7 @@
 This directory contains deployment files for running the service using docker compose
 
 ## Prerequisites
-- Docker: https://docs.docker.com/get-docker/ 
+- Docker: https://docs.docker.com/get-docker/
 - Docker Compose: https://docs.docker.com/compose/install/
 
 ## Environment Variables and Secrets
@@ -13,7 +13,7 @@ LIVEKIT_SERVER_URL="YOUR_LIVEKIT_SERVER_URL"
 LIVEKIT_API_KEY="YOUR_LIVEKIT_API_KEY"
 LIVEKIT_API_SECRET="YOUR_LIVEKIT_API_SECRET"
 APP_PORT="APP_HOST" # The port the service will listen on (hardcode to 8082 to use the compose files in this directory)
-APP_HOST="APP_HOST" # The host the service will listen on (hardcode to 
+APP_HOST="APP_HOST" # The host the service will listen on (hardcode to
 DATABASE_URL="DATABASE_URL" # The database connection string
 POSTGRES_USER="POSTGRES_USER" # The postgres user
 POSTGRES_PASSWORD="POSTGRES_PASSWORD" # The postgres password
@@ -25,7 +25,7 @@ NUM_ACTIX_WORKERS="NUM_ACTIX_WORKERS" # The number of actix workers
 JWT_SECRET="JWT_SECRET" # The jwt secret
 ```
 
-The environment variables should be self-explanatory. For using the compose files in this directory, you can create an `.env.prod`(in the [`crates`](../../crates) directory) and set the environment variables there.  
+The environment variables should be self-explanatory. For using the compose files in this directory, you can create an `.env.prod`(in the [`crates`](../../crates) directory) and set the environment variables there.
 
 ## Images used for Deployment
 Postgres and pgAdmin are used for the database and database management respectively. The service is built and run using the [`Dockerfile`](./Dockerfile.api). The database migrations are run using the [`Dockerfile.migrations`](./Dockerfile.migrations) file.
@@ -35,7 +35,7 @@ Postgres and pgAdmin are used for the database and database management respectiv
 To build and run the service using docker compose, run the following commands :
 
 ## Initial Deployment
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Make sure you run these commands from the [`crates`](../../crates) directory.
 
 ```shell

@@ -5,4 +5,3 @@ DROP TABLE IF EXISTS "users";
 
 -- Drop type Role
 DROP TYPE IF EXISTS public."Role" CASCADE;
-

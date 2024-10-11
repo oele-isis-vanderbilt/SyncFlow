@@ -155,7 +155,7 @@ class ServiceConfig(Config):
     livekit_api_secret: str
     jwt_secret: str
     encryption_key: str
-    jwt_expiration: int 
+    jwt_expiration: int
     jwt_refresh_expiration: int
     github_client_id: Optional[str] = None
     github_client_secret: Optional[str] = None
@@ -165,7 +165,7 @@ class ServiceConfig(Config):
     login_token: Optional[str] = None
     test_user: Optional[str] = None
     test_password: Optional[str] = None
-    
+
 
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "ServiceConfig":
@@ -292,4 +292,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.config_file, args.outfile_name)
-
