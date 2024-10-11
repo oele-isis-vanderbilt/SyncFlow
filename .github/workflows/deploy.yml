@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  
+
   release: # Trigger the workflow on release events
     types: [published]
 
@@ -37,11 +37,11 @@ jobs:
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_dev_cloud.json --outfile-name .env.dev
             sudo chmod 666 /var/run/docker.sock
-            docker compose -p syncflow-dev-prod --file docker/docker-compose.dev.yaml build migrations-dev-prod api-syncflow-dev-prod syncflow-dashboard-dev-prod 
+            docker compose -p syncflow-dev-prod --file docker/docker-compose.dev.yaml build migrations-dev-prod api-syncflow-dev-prod syncflow-dashboard-dev-prod
             docker compose -p syncflow-dev-prod --file docker/docker-compose.dev.yaml down api-syncflow-dev-prod syncflow-dashboard-dev-prod
             docker compose -p syncflow-dev-prod --file docker/docker-compose.dev.yaml up -d
           '
-      
+
       - name: Build and Deploy (syncflow.live)
         if: github.event_name == 'release'
         env:

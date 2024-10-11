@@ -1,0 +1,32 @@
+ci:
+  autofix_commit_msg: |
+        [pre-commit.ci] auto fixes from pre-commit.com hooks
+        for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: check-byte-order-marker
+    - id: check-case-conflict
+    - id: check-merge-conflict
+    - id: check-symlinks
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: mixed-line-ending
+    - id: trailing-whitespace
+
+- repo: https://github.com/umesh-timalsina/pre-commit-rust.git
+  rev: '5a79375'
+  hooks:
+    - id: fmt
+      args: [--all, --manifest-path, crates/Cargo.toml]
+      pass_filenames: false
+    - id: clippy
+      args: [ "--manifest-path", "crates/Cargo.toml", "--", "-D", "warnings" ]
+      pass_filenames: false

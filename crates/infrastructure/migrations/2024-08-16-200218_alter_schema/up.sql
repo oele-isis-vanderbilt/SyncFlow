@@ -66,7 +66,7 @@ ALTER TABLE syncflow.egress_actions
 
 -- Migrate data to the new columns
 UPDATE syncflow.egress_actions
-SET 
+SET
     egress_destination = egress_destination_old::text::"syncflow"."EgressDestination",
     egress_type = egress_type_old::text::"syncflow"."EgressType";
 
@@ -96,7 +96,7 @@ EXECUTE FUNCTION syncflow.enforce_user_constraints();
 
 CREATE TRIGGER set_updated_at
 BEFORE UPDATE ON syncflow.users
-FOR EACH ROW 
+FOR EACH ROW
 EXECUTE FUNCTION syncflow.diesel_set_updated_at();
 
 -- Drop existing ENUM types in the public schema if they exist
