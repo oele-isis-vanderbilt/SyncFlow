@@ -96,7 +96,7 @@ const devicesToData = (devices: ProjectDevice[]) => {
   });
 };
 
-export function ProjectDevices({
+export default function ProjectDevices({
   devices,
   projectId,
 }: {

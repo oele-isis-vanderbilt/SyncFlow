@@ -1,9 +1,22 @@
 import { projectClient } from '@/app/lib/project-client';
-import ApiKeysTable from '@/app/ui/dashboard/project/api-keys';
 import CreateApiKeys from '@/app/ui/dashboard/project/create-api-keys';
-import { ProjectDevices } from '@/app/ui/dashboard/project/devices';
 import ErrorComponent from '@/app/ui/dashboard/project/error-component';
 import { lusitana } from '@/app/ui/fonts';
+import dynamic from 'next/dynamic';
+
+const ProjectDevices = dynamic(
+  () => import('@/app/ui/dashboard/project/devices'),
+  {
+    ssr: false,
+  },
+);
+
+const ApiKeysTable = dynamic(
+  () => import('@/app/ui/dashboard/project/api-keys'),
+  {
+    ssr: false,
+  },
+);
 
 export default async function Page({
   params,
