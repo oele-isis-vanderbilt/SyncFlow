@@ -9,6 +9,7 @@ use application::livekit::egress::EgressService;
 use application::livekit::room::RoomService;
 use application::mmla::mmla_service::MMLAService;
 use application::mmla::user_actions::UserActions;
+use application::project::devices::device_service;
 use application::project::session_service::SessionService;
 use application::users::account_service::AccountService;
 
@@ -72,6 +73,7 @@ async fn main() -> std::io::Result<()> {
     let user_actions = UserActions::new(pool.clone());
     let mmla_service = MMLAService::new(room_service, egress_service, user_actions);
     let session_service = SessionService::new(&config.encryption_key, pool.clone());
+    let device_service = device_service::DeviceService::new(&config, pool.clone());
 
     HttpServer::new(move || {
         let mut app = App::new()
@@ -84,7 +86,13 @@ async fn main() -> std::io::Result<()> {
             .configure(lk_init_routes)
             .configure(login_init_routes)
             .configure(init_api_doc)
-            .configure(|cfg| project_init_routes(cfg, web::Data::new(session_service.clone())));
+            .configure(|cfg| {
+                project_init_routes(
+                    cfg,
+                    web::Data::new(session_service.clone()),
+                    web::Data::new(device_service.clone()),
+                )
+            });
 
         if config.github_client_id.is_some() && config.github_client_secret.is_some() {
             app = app.configure(init_github_oauth_routes);

@@ -8,10 +8,11 @@ use actix_web::{
     HttpResponse,
 };
 use application::{
-    project::session_service::SessionService,
+    project::{devices::device_service::DeviceService, session_service::SessionService},
     users::{account_service::AccountService, tokens_manager::UserInfo},
 };
 use shared::{
+    device_models::DeviceRegisterRequest,
     livekit_models::TokenRequest,
     project_models::NewSessionRequest,
     user_models::{ApiKeyRequest, ProjectRequest},
@@ -336,7 +337,63 @@ async fn delete_api_key(
         .unwrap_or_else(error_response)
 }
 
-pub fn init_routes(cfg: &mut web::ServiceConfig, session_service: web::Data<SessionService>) {
+#[get("{project_id}/devices")]
+async fn list_devices(
+    project_id: web::Path<String>,
+    device_service: web::Data<DeviceService>,
+) -> HttpResponse {
+    device_service
+        .list_devices(&project_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+#[get("{project_id}/devices/{device_id}")]
+async fn get_device(
+    path: web::Path<(String, String)>,
+    device_service: web::Data<DeviceService>,
+) -> HttpResponse {
+    let (project_id, device_id) = path.into_inner();
+    device_service
+        .get_device(&project_id, &device_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+#[post("{project_id}/devices/register")]
+async fn register_device(
+    project_id: web::Path<String>,
+    user_info: ReqData<UserInfo>,
+    request: web::Json<DeviceRegisterRequest>,
+    device_service: web::Data<DeviceService>,
+) -> HttpResponse {
+    device_service
+        .register_device(
+            &project_id,
+            user_info.into_inner().user_id,
+            &request.into_inner(),
+        )
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+#[delete("{project_id}/devices/{device_id}")]
+async fn delete_device(
+    path: web::Path<(String, String)>,
+    device_service: web::Data<DeviceService>,
+) -> HttpResponse {
+    let (project_id, device_id) = path.into_inner();
+    device_service
+        .delete_device(&project_id, &device_id)
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+pub fn init_routes(
+    cfg: &mut web::ServiceConfig,
+    session_service: web::Data<SessionService>,
+    device_service: web::Data<DeviceService>,
+) {
     let projects_scope = web::scope("/projects")
         .wrap(ownership_middleware::Ownership)
         .app_data(session_service.clone())
@@ -356,7 +413,12 @@ pub fn init_routes(cfg: &mut web::ServiceConfig, session_service: web::Data<Sess
         .service(get_livekit_session_info)
         .service(create_api_key)
         .service(get_all_api_keys)
-        .service(delete_api_key);
+        .service(delete_api_key)
+        .app_data(device_service.clone())
+        .service(list_devices)
+        .service(get_device)
+        .service(register_device)
+        .service(delete_device);
 
     cfg.service(projects_scope);
 }
