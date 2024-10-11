@@ -34,7 +34,7 @@ ALTER TABLE public.egress_actions ADD COLUMN egress_type_new "EgressType";
 
 -- Migrate data back to the new columns
 UPDATE public.egress_actions
-SET 
+SET
     egress_destination_new = egress_destination::text::"EgressDestination",
     egress_type_new = egress_type::text::"EgressType";
 
@@ -65,7 +65,7 @@ EXECUTE FUNCTION enforce_user_constraints();
 
 CREATE TRIGGER set_updated_at
 BEFORE UPDATE ON users
-FOR EACH ROW 
+FOR EACH ROW
 EXECUTE FUNCTION diesel_set_updated_at();
 
 
