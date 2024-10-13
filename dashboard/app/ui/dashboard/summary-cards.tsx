@@ -1,56 +1,13 @@
-import { mmlaClient } from '@/app/lib/mmla-client';
-import {
-  HomeModernIcon,
-  UserGroupIcon,
-  VideoCameraIcon,
-} from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
 import { HiChartPie } from 'react-icons/hi';
 import { SiSession } from 'react-icons/si';
 import { CgMediaLive } from 'react-icons/cg';
 
 const iconMap = {
-  rooms: HomeModernIcon,
-  participants: UserGroupIcon,
-  recordings: VideoCameraIcon,
   projects: HiChartPie,
   sessions: SiSession,
   liveSessions: CgMediaLive,
 };
-
-async function roomsSummary() {
-  const roomsResult = await mmlaClient.listRooms();
-  let rooms = roomsResult.unwrap();
-  return rooms
-    .filter((room) => !!room.name)
-    .map((room) => {
-      return {
-        name: room.name,
-        participants: room.numParticipants,
-        recording: room.activeRecording,
-      };
-    });
-}
-
-export async function SummaryCards() {
-  const rooms = await roomsSummary();
-  const numParticipants = rooms.reduce(
-    (acc, room) => acc + room.participants,
-    0,
-  );
-  const numRecordings = rooms.reduce(
-    (acc, room) => acc + (room.recording ? 1 : 0),
-    0,
-  );
-
-  return (
-    <>
-      <Card title="Rooms" value={rooms.length} type="rooms" />
-      <Card title="Participants" value={numParticipants} type="participants" />
-      <Card title="Active Recordings" value={numRecordings} type="recordings" />
-    </>
-  );
-}
 
 export async function UserSummaryCards({
   numProjects,
@@ -82,9 +39,6 @@ export function Card({
   title: string;
   value: string | number;
   type:
-    | 'rooms'
-    | 'participants'
-    | 'recordings'
     | 'projects'
     | 'sessions'
     | 'liveSessions';

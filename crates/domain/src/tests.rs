@@ -5,7 +5,7 @@ mod tests {
     use infrastructure::establish_connection_pool;
     use std::env;
 
-    use crate::models::{User, UserEgressAction};
+    use crate::models::User;
 
     #[test]
     fn test_establish_connection_pool() {
@@ -22,18 +22,5 @@ mod tests {
         let mut conn = pool.get().expect("Failed to get connection");
         let user = users.filter(id.eq(1)).first::<User>(&mut conn);
         assert!(user.is_ok());
-    }
-
-    #[test]
-    fn test_user_egress_actions() {
-        use crate::schema::syncflow::egress_actions::dsl::*;
-
-        let env_var = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        let pool = establish_connection_pool(&env_var);
-        let mut conn = pool.get().expect("Failed to get connection");
-        let actions = egress_actions
-            .filter(user_id.eq(1))
-            .load::<UserEgressAction>(&mut conn);
-        assert!(actions.is_ok());
     }
 }

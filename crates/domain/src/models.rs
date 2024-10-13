@@ -1,7 +1,5 @@
 use crate::schema::syncflow::{
-    api_keys, create_room_actions, delete_room_actions, egress_actions, generate_token_actions,
-    list_rooms_actions, login_sessions, project_api_keys, project_devices, project_sessions,
-    projects, users,
+    api_keys, login_sessions, project_api_keys, project_devices, project_sessions, projects, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
@@ -78,120 +76,6 @@ pub struct LoginSession {
 #[diesel(table_name = login_sessions)]
 pub struct NewLoginSession {
     pub user_id: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable, Queryable)]
-#[diesel(table_name = create_room_actions)]
-pub struct CreateRoomAction {
-    pub id: i32,
-    pub room_name: String,
-    pub user_id: i32,
-    pub created_at: Option<chrono::NaiveDateTime>,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
-#[diesel(table_name = create_room_actions)]
-pub struct NewCreateRoomAction {
-    pub room_name: String,
-    pub user_id: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable, Queryable)]
-#[diesel(table_name = delete_room_actions)]
-pub struct DeleteRoomAction {
-    pub id: i32,
-    pub room_name: String,
-    pub user_id: i32,
-    pub deleted_at: Option<chrono::NaiveDateTime>,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
-#[diesel(table_name = delete_room_actions)]
-pub struct NewDeleteRoomAction {
-    pub room_name: String,
-    pub user_id: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable, Queryable)]
-#[diesel(table_name = list_rooms_actions)]
-pub struct ListRoomsAction {
-    pub id: i32,
-    pub user_id: i32,
-    pub listed_at: Option<chrono::NaiveDateTime>,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
-#[diesel(table_name = list_rooms_actions)]
-pub struct NewListRoomsAction {
-    pub user_id: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable, Queryable)]
-#[diesel(table_name = generate_token_actions)]
-pub struct GenerateTokenAction {
-    pub id: i32,
-    pub user_id: i32,
-    pub token_identity: String,
-    pub token_room: String,
-    pub generated_at: Option<chrono::NaiveDateTime>,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Insertable)]
-#[diesel(table_name = generate_token_actions)]
-pub struct NewGenerateTokenAction {
-    pub user_id: i32,
-    pub token_identity: String,
-    pub token_room: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
-#[ExistingTypePath = "crate::schema::syncflow::sql_types::EgressDestination"]
-#[DbValueStyle = "PascalCase"]
-pub enum EgressDestination {
-    S3,
-    LocalFile,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum)]
-#[ExistingTypePath = "crate::schema::syncflow::sql_types::EgressType"]
-#[DbValueStyle = "PascalCase"]
-pub enum EgressType {
-    RoomComposite,
-    TrackComposite,
-    Participant,
-    Track,
-    Web,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name = egress_actions)]
-pub struct UserEgressAction {
-    pub id: i32,
-    pub user_id: i32,
-    pub egress_id: String,
-    pub room_name: String,
-
-    pub egress_destination_path: String,
-    pub egress_destination_root: String,
-    pub created_at: Option<chrono::NaiveDateTime>,
-    pub updated_at: Option<chrono::NaiveDateTime>,
-    pub success: bool,
-    pub egress_destination: EgressDestination,
-    pub egress_type: EgressType,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Queryable, Insertable, AsChangeset)]
-#[diesel(table_name = egress_actions)]
-pub struct NewUserEgressAction {
-    pub user_id: i32,
-    pub egress_id: String,
-    pub room_name: String,
-    pub egress_destination_path: String,
-    pub egress_destination_root: String,
-    pub success: bool,
-    pub updated_at: Option<chrono::NaiveDateTime>,
-    pub egress_destination: EgressDestination,
-    pub egress_type: EgressType,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, DbEnum, Eq, PartialEq)]

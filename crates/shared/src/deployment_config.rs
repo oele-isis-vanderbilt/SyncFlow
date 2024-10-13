@@ -7,12 +7,8 @@ pub struct DeploymentConfig {
     pub app_host: String,
     pub app_port: u16,
     pub num_actix_workers: usize,
-    pub livekit_server_url: String,
-    pub livekit_api_key: String,
-    pub livekit_api_secret: String,
     pub jwt_secret: String,
     pub database_url: String,
-    pub storage_config: StorageConfig,
     pub encryption_key: String,
     pub jwt_expiration: usize,
     pub jwt_refresh_expiration: usize,
@@ -84,9 +80,6 @@ mod tests {
         let config = DeploymentConfig::load();
         assert!(!config.app_host.is_empty());
         assert!(config.app_port > 0);
-        assert!(!config.livekit_server_url.is_empty());
-        assert!(!config.livekit_api_key.is_empty());
-        assert!(!config.livekit_api_secret.is_empty());
         assert!(!config.jwt_secret.is_empty());
         assert!(!config.database_url.is_empty());
 
