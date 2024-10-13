@@ -1,16 +1,3 @@
-/*
-    This file contains the types for the project.
-    {
-"bucketName": "string",
-"description": "string",
-"endpoint": "string",
-"id": "string",
-"livekitServerUrl": "string",
-"name": "string",
-"storageType": "string"
-}
-*/
-
 import { EgressInfo, ParticipantInfo } from 'livekit-server-sdk';
 
 export interface Project {
