@@ -1,4 +1,5 @@
 import { projectClient } from '@/app/lib/project-client';
+import DataSharingPrompt from '@/app/ui/dashboard/project/data-sharing-prompt';
 import ErrorComponent from '@/app/ui/dashboard/project/error-component';
 import ParticipantsInfo from '@/app/ui/dashboard/project/participants-info';
 import RecordingsInfo from '@/app/ui/dashboard/project/recordings-info';
@@ -66,6 +67,12 @@ export default async function Page({
                     </div>
                   </Link>
                 </Tooltip>
+                <div className="-mt-3 flex items-center justify-center">
+                  <DataSharingPrompt
+                    projectId={projectId}
+                    session={sessionInfo}
+                  />
+                </div>
               </>
             ) : (
               <div>

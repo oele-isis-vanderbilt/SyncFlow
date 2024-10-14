@@ -38,10 +38,7 @@ export function Card({
 }: {
   title: string;
   value: string | number;
-  type:
-    | 'projects'
-    | 'sessions'
-    | 'liveSessions';
+  type: 'projects' | 'sessions' | 'liveSessions';
 }) {
   const Icon = iconMap[type];
 

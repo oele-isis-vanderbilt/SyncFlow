@@ -1,13 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
 import json
-
 from argparse import ArgumentParser
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
-from dataclasses import dataclass, asdict
 
 def dump_string(s: str, path: str):
     with open(path, "w") as f:
@@ -49,25 +47,6 @@ class DashboardConfig(Config):
 
 
 @dataclass
-class ExampleAppConfig(Config):
-    livekit_mmla_api_key: str
-    livekit_mmla_api_secret: str
-    livekit_mmla_api_base_url: str
-    livekit_server_url: str
-    next_public_livekit_server_url: str
-
-    @classmethod
-    def from_json(cls, json_dict: Dict[str, Any]) -> "ExampleAppConfig":
-        return ExampleAppConfig(
-            livekit_mmla_api_key=json_dict["livekit_mmla_api_key"],
-            livekit_mmla_api_secret=json_dict["livekit_mmla_api_secret"],
-            livekit_mmla_api_base_url=json_dict["livekit_mmla_api_base_url"],
-            livekit_server_url=json_dict["livekit_server_url"],
-            next_public_livekit_server_url=json_dict["next_public_livekit_server_url"]
-        )
-
-
-@dataclass
 class DatabasePgAdminConfig(Config):
     postgres_user: str
     postgres_password: str
@@ -84,7 +63,7 @@ class DatabasePgAdminConfig(Config):
             postgres_db=json_dict["postgres_db"],
             pgadmin_default_email=json_dict["pgadmin_default_email"],
             pgadmin_default_password=json_dict["pgadmin_default_password"],
-            pgadmin_listen_port=json_dict["pgadmin_listen_port"]
+            pgadmin_listen_port=json_dict["pgadmin_listen_port"],
         )
 
 
@@ -94,9 +73,8 @@ class MigrationConfig(Config):
 
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "MigrationConfig":
-        return MigrationConfig(
-            database_url=json_dict["database_url"]
-        )
+        return MigrationConfig(database_url=json_dict["database_url"])
+
 
 @dataclass
 class RootUser(Config):
@@ -130,7 +108,6 @@ class ServiceConfig(Config):
     test_user: Optional[str] = None
     test_password: Optional[str] = None
 
-
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "ServiceConfig":
 
@@ -153,14 +130,16 @@ class ServiceConfig(Config):
             root_user=root_user,
             login_token=json_dict.get("login_token"),
             test_user=json_dict.get("test_user"),
-            test_password=json_dict.get("test_password")
+            test_password=json_dict.get("test_password"),
         )
 
     def as_env(self, prefix: str = "") -> str:
         env = []
         for field, value in asdict(self).items():
             if field == "root_user" and value is not None:
-                root_user_env = self.root_user.as_env(prefix=f"{prefix.upper()}_ROOT_USER__" if prefix else "ROOT_USER__")
+                root_user_env = self.root_user.as_env(
+                    prefix=f"{prefix.upper()}_ROOT_USER__" if prefix else "ROOT_USER__"
+                )
                 env.append(root_user_env)
             elif value is not None:
                 env.append(f'{prefix.upper()}{field.upper()}="{value}"')
@@ -170,7 +149,6 @@ class ServiceConfig(Config):
 @dataclass
 class ConsolidatedConfig:
     dashboard_config: DashboardConfig
-    example_app_config: ExampleAppConfig
     service_config: ServiceConfig
     migration_config: MigrationConfig
     database_pgadmin_config: DatabasePgAdminConfig
@@ -179,17 +157,15 @@ class ConsolidatedConfig:
     def from_json(cls, json_dict: Dict[str, Any]) -> "ConsolidatedConfig":
         return cls(
             dashboard_config=DashboardConfig.from_json(json_dict["dashboard"]),
-            example_app_config=ExampleAppConfig.from_json(json_dict["example_app"]),
             service_config=ServiceConfig.from_json(json_dict["service"]),
-            database_pgadmin_config=DatabasePgAdminConfig.from_json(json_dict["database_pgadmin"]),
-            migration_config=MigrationConfig.from_json(json_dict["migration"])
+            database_pgadmin_config=DatabasePgAdminConfig.from_json(
+                json_dict["database_pgadmin"]
+            ),
+            migration_config=MigrationConfig.from_json(json_dict["migration"]),
         )
 
     def get_dashboard_env(self, prefix: str = "") -> str:
         return self.dashboard_config.as_env(prefix=prefix)
-
-    def get_example_app_env(self, prefix: str = "") -> str:
-        return self.example_app_config.as_env(prefix=prefix)
 
     def get_service_env(self, prefix: str = "") -> str:
         return self.service_config.as_env(prefix=prefix)
@@ -207,10 +183,6 @@ def main(config_file: str, outfile_name: str):
 
     dashboard_env = config.get_dashboard_env() + "\n"
     dump_string(dashboard_env, f"dashboard/{outfile_name}")
-
-    example_app_env = config.get_example_app_env() + "\n"
-
-    dump_string(example_app_env, f"examples/syncflow-demo-client/{outfile_name}")
 
     service_env = config.get_service_env() + "\n"
     dump_string(service_env, f"crates/{outfile_name}")

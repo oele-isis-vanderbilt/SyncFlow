@@ -33,7 +33,6 @@ const randomRoomName = () => {
   return APP_NAME + '_' + Math.random().toString(36).substring(7);
 };
 
-
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
@@ -70,7 +69,6 @@ export async function redirectTo(url: string) {
   revalidatePath(url);
   redirect(url);
 }
-
 
 export async function apiSignInWithGithub() {
   await signIn('github');
