@@ -5,16 +5,15 @@ import {
   LiveKitRoom,
   useLocalParticipant,
   useMediaDevices,
-  useToken,
   VideoTrack,
 } from '@livekit/components-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import {
   AudioPresets,
   createLocalAudioTrack,
   createLocalScreenTracks,
   createLocalVideoTrack,
+  DataPacket_Kind,
   LocalAudioTrack,
   LocalTrackPublication,
   RemoteAudioTrack,
@@ -23,7 +22,7 @@ import {
   VideoPresets,
 } from 'livekit-client';
 import Select from 'react-select';
-import { customSelectStyles } from '@/app/utils';
+import { customClassNames } from '@/app/ui/dashboard/rooms/widgets/utils';
 import 'react-virtualized/styles.css';
 import {
   List,
@@ -31,6 +30,8 @@ import {
   CellMeasurer,
   CellMeasurerCache,
 } from 'react-virtualized';
+import '@livekit/components-styles';
+import { redirectTo, redirectToDashboard } from '@/app/lib/actions';
 
 export interface RoomJoinOptions {
   videoPreset: keyof typeof VideoPresets;
@@ -38,27 +39,23 @@ export interface RoomJoinOptions {
   videoCodec: (typeof videoCodecs)[number];
 }
 
-export default function LkRoom({
-  roomName,
-  participantId,
+export default function DataSharer({
+  token,
+  sessionName,
+  user,
+  lkServerUrl,
   joinOptions,
+  settingsUrl,
+  disconnectRedirectUrl,
 }: {
-  roomName: string;
-  participantId: string;
+  token: string;
+  sessionName: string;
+  user: string;
+  lkServerUrl?: string;
+  settingsUrl?: string;
   joinOptions?: RoomJoinOptions;
+  disconnectRedirectUrl?: string;
 }) {
-  let tokenOptions = useMemo(() => {
-    return {
-      userInfo: {
-        identity: participantId,
-        name: participantId,
-      },
-    };
-  }, [participantId]);
-  const token = useToken('/api/token', roomName, tokenOptions);
-  const lkUrl = process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL;
-  const router = useRouter();
-
   const roomOptions = {
     videoPreset: 'h1080',
     audioPreset: 'speech',
@@ -67,14 +64,16 @@ export default function LkRoom({
   };
 
   return (
-    <div data-lk-theme="default">
+    <div data-lk-theme="huddle" className="h-full w-full">
       <LiveKitRoom
-        serverUrl={lkUrl}
+        serverUrl={lkServerUrl || process.env.NEXT_PUBLIC_LIVEKIT_SERVER_URL}
         token={token}
         video={false}
         audio={false}
         onDisconnected={() => {
-          router.push('/');
+          disconnectRedirectUrl
+            ? redirectTo(disconnectRedirectUrl)
+            : redirectToDashboard();
         }}
         options={{
           adaptiveStream: true,
@@ -89,15 +88,18 @@ export default function LkRoom({
           },
         }}
       >
-        <div className="flex h-screen w-screen flex-col overflow-x-hidden p-2">
+        <div className="flex h-full w-full flex-col overflow-x-hidden p-2 dark:text-white">
           <div className="mb-10 w-full text-center">
             <h1 className="text-2xl font-bold">
-              Welcome to room {roomName}, {participantId}!{' '}
+              Welcome to session {sessionName}, {user}!{' '}
             </h1>
             <p>
               Connect Web Cameras and Microphones to your system for streaming
               to the room, or go{' '}
-              <a href={'/'} className={'text-red-700 hover:underline'}>
+              <a
+                href={settingsUrl || disconnectRedirectUrl || '/dashboard'}
+                className={'text-red-700 hover:underline'}
+              >
                 {' '}
                 back
               </a>{' '}
@@ -119,7 +121,7 @@ export default function LkRoom({
               />
             </div>
             <div className="h-full w-1/3">
-              <ShreenSharer
+              <ScreenSharer
                 preset={roomOptions.videoPreset as keyof typeof VideoPresets}
               />
             </div>
@@ -154,7 +156,7 @@ function VideoTracksPublisher({
       <h2 className={'text-xl'}>Select video devices to publish</h2>
       <Select
         isMulti
-        styles={customSelectStyles}
+        classNames={customClassNames}
         options={videoDeviceOptions}
         placeholder={'Select video devices'}
         onChange={(selected) => {
@@ -202,7 +204,7 @@ function AudioTracksPublisher({
       <h2 className={'text-xl'}>Select audio devices to publish</h2>
       <Select
         isMulti
-        styles={customSelectStyles}
+        classNames={customClassNames}
         options={audioDeviceOptions}
         placeholder={'Select audio devices'}
         onChange={(selected) => {
@@ -441,9 +443,8 @@ function DataSender() {
     if (data) {
       const dataArray = encoder.encode(data);
       participantInfo.localParticipant
-        .publishData(dataArray, {
-          reliable: true,
-          topic: topic || 'chat',
+        .publishData(dataArray, DataPacket_Kind.RELIABLE, {
+          topic: topic,
         })
         .then(() => {
           setData('');
@@ -460,7 +461,11 @@ function DataSender() {
   };
 
   const ChatMessageFormatter = (message: string) => {
-    return <span>{message}</span>;
+    return (
+      <span className="rounded-lg bg-gray-200 p-2 dark:bg-gray-900">
+        {message}
+      </span>
+    );
   };
 
   const renderItem = ({ key, index, style, parent }) => {
@@ -501,7 +506,7 @@ function DataSender() {
           <div className={'w-1/4'}>
             <div>Select Topic</div>
             <Select
-              styles={customSelectStyles}
+              classNames={customClassNames}
               placeholder={'select a topic'}
               options={topics}
               defaultValue={topics[0]}
@@ -517,7 +522,7 @@ function DataSender() {
             value={data}
             onChange={(e) => setData(e.target.value)}
             placeholder={'Type your message'}
-            className={'mb-2 min-h-64 w-full bg-[#111] p-2'}
+            className={'mb-2 min-h-64 w-full p-2 dark:bg-gray-900'}
           />
         </div>
         <button
@@ -552,7 +557,7 @@ function DataSender() {
   );
 }
 
-function ShreenSharer({ preset }: { preset: keyof typeof VideoPresets }) {
+function ScreenSharer({ preset }: { preset: keyof typeof VideoPresets }) {
   const videoPreset = VideoPresets[preset as keyof typeof VideoPresets];
   const participantInfo = useLocalParticipant();
   const [publication, setPlublication] = useState<LocalTrackPublication | null>(
@@ -604,7 +609,7 @@ function ShreenSharer({ preset }: { preset: keyof typeof VideoPresets }) {
           }
           // setIsSharing(!isSharing);
         }}
-        className={`${isSharing ? 'bg-red-900' : 'bg-blue-500'} rounded-md p-2 text-white w-full`}
+        className={`${isSharing ? 'bg-red-900' : 'bg-blue-500'} w-full rounded-md p-2 text-white`}
       >
         {isSharing ? 'Stop Sharing' : 'Start Sharing'}
       </button>

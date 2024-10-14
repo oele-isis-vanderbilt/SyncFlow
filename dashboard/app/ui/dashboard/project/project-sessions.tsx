@@ -7,10 +7,13 @@ import { FaStop } from 'react-icons/fa';
 import InfoModal from '../info-modal';
 import { useState } from 'react';
 import type { InfoModalContent } from '../info-modal';
+import { GiMirrorMirror } from 'react-icons/gi';
+import SessionJoinForm from '@/app/ui/dashboard/project/session-join-form';
 
 import { CustomDataTable } from './data-table';
 import Link from 'next/link';
 import { getDateFromTimeStamp } from '../utils';
+import DataSharingPrompt from './data-sharing-prompt';
 
 const isActive = (session: ProjectSession): boolean => {
   return session.status === 'Started';
@@ -124,6 +127,9 @@ const sortedSessionsToColumns = (projectId: string) => {
                   <FaStop className="cursor-pointer text-2xl text-red-600 hover:text-red-900" />
                 </Tooltip>
               </button>
+            ) : null}
+            {isActive(session) ? (
+              <DataSharingPrompt projectId={projectId} session={session} />
             ) : null}
             <button
               onClick={async () => {
