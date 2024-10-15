@@ -1,6 +1,6 @@
 'use client';
 import { Button as ActionButton } from '@/app/ui/button';
-import { Project, ProjectSession } from '@/types/project';
+import { Project, ProjectDevice, ProjectSession } from '@/types/project';
 import {
   ExclamationCircleIcon,
   FingerPrintIcon,
@@ -12,15 +12,24 @@ import { useState } from 'react';
 import { useFormState } from 'react-dom';
 import { Checkbox, Input, RangeSlider } from '../../input';
 import { BsFillChatSquareTextFill } from 'react-icons/bs';
-import {
-  createProjectSession,
-  FormSubmissionState,
-} from '@/app/lib/project-actions';
+import { createProjectSession } from '@/app/lib/project-actions';
 
 import { useEffect } from 'react';
+import { groupBy } from '../utils';
+import ReactSelect from 'react-select';
+import { customClassNames } from '../rooms/widgets/utils';
 
-export function CreateSession({ project }: { project: Project }) {
+export function CreateSession({
+  project,
+  devices,
+}: {
+  project: Project;
+  devices: ProjectDevice[];
+}) {
   const [showModal, setShowModal] = useState(false);
+  const groupedDevices = groupBy(devices, 'group');
+  const deviceGroups = Object.keys(groupedDevices);
+
   return (
     <>
       <ActionButton
@@ -36,6 +45,7 @@ export function CreateSession({ project }: { project: Project }) {
         show={showModal}
         projectName={project.name}
         projectId={project.id}
+        groups={deviceGroups}
         onClose={() => setShowModal(false)}
       />
     </>
@@ -46,11 +56,13 @@ function CreateSessionModal({
   show,
   projectName,
   projectId,
+  groups,
   onClose,
 }: {
   show: boolean;
   projectName: string;
   projectId: string;
+  groups: string[];
   onClose: () => void;
 }) {
   let [messages, dispatch] = useFormState(
@@ -58,12 +70,29 @@ function CreateSessionModal({
     null,
   );
 
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+
+  const selectOptions = groups.map((group) => ({
+    label: group,
+    value: group,
+  }));
+
   useEffect(() => {
     if (messages?.success) {
       dispatch(null);
       onClose();
     }
   }, [messages]);
+
+  const submitWithGroups = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    let formData = new FormData(form);
+    selectedGroups.forEach((group, index) => {
+      formData.append(`deviceGroups${index}`, group);
+    });
+    dispatch(formData);
+  };
 
   return (
     <Modal
@@ -79,7 +108,7 @@ function CreateSessionModal({
       </Modal.Header>
 
       <Modal.Body>
-        <form action={dispatch} id="createSessionForm">
+        <form onSubmit={submitWithGroups} id="createSessionForm">
           <div className="w-full">
             <h3 className="text-xl dark:text-white">Session Details</h3>
             <Input
@@ -118,6 +147,25 @@ function CreateSessionModal({
               defaultValue={600}
               onChange={(e) => {}}
             />
+            <div className="mb-4 mt-4 flex flex-row items-center justify-center gap-2">
+              <label
+                className="block text-xs font-medium dark:text-white"
+                htmlFor="deviceGroups"
+              >
+                Device Groups to notify
+              </label>
+              <div className="flex-1">
+                <ReactSelect
+                  classNames={customClassNames}
+                  options={selectOptions}
+                  menuPlacement="top"
+                  onChange={(selected) => {
+                    setSelectedGroups(selected.map((s) => s.value));
+                  }}
+                  isMulti
+                />
+              </div>
+            </div>
             <Checkbox
               id="autoRecording"
               label="Automatically start recording when the session starts"

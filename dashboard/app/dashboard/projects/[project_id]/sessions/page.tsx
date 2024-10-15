@@ -26,6 +26,7 @@ export default async function Project({
   };
 
   const sessionResult = await projectClient.getSessions(id);
+  let projectDevices = (await projectClient.listDevices(id)).unwrapOr([]);
 
   return (
     await (
@@ -42,7 +43,7 @@ export default async function Project({
                 Active Sessions
               </h1>
             </div>
-            <CreateSession project={project} />
+            <CreateSession project={project} devices={projectDevices} />
           </div>
           <div className="min-h-20">
             {(

@@ -33,6 +33,10 @@ export default async function Project({
     await (
       await projectClient.getProject(id)
     ).mapAsync(async (project) => {
+      const projectDevices = (
+        await projectClient.listDevices(project.id)
+      ).unwrapOr([]);
+
       return (
         <div className="flex flex-col p-2 dark:text-white">
           <ProjectHeader projectName={project.name} projectId={project.id} />
@@ -50,7 +54,7 @@ export default async function Project({
                 Sessions
               </h1>
             </div>
-            <CreateSession project={project} />
+            <CreateSession project={project} devices={projectDevices} />
             <Link
               href={`/dashboard/projects/${project.id}/sessions`}
               className="ml-2"

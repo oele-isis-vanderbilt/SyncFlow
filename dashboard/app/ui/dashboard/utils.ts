@@ -18,3 +18,17 @@ export function partitionArray(arr: any[], size: number) {
     return acc;
   }, []);
 }
+
+export function groupBy<T extends Record<string, any>>(
+  arr: T[],
+  key: keyof T,
+): Record<string, T[]> {
+  return arr.reduce(
+    (acc, item) => {
+      const groupKey = String(item[key]);
+      (acc[groupKey] = acc[groupKey] || []).push(item);
+      return acc;
+    },
+    {} as Record<string, T[]>,
+  );
+}

@@ -56,6 +56,7 @@ export const NewSessionSchema = z.object({
     .optional()
     .default('off')
     .transform((v) => v === 'on'),
+  deviceGroups: z.array(z.string()).optional().default([]),
 });
 
 export const NewApiKeySchema = z.object({

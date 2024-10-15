@@ -1,12 +1,14 @@
 use actix_web::{web, App, HttpResponse, HttpServer};
 use api::apidoc::init_api_doc;
-use api::auth_middleware;
 use api::login_handlers::init_routes as login_init_routes;
 use api::oauth_handlers::init_github_oauth_routes;
 use api::project_handlers::init_routes as project_init_routes;
+use api::{auth_middleware, rmq_handlers};
 
 use application::project::devices::device_service;
 use application::project::session_service::SessionService;
+use application::rmq::auth::RMQAuthService;
+use application::rmq::session_notifier::SessionNotifier;
 use application::users::account_service::AccountService;
 
 use infrastructure::establish_connection_pool;
@@ -56,6 +58,10 @@ async fn main() -> std::io::Result<()> {
 
     let session_service = SessionService::new(&config.encryption_key, pool.clone());
     let device_service = device_service::DeviceService::new(&config, pool.clone());
+    let rmq_auth_service = RMQAuthService::new(auth_service.clone(), config.clone());
+    let session_notifier_service = SessionNotifier::create(config.rabbitmq_config.clone())
+        .await
+        .expect("Failed to create session notifier");
 
     HttpServer::new(move || {
         let mut app = App::new()
@@ -71,7 +77,11 @@ async fn main() -> std::io::Result<()> {
                     cfg,
                     web::Data::new(session_service.clone()),
                     web::Data::new(device_service.clone()),
+                    web::Data::new(session_notifier_service.clone()),
                 )
+            })
+            .configure(|cfg| {
+                rmq_handlers::init_routes(cfg, web::Data::new(rmq_auth_service.clone()))
             });
 
         if config.github_client_id.is_some() && config.github_client_secret.is_some() {

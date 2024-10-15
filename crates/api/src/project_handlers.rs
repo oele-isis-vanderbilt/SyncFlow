@@ -9,6 +9,7 @@ use actix_web::{
 };
 use application::{
     project::{devices::device_service::DeviceService, session_service::SessionService},
+    rmq::session_notifier::SessionNotifier,
     users::{account_service::AccountService, tokens_manager::UserInfo},
 };
 use shared::{
@@ -186,9 +187,14 @@ async fn create_session(
     project_id: web::Path<String>,
     session: web::Json<NewSessionRequest>,
     session_service: web::Data<SessionService>,
+    notifier_service: web::Data<SessionNotifier>,
 ) -> HttpResponse {
     session_service
-        .create_session(&project_id, session.into_inner())
+        .create_session(
+            &project_id,
+            session.into_inner(),
+            &notifier_service.into_inner(),
+        )
         .await
         .map(json_ok_response)
         .unwrap_or_else(error_response)
@@ -366,13 +372,16 @@ async fn register_device(
     user_info: ReqData<UserInfo>,
     request: web::Json<DeviceRegisterRequest>,
     device_service: web::Data<DeviceService>,
+    notifier_service: web::Data<SessionNotifier>,
 ) -> HttpResponse {
     device_service
         .register_device(
             &project_id,
             user_info.into_inner().user_id,
             &request.into_inner(),
+            &notifier_service.into_inner(),
         )
+        .await
         .map(json_ok_response)
         .unwrap_or_else(error_response)
 }
@@ -393,10 +402,12 @@ pub fn init_routes(
     cfg: &mut web::ServiceConfig,
     session_service: web::Data<SessionService>,
     device_service: web::Data<DeviceService>,
+    notifier_service: web::Data<SessionNotifier>,
 ) {
     let projects_scope = web::scope("/projects")
         .wrap(ownership_middleware::Ownership)
         .app_data(session_service.clone())
+        .app_data(notifier_service.clone())
         .service(create_project)
         .service(list_projects)
         .service(summarize_projects)

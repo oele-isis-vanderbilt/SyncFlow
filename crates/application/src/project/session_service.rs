@@ -6,8 +6,10 @@ use livekit_protocol::ParticipantInfo;
 use crate::{
     livekit::{egress::EgressService, room::RoomService},
     project::session_crud::{self, SessionError},
+    rmq::session_notifier::SessionNotifier,
 };
 use shared::{
+    device_models::NewSessionMessage,
     livekit_models::{TokenRequest, TokenResponse},
     project_models::{LivekitSessionInfo, NewSessionRequest, ProjectSessionResponse},
 };
@@ -38,6 +40,7 @@ impl SessionService {
         &self,
         project_id: &str,
         session: NewSessionRequest,
+        notifier: &SessionNotifier,
     ) -> Result<ProjectSessionResponse, SessionError> {
         let new_session = session_crud::create_session(
             project_id,
@@ -59,6 +62,18 @@ impl SessionService {
             let mut conn = pool.get().unwrap();
             let _ = session_listener(project, &session_id, &livekit_room_name, &mut conn).await;
         });
+
+        let device_groups = session.device_groups.unwrap_or_default();
+        for grp in device_groups {
+            let routing_key = format!("{}.{}", project_id, grp);
+            let new_session_message = NewSessionMessage {
+                session_id: session_id.to_string(),
+                session_name: new_session.livekit_room_name.clone(),
+            };
+            let bytes = serde_json::to_vec(&new_session_message).unwrap();
+
+            notifier.publish(&routing_key, bytes).await?;
+        }
 
         Ok(new_session.into())
     }

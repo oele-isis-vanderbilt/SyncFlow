@@ -1,3 +1,4 @@
+use crate::rmq::session_notifier::SessionNotifierError;
 use diesel::{prelude::*, PgConnection};
 use domain::models::{NewProjectDevice, ProjectDevice};
 use shared::device_models::DeviceRegisterRequest;
@@ -14,6 +15,9 @@ pub enum DeviceError {
 
     #[error("Device not found")]
     NotFound(String),
+
+    #[error("Session Notifier Error: {0}")]
+    SessionNotifierError(#[from] SessionNotifierError),
 }
 
 impl From<DeviceError> for shared::response_models::Response {
@@ -36,6 +40,10 @@ impl From<DeviceError> for shared::response_models::Response {
             DeviceError::NotFound(e) => shared::response_models::Response {
                 status: 404,
                 message: e,
+            },
+            DeviceError::SessionNotifierError(e) => shared::response_models::Response {
+                status: 500,
+                message: e.to_string(),
             },
         }
     }

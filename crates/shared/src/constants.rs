@@ -1,6 +1,6 @@
 pub const AUTHORIZATION_HEADER: &str = "Authorization";
 
-pub const IGNORE_ROUTES: [&str; 8] = [
+pub const IGNORE_ROUTES: [&str; 9] = [
     "/users/login",
     "/users/signup",
     "/users/refresh-token",
@@ -9,6 +9,7 @@ pub const IGNORE_ROUTES: [&str; 8] = [
     "/redoc",
     "/swagger-ui",
     "/api-docs",
+    "/rmq/auth/user",
 ];
 
 pub const IGNORE_PROJECT_OWNERSHIP_ROUTES: [&str; 3] =
