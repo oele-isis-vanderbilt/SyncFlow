@@ -101,6 +101,8 @@ class RabbitMQConfig(Config):
     port: int
     use_ssl: bool
     virtual_host_name: str
+    queue_name: str
+    exchange_name: str
 
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "RabbitMQConfig":
@@ -110,7 +112,9 @@ class RabbitMQConfig(Config):
             host=json_dict["host"],
             port=json_dict["port"],
             use_ssl=json_dict["use_ssl"],
-            virtual_host_name=json_dict["virtual_host_name"],
+            virtual_host_name=json_dict["vhost_name"],
+            queue_name=json_dict["queue_name"],
+            exchange_name=json_dict["exchange_name"],
         )
 
 
