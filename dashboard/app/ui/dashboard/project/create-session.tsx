@@ -86,11 +86,9 @@ function CreateSessionModal({
 
   const submitWithGroups = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
-    let formData = new FormData(form);
-    selectedGroups.forEach((group, index) => {
-      formData.append(`deviceGroups${index}`, group);
-    });
+    let formData = new FormData(e.currentTarget);
+    formData.append('deviceGroups', selectedGroups.join(','));
+
     dispatch(formData);
   };
 

@@ -123,3 +123,23 @@ pub fn delete_device(
 
     Ok(device)
 }
+
+pub fn get_possible_routing_keys(
+    proj_id: &str,
+    conn: &mut PgConnection,
+) -> Result<Vec<String>, DeviceError> {
+    use domain::schema::syncflow::project_devices::dsl::*;
+
+    let proj_uuid = Uuid::parse_str(proj_id)?;
+
+    let devices = project_devices
+        .filter(project_id.eq(proj_uuid))
+        .load::<ProjectDevice>(conn)?;
+
+    let routing_keys = devices
+        .iter()
+        .map(|d| format!("{}.{}", proj_id, d.device_group))
+        .collect();
+
+    Ok(routing_keys)
+}

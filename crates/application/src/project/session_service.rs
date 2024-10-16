@@ -15,6 +15,7 @@ use shared::{
 };
 
 use super::{
+    devices::device_crud,
     project_crud::{self, Encryptable},
     session_listener::session_listener,
 };
@@ -39,12 +40,33 @@ impl SessionService {
     pub async fn create_session(
         &self,
         project_id: &str,
-        session: NewSessionRequest,
+        session: &NewSessionRequest,
         notifier: &SessionNotifier,
     ) -> Result<ProjectSessionResponse, SessionError> {
+        let registered_devices =
+            device_crud::list_devices(project_id, &mut self.pool.get().unwrap())
+                .unwrap_or_default()
+                .into_iter()
+                .map(|d| d.device_group)
+                .collect::<Vec<String>>();
+        let notified_devices = session.device_groups.clone().unwrap_or_default();
+
+        let unregistered_devices = notified_devices
+            .iter()
+            .filter(|grp| !registered_devices.contains(grp))
+            .cloned()
+            .collect::<Vec<String>>();
+
+        if !unregistered_devices.is_empty() {
+            return Err(SessionError::InvalidDeviceGroupError(format!(
+                "Invalid device groups: [{}]",
+                unregistered_devices.join(", ")
+            )));
+        }
+
         let new_session = session_crud::create_session(
             project_id,
-            &session,
+            session,
             &self.encryption_key,
             &mut self.pool.get().unwrap(),
         )
@@ -63,13 +85,13 @@ impl SessionService {
             let _ = session_listener(project, &session_id, &livekit_room_name, &mut conn).await;
         });
 
-        let device_groups = session.device_groups.unwrap_or_default();
-        for grp in device_groups {
+        for grp in notified_devices {
             let routing_key = format!("{}.{}", project_id, grp);
             let new_session_message = NewSessionMessage {
                 session_id: session_id.to_string(),
                 session_name: new_session.livekit_room_name.clone(),
             };
+
             let bytes = serde_json::to_vec(&new_session_message).unwrap();
 
             notifier.publish(&routing_key, bytes).await?;

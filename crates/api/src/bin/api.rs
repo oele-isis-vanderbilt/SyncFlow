@@ -58,7 +58,7 @@ async fn main() -> std::io::Result<()> {
 
     let session_service = SessionService::new(&config.encryption_key, pool.clone());
     let device_service = device_service::DeviceService::new(&config, pool.clone());
-    let rmq_auth_service = RMQAuthService::new(auth_service.clone(), config.clone());
+    let rmq_auth_service = RMQAuthService::new(auth_service.clone(), config.clone(), pool.clone());
     let session_notifier_service = SessionNotifier::create(config.rabbitmq_config.clone())
         .await
         .expect("Failed to create session notifier");

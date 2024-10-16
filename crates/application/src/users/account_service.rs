@@ -1,7 +1,7 @@
 use super::{secret, tokens_manager, user};
 use crate::project::{self, project_crud};
 use crate::users::oauth::github::{fetch_github_user, verify_user_token, GithubUser};
-use crate::users::tokens_manager::{TokenTypes, UserInfo};
+use crate::users::tokens_manager::{TokenInfo, TokenTypes};
 use crate::users::user::UserError;
 use domain::models::User;
 use infrastructure::DbPool;
@@ -99,7 +99,7 @@ impl AccountService {
         self.tokens_manager.decode_token_unsafe(&token)
     }
 
-    pub fn verify_token(&self, token_data: &str) -> Result<UserInfo, UserError> {
+    pub fn verify_token(&self, token_data: &str) -> Result<TokenInfo, UserError> {
         self.tokens_manager
             .verify_token(token_data, &mut self.pool.get().unwrap())
     }

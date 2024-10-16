@@ -11,10 +11,11 @@ pub type UserTokenType = TokenTypes;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct UserInfo {
+pub struct TokenInfo {
     pub user_id: i32,
     pub user_name: String,
     pub login_session: Option<String>,
+    pub project_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -173,7 +174,7 @@ impl JWTTokensManager {
         &self,
         token: &str,
         conn: &mut PgConnection,
-    ) -> Result<UserInfo, UserError> {
+    ) -> Result<TokenInfo, UserError> {
         let parsed_token = self.decode_token_unsafe(token)?;
         match parsed_token {
             TokenTypes::LoginToken(token_data) => {
@@ -193,10 +194,11 @@ impl JWTTokensManager {
                     return Err(UserError::TokenError("Invalid token".to_string()));
                 }
 
-                Ok(UserInfo {
+                Ok(TokenInfo {
                     user_id: token_data.user_id,
                     user_name: token_data.user_name.to_owned(),
                     login_session: Some(token_data.login_session.to_owned()),
+                    project_id: None,
                 })
             }
 
@@ -218,10 +220,11 @@ impl JWTTokensManager {
 
                 let user = user::get_user(api_key.user_id, conn)?;
 
-                Ok(UserInfo {
+                Ok(TokenInfo {
                     user_id: user.id,
                     user_name: user.username.to_owned(),
                     login_session: Some(token_data.login_session.to_owned()),
+                    project_id: None,
                 })
             }
 
@@ -243,10 +246,11 @@ impl JWTTokensManager {
                 }
 
                 let user = user::get_user(api_key.user_id, conn)?;
-                Ok(UserInfo {
+                Ok(TokenInfo {
                     user_id: user.id,
                     user_name: user.username.to_owned(),
                     login_session: None,
+                    project_id: None,
                 })
             }
 
@@ -274,10 +278,11 @@ impl JWTTokensManager {
                 }
 
                 let user = user::get_user(api_key.user_id, conn)?;
-                Ok(UserInfo {
+                Ok(TokenInfo {
                     user_id: user.id,
                     user_name: user.username.to_owned(),
                     login_session: None,
+                    project_id: Some(token_data.project_id.to_owned()),
                 })
             }
         }

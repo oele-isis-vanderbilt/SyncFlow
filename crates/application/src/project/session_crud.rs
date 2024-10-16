@@ -47,6 +47,9 @@ pub enum SessionError {
 
     #[error("Session Notifier Error: {0}")]
     SessionNotifierError(#[from] SessionNotifierError),
+
+    #[error("Invalid Device Group Error: {0}")]
+    InvalidDeviceGroupError(String),
 }
 
 #[derive(Debug, Clone)]
@@ -132,6 +135,10 @@ impl From<SessionError> for shared::response_models::Response {
             SessionError::SessionNotifierError(e) => shared::response_models::Response {
                 status: 500,
                 message: e.to_string(),
+            },
+            SessionError::InvalidDeviceGroupError(e) => shared::response_models::Response {
+                status: 400,
+                message: e,
             },
         }
     }

@@ -8,7 +8,7 @@ use actix_web::{
     Error, HttpMessage, HttpResponse,
 };
 use application::users::account_service::AccountService;
-use application::users::tokens_manager::UserInfo;
+use application::users::tokens_manager::TokenInfo;
 use futures_util::future::LocalBoxFuture;
 use shared::constants;
 use shared::response_models::Response;
@@ -70,7 +70,7 @@ where
                 .any(|ignore_route| req.path().starts_with(ignore_route))
         {
             OwnershipStatus::Ignored
-        } else if let Some(user_info) = req.extensions().get::<UserInfo>() {
+        } else if let Some(user_info) = req.extensions().get::<TokenInfo>() {
             let account_service = req.app_data::<Data<AccountService>>();
 
             account_service

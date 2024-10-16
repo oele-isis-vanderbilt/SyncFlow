@@ -5,8 +5,8 @@ use crate::{
 };
 use diesel::{prelude::*, PgConnection};
 use domain::models::{
-    NewProject, NewProjectAPIKey, Project, ProjectAPIKey, ProjectSession, ProjectSessionStatus,
-    StorageType,
+    NewProject, NewProjectAPIKey, Project, ProjectAPIKey, ProjectDevice, ProjectSession,
+    ProjectSessionStatus, StorageType,
 };
 use livekit_api::services::ServiceError;
 use shared::{
@@ -527,4 +527,24 @@ pub fn fetch_api_key_by_key(
         })?;
 
     Ok(key)
+}
+
+pub fn project_contains_device_group(
+    proj_id: &str,
+    device_group_name: &str,
+    conn: &mut PgConnection,
+) -> Result<Vec<ProjectDevice>, ProjectError> {
+    use domain::schema::syncflow::project_devices::dsl::*;
+
+    let project = get_project_by_id(proj_id, conn)?;
+
+    let devices = project_devices
+        .filter(
+            project_id
+                .eq(project.id)
+                .and(device_group.eq(device_group_name)),
+        )
+        .load::<ProjectDevice>(conn)?;
+
+    Ok(devices)
 }
