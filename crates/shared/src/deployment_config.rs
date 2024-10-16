@@ -63,6 +63,8 @@ pub struct RabbitMQConfig {
     pub root_password: String,
     pub exchange_name: String,
     pub queue_name: String,
+    pub use_ssl: bool,
+    pub vhost_name: String,
 }
 
 impl DeploymentConfig {

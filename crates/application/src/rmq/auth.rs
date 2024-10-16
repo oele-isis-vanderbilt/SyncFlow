@@ -88,11 +88,15 @@ impl RMQAuthService {
     pub fn authorize_vhost(&self, vhost_query: &RMQAuthVhostQuery) -> bool {
         let token_info = self.account_service.verify_token(&vhost_query.username);
         token_info
-            .map(|_| vhost_query.vhost == "/")
+            .map(|_| vhost_query.vhost == self.deployment_config.rabbitmq_config.vhost_name)
             .unwrap_or(false)
     }
 
     pub fn authorize_resource_path(&self, resource_path_query: &RMQAuthResourcePathQuery) -> bool {
+        if resource_path_query.vhost != self.deployment_config.rabbitmq_config.vhost_name {
+            return false;
+        }
+
         let token_info = self
             .account_service
             .verify_token(&resource_path_query.username);
@@ -123,6 +127,10 @@ impl RMQAuthService {
     }
 
     pub fn authorize_topic(&self, topic_query: &RMQAuthTopicQuery) -> bool {
+        if topic_query.vhost != self.deployment_config.rabbitmq_config.vhost_name {
+            return false;
+        }
+
         let token_info = self.account_service.verify_token(&topic_query.username);
 
         token_info

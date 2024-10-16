@@ -63,6 +63,15 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to create session notifier");
 
+    let queue_name = session_notifier_service
+        .initialize()
+        .await
+        .unwrap_or_else(|e| {
+            panic!("Failed to initialize session notifier: {}", e);
+        });
+
+    info!("Session notifier initialized with queue: {:?}", queue_name);
+
     HttpServer::new(move || {
         let mut app = App::new()
             .wrap(auth_middleware::Authentication) // Comment this line if you want to integrate with yew-address-book-frontend

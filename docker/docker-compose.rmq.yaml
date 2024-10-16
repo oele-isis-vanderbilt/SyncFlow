@@ -4,11 +4,13 @@ services:
     container_name: demo-broker
     volumes:
       - rabbit-mq-data:/var/lib/rabbitmq
-      - ./rabbitmq.local.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/rabbitmq.local.conf:/etc/rabbitmq/rabbitmq.conf
     ports:
       - "5672:5672"
       - "15672:15672"
     network_mode: "host"
+    env_file:
+      - ../crates/.env
 
 volumes:
   rabbit-mq-data:

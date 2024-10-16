@@ -8,6 +8,8 @@ use amqprs::channel::{
 use amqprs::connection::{Connection, OpenConnectionArguments};
 use thiserror::Error;
 
+use amqprs::tls::TlsAdaptor;
+
 #[derive(Debug, Error)]
 pub enum SessionNotifierError {
     #[error("Failed to connect to RabbitMQ: {0}")]
@@ -25,13 +27,29 @@ pub struct SessionNotifier {
 
 impl SessionNotifier {
     pub async fn create(rabbitmq_config: RabbitMQConfig) -> Result<Self, SessionNotifierError> {
-        let connection = Connection::open(&OpenConnectionArguments::new(
-            &rabbitmq_config.host,
-            rabbitmq_config.port,
-            &rabbitmq_config.root_username,
-            &rabbitmq_config.root_password,
-        ))
-        .await?;
+        let args = if rabbitmq_config.use_ssl {
+            let domain = rabbitmq_config.host.clone();
+            OpenConnectionArguments::new(
+                &rabbitmq_config.host,
+                rabbitmq_config.port,
+                &rabbitmq_config.root_username,
+                &rabbitmq_config.root_password,
+            )
+            .virtual_host(&rabbitmq_config.vhost_name)
+            .tls_adaptor(TlsAdaptor::without_client_auth(None, domain).unwrap())
+            .finish()
+        } else {
+            OpenConnectionArguments::new(
+                &rabbitmq_config.host,
+                rabbitmq_config.port,
+                &rabbitmq_config.root_username,
+                &rabbitmq_config.root_password,
+            )
+            .virtual_host(&rabbitmq_config.vhost_name)
+            .finish()
+        };
+
+        let connection = Connection::open(&args).await?;
         let channel = connection.open_channel(None).await?;
 
         Ok(Self {
@@ -72,6 +90,12 @@ impl SessionNotifier {
         Ok(())
     }
 
+    pub async fn close(self) -> Result<(), SessionNotifierError> {
+        self.channel.clone().close().await?;
+        self.connection.clone().close().await?;
+        Ok(())
+    }
+
     pub async fn initialize(&self) -> Result<String, SessionNotifierError> {
         let exchange_name = &self.rabbitmq_config.exchange_name;
         let queue_name = &self.rabbitmq_config.queue_name;
@@ -80,7 +104,6 @@ impl SessionNotifier {
             .channel
             .queue_declare(QueueDeclareArguments::durable_client_named(queue_name))
             .await?;
-
         let queue_details = queue_declare_result.ok_or(SessionNotifierError::QueueDeclareError(
             format!("Failed to declare queue: {}", queue_name),
         ))?;

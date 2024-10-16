@@ -11,7 +11,7 @@ async fn authorize_user(
 ) -> HttpResponse {
     let is_user_valid = auth_service.authorize(&auth_query.into_inner());
     if is_user_valid {
-        HttpResponse::Ok().body("allow administrator")
+        HttpResponse::Ok().body("allow")
     } else {
         HttpResponse::Unauthorized().finish()
     }
