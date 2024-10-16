@@ -17,6 +17,8 @@ class Config:
     def as_env(self, prefix: str = "") -> str:
         env = []
         for field, value in asdict(self).items():
+            if isinstance(value, bool):
+                value = str(value).lower()
             env.append(f'{prefix.upper()}{field.upper()}="{value}"')
         return "\n".join(env)
 
@@ -90,6 +92,7 @@ class RootUser(Config):
             password=json_dict["password"],
         )
 
+
 @dataclass
 class RabbitMQConfig(Config):
     root_username: str
@@ -155,7 +158,6 @@ class ServiceConfig(Config):
             login_token=json_dict.get("login_token"),
             test_user=json_dict.get("test_user"),
             test_password=json_dict.get("test_password"),
-
         )
 
     def as_env(self, prefix: str = "") -> str:
@@ -168,7 +170,11 @@ class ServiceConfig(Config):
                 env.append(root_user_env)
             elif field == "rabbitmq_config" and value is not None:
                 rabbitmq_env = self.rabbitmq_config.as_env(
-                    prefix=f"{prefix.upper()}_RABBITMQ_CONFIG__" if prefix else "RABBITMQ_CONFIG__"
+                    prefix=(
+                        f"{prefix.upper()}_RABBITMQ_CONFIG__"
+                        if prefix
+                        else "RABBITMQ_CONFIG__"
+                    )
                 )
                 env.append(rabbitmq_env)
             elif value is not None:
