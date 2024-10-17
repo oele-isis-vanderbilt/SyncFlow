@@ -17,6 +17,8 @@ class Config:
     def as_env(self, prefix: str = "") -> str:
         env = []
         for field, value in asdict(self).items():
+            if isinstance(value, bool):
+                value = str(value).lower()
             env.append(f'{prefix.upper()}{field.upper()}="{value}"')
         return "\n".join(env)
 
@@ -92,6 +94,31 @@ class RootUser(Config):
 
 
 @dataclass
+class RabbitMQConfig(Config):
+    root_username: str
+    root_password: str
+    host: str
+    port: int
+    use_ssl: bool
+    vhost_name: str
+    queue_name: str
+    exchange_name: str
+
+    @classmethod
+    def from_json(cls, json_dict: Dict[str, Any]) -> "RabbitMQConfig":
+        return RabbitMQConfig(
+            root_username=json_dict["root_username"],
+            root_password=json_dict["root_password"],
+            host=json_dict["host"],
+            port=json_dict["port"],
+            use_ssl=json_dict["use_ssl"],
+            vhost_name=json_dict["vhost_name"],
+            queue_name=json_dict["queue_name"],
+            exchange_name=json_dict["exchange_name"],
+        )
+
+
+@dataclass
 class ServiceConfig(Config):
     app_host: str
     app_port: int
@@ -101,6 +128,7 @@ class ServiceConfig(Config):
     encryption_key: str
     jwt_expiration: int
     jwt_refresh_expiration: int
+    rabbitmq_config: RabbitMQConfig
     github_client_id: Optional[str] = None
     github_client_secret: Optional[str] = None
     root_user: Optional[RootUser] = None
@@ -116,6 +144,8 @@ class ServiceConfig(Config):
         else:
             root_user = None
 
+        rabbitmq_config = RabbitMQConfig.from_json(json_dict["rabbitmq_config"])
+
         return cls(
             app_host=json_dict["app_host"],
             app_port=json_dict["app_port"],
@@ -125,6 +155,7 @@ class ServiceConfig(Config):
             encryption_key=json_dict["encryption_key"],
             jwt_expiration=json_dict["jwt_expiration"],
             jwt_refresh_expiration=json_dict["jwt_refresh_expiration"],
+            rabbitmq_config=rabbitmq_config,
             github_client_id=json_dict.get("github_client_id"),
             github_client_secret=json_dict.get("github_client_secret"),
             root_user=root_user,
@@ -141,6 +172,15 @@ class ServiceConfig(Config):
                     prefix=f"{prefix.upper()}_ROOT_USER__" if prefix else "ROOT_USER__"
                 )
                 env.append(root_user_env)
+            elif field == "rabbitmq_config" and value is not None:
+                rabbitmq_env = self.rabbitmq_config.as_env(
+                    prefix=(
+                        f"{prefix.upper()}_RABBITMQ_CONFIG__"
+                        if prefix
+                        else "RABBITMQ_CONFIG__"
+                    )
+                )
+                env.append(rabbitmq_env)
             elif value is not None:
                 env.append(f'{prefix.upper()}{field.upper()}="{value}"')
         return "\n".join(env)

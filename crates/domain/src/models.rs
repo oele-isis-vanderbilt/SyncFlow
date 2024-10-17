@@ -348,6 +348,22 @@ pub struct ProjectDevice {
     pub registered_by: i32,
 }
 
+impl ProjectDevice {
+    pub fn into_device_response(&self, routing_key: &str, exchange_name: &str) -> DeviceResponse {
+        DeviceResponse {
+            id: self.id.to_string(),
+            group: self.device_group.clone(),
+            comments: self.comments.clone(),
+            name: self.device_name.clone(),
+            registered_at: self.registered_at.and_utc().timestamp() as usize,
+            registered_by: self.registered_by,
+            project_id: self.project_id.to_string(),
+            session_notification_exchange_name: Some(exchange_name.to_string()),
+            session_notification_binding_key: Some(routing_key.to_string()),
+        }
+    }
+}
+
 impl From<ProjectDevice> for DeviceResponse {
     fn from(value: ProjectDevice) -> Self {
         DeviceResponse {
@@ -358,6 +374,8 @@ impl From<ProjectDevice> for DeviceResponse {
             registered_at: value.registered_at.and_utc().timestamp() as usize,
             registered_by: value.registered_by,
             project_id: value.project_id.to_string(),
+            session_notification_exchange_name: None,
+            session_notification_binding_key: None,
         }
     }
 }

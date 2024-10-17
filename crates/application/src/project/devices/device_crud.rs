@@ -1,3 +1,4 @@
+use crate::rmq::session_notifier::SessionNotifierError;
 use diesel::{prelude::*, PgConnection};
 use domain::models::{NewProjectDevice, ProjectDevice};
 use shared::device_models::DeviceRegisterRequest;
@@ -14,6 +15,9 @@ pub enum DeviceError {
 
     #[error("Device not found")]
     NotFound(String),
+
+    #[error("Session Notifier Error: {0}")]
+    SessionNotifierError(#[from] SessionNotifierError),
 }
 
 impl From<DeviceError> for shared::response_models::Response {
@@ -36,6 +40,10 @@ impl From<DeviceError> for shared::response_models::Response {
             DeviceError::NotFound(e) => shared::response_models::Response {
                 status: 404,
                 message: e,
+            },
+            DeviceError::SessionNotifierError(e) => shared::response_models::Response {
+                status: 500,
+                message: e.to_string(),
             },
         }
     }
@@ -114,4 +122,24 @@ pub fn delete_device(
             .get_result::<ProjectDevice>(conn)?;
 
     Ok(device)
+}
+
+pub fn get_possible_routing_keys(
+    proj_id: &str,
+    conn: &mut PgConnection,
+) -> Result<Vec<String>, DeviceError> {
+    use domain::schema::syncflow::project_devices::dsl::*;
+
+    let proj_uuid = Uuid::parse_str(proj_id)?;
+
+    let devices = project_devices
+        .filter(project_id.eq(proj_uuid))
+        .load::<ProjectDevice>(conn)?;
+
+    let routing_keys = devices
+        .iter()
+        .map(|d| format!("{}.{}", proj_id, d.device_group))
+        .collect();
+
+    Ok(routing_keys)
 }

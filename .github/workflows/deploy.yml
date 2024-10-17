@@ -26,13 +26,14 @@ jobs:
           USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          openssl rsa -in private_key -check
+          ssh-keygen -y -f private_key > /dev/null
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             echo "Pulling latest changes from GitHub"
             rm -rf $HOME/SyncFlowDeploymentDev && cd $HOME
             mkdir SyncFlowDeploymentDev && cd SyncFlowDeploymentDev
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
+            cp ~/rabbitmq-deployment/rabbitmq.dev.conf docker/rabbitmq/rabbitmq.dev.conf
             cp $HOME/.deployment_config_dev_cloud.json  deployment_config_dev_cloud.json
             chmod +x docker/generate-prod-config
             ./docker/generate-prod-config --config-file deployment_config_dev_cloud.json --outfile-name .env.dev
@@ -50,7 +51,7 @@ jobs:
           USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          openssl rsa -in private_key -check
+          ssh-keygen -y -f private_key > /dev/null
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             echo "Pulling latest changes from GitHub"
             rm -rf $HOME/SyncFlowDeploymentProd && cd $HOME
@@ -76,7 +77,7 @@ jobs:
           USERNAME: ${{ secrets.JETSTREAM2_USERNAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          openssl rsa -in private_key -check
+          ssh-keygen -y -f private_key > /dev/null
           ssh -o StrictHostKeyChecking=no -i private_key ${USERNAME}@${HOST} '
             sudo chmod 666 /var/run/docker.sock
             docker system prune -f

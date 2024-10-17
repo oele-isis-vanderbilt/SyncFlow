@@ -114,7 +114,7 @@ export async function createProjectSession(
           success: false,
           data: null as any,
           errors: [
-            `An error occurred while creating the session. ${error.message} | Code: ${error.code}`,
+            `An error occurred while creating the session. ${JSON.stringify(error.message)} | Code: ${error.code}`,
           ],
         };
       });

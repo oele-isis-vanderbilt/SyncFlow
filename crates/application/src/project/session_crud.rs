@@ -17,6 +17,7 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use super::project_crud::ProjectError;
+use crate::rmq::session_notifier::SessionNotifierError;
 
 #[derive(Debug, Error)]
 pub enum SessionError {
@@ -43,6 +44,12 @@ pub enum SessionError {
 
     #[error("Inactive Session Error: {0}")]
     InactiveSessionError(String),
+
+    #[error("Session Notifier Error: {0}")]
+    SessionNotifierError(#[from] SessionNotifierError),
+
+    #[error("Invalid Device Group Error: {0}")]
+    InvalidDeviceGroupError(String),
 }
 
 #[derive(Debug, Clone)]
@@ -122,6 +129,14 @@ impl From<SessionError> for shared::response_models::Response {
                 message: e,
             },
             SessionError::InactiveSessionError(e) => shared::response_models::Response {
+                status: 400,
+                message: e,
+            },
+            SessionError::SessionNotifierError(e) => shared::response_models::Response {
+                status: 500,
+                message: e.to_string(),
+            },
+            SessionError::InvalidDeviceGroupError(e) => shared::response_models::Response {
                 status: 400,
                 message: e,
             },

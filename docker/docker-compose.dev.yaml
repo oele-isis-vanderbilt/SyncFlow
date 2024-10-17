@@ -28,6 +28,16 @@ services:
     depends_on:
       - postgres-syncflow-dev-prod
 
+  rabbitmq-dev-prod:
+    image: rabbitmq:4-management
+    container_name: rabbitmq-syncflow-dev-prod
+    ports:
+      - "20001:20001"
+      - "20002:20002"
+    volumes:
+      - rabbitmq-data-dev-prod:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.dev.conf:/etc/rabbitmq/rabbitmq.conf
+
   api-syncflow-dev-prod:
     build:
       context: ../crates
@@ -57,3 +67,4 @@ services:
 
 volumes:
   postgres-data-dev-prod:
+  rabbitmq-data-dev-prod:

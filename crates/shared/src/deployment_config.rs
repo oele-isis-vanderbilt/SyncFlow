@@ -20,6 +20,8 @@ pub struct DeploymentConfig {
 
     pub root_user: Option<RootUser>,
 
+    pub rabbitmq_config: RabbitMQConfig,
+
     /// Test configuration
     pub login_token: Option<String>,
     pub test_user: Option<String>,
@@ -51,6 +53,18 @@ pub struct S3Config {
 #[derive(Deserialize, Debug, Clone)]
 pub struct LocalConfig {
     pub recording_root_path: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct RabbitMQConfig {
+    pub host: String,
+    pub port: u16,
+    pub root_username: String,
+    pub root_password: String,
+    pub exchange_name: String,
+    pub queue_name: String,
+    pub use_ssl: bool,
+    pub vhost_name: String,
 }
 
 impl DeploymentConfig {

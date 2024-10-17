@@ -13,6 +13,7 @@ pub struct NewSessionRequest {
     pub empty_timeout: Option<i32>,
     pub max_participants: Option<i32>,
     pub auto_recording: Option<bool>,
+    pub device_groups: Option<Vec<String>>,
 }
 
 impl NewSessionRequest {
@@ -38,6 +39,7 @@ impl Default for NewSessionRequest {
             empty_timeout: Some(600),
             max_participants: Some(100),
             auto_recording: Some(false),
+            device_groups: None,
         }
     }
 }

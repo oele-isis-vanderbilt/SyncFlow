@@ -2,7 +2,7 @@ use crate::helpers::{error_response, json_ok_response};
 use actix_web::web::{Json, ReqData};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse};
 use application::users::account_service::AccountService;
-use application::users::tokens_manager::UserInfo;
+use application::users::tokens_manager::TokenInfo;
 use shared::constants;
 use shared::response_models::Response;
 use shared::user_models::{ApiKeyRequest, LoginRequest, RefreshTokenRequest, SignUpRequest};
@@ -107,7 +107,7 @@ pub async fn refresh_login_token(
 #[post("/api-key")]
 pub async fn create_api_key(
     api_token_request: Json<ApiKeyRequest>,
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
     user_auth
@@ -123,7 +123,7 @@ pub async fn create_api_key(
 pub async fn delete_api_key(
     account_service: web::Data<AccountService>,
     key_id: web::Path<String>,
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
 ) -> HttpResponse {
     account_service
         .delete_api_key(user_data.into_inner().user_id, &key_id)
@@ -141,7 +141,7 @@ pub async fn delete_api_key(
 )]
 #[get("/api-keys")]
 pub async fn list_all_api_keys(
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
     user_auth
@@ -160,7 +160,7 @@ pub async fn list_all_api_keys(
 )]
 #[get("/me")]
 pub async fn me(
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     user_auth: web::Data<AccountService>,
 ) -> HttpResponse {
     user_auth

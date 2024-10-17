@@ -9,7 +9,8 @@ use actix_web::{
 };
 use application::{
     project::{devices::device_service::DeviceService, session_service::SessionService},
-    users::{account_service::AccountService, tokens_manager::UserInfo},
+    rmq::session_notifier::SessionNotifier,
+    users::{account_service::AccountService, tokens_manager::TokenInfo},
 };
 use shared::{
     device_models::DeviceRegisterRequest,
@@ -31,7 +32,7 @@ use shared::{
 )]
 #[get("/list")]
 async fn list_projects(
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     account_service: web::Data<AccountService>,
 ) -> HttpResponse {
     account_service
@@ -52,7 +53,7 @@ async fn list_projects(
 )]
 #[get("/summarize")]
 async fn summarize_projects(
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     account_service: web::Data<AccountService>,
 ) -> HttpResponse {
     account_service
@@ -77,7 +78,7 @@ async fn summarize_projects(
 )]
 #[get("/{project_id}")]
 async fn get_project(
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     project_id: web::Path<String>,
     account_service: web::Data<AccountService>,
 ) -> HttpResponse {
@@ -103,7 +104,7 @@ async fn get_project(
 )]
 #[delete("/{project_id}")]
 async fn delete_project(
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     project_id: web::Path<String>,
     account_service: web::Data<AccountService>,
 ) -> HttpResponse {
@@ -127,7 +128,7 @@ async fn delete_project(
 )]
 #[post("/create")]
 async fn create_project(
-    user_data: ReqData<UserInfo>,
+    user_data: ReqData<TokenInfo>,
     project_request: web::Json<ProjectRequest>,
     account_service: web::Data<AccountService>,
 ) -> HttpResponse {
@@ -186,9 +187,14 @@ async fn create_session(
     project_id: web::Path<String>,
     session: web::Json<NewSessionRequest>,
     session_service: web::Data<SessionService>,
+    notifier_service: web::Data<SessionNotifier>,
 ) -> HttpResponse {
     session_service
-        .create_session(&project_id, session.into_inner())
+        .create_session(
+            &project_id,
+            &session.into_inner(),
+            &notifier_service.into_inner(),
+        )
         .await
         .map(json_ok_response)
         .unwrap_or_else(error_response)
@@ -299,7 +305,7 @@ async fn stop_session(
 #[post("/{project_id}/settings/create-api-key")]
 async fn create_api_key(
     project_id: web::Path<String>,
-    user_info: ReqData<UserInfo>,
+    user_info: ReqData<TokenInfo>,
     account_service: web::Data<AccountService>,
     request: web::Json<ApiKeyRequest>,
 ) -> HttpResponse {
@@ -313,7 +319,7 @@ async fn create_api_key(
 #[get("{project_id}/settings/api-keys")]
 async fn get_all_api_keys(
     project_id: web::Path<String>,
-    user_info: ReqData<UserInfo>,
+    user_info: ReqData<TokenInfo>,
     account_service: web::Data<AccountService>,
 ) -> HttpResponse {
     let user_id = user_info.into_inner().user_id;
@@ -326,7 +332,7 @@ async fn get_all_api_keys(
 #[delete("{project_id}/settings/api-keys/{api_key_id}")]
 async fn delete_api_key(
     path: web::Path<(String, i32)>,
-    user_info: ReqData<UserInfo>,
+    user_info: ReqData<TokenInfo>,
     account_service: web::Data<AccountService>,
 ) -> HttpResponse {
     let (project_id, api_key_id) = path.into_inner();
@@ -363,16 +369,19 @@ async fn get_device(
 #[post("{project_id}/devices/register")]
 async fn register_device(
     project_id: web::Path<String>,
-    user_info: ReqData<UserInfo>,
+    user_info: ReqData<TokenInfo>,
     request: web::Json<DeviceRegisterRequest>,
     device_service: web::Data<DeviceService>,
+    notifier_service: web::Data<SessionNotifier>,
 ) -> HttpResponse {
     device_service
         .register_device(
             &project_id,
             user_info.into_inner().user_id,
             &request.into_inner(),
+            &notifier_service.into_inner(),
         )
+        .await
         .map(json_ok_response)
         .unwrap_or_else(error_response)
 }
@@ -393,10 +402,12 @@ pub fn init_routes(
     cfg: &mut web::ServiceConfig,
     session_service: web::Data<SessionService>,
     device_service: web::Data<DeviceService>,
+    notifier_service: web::Data<SessionNotifier>,
 ) {
     let projects_scope = web::scope("/projects")
         .wrap(ownership_middleware::Ownership)
         .app_data(session_service.clone())
+        .app_data(notifier_service.clone())
         .service(create_project)
         .service(list_projects)
         .service(summarize_projects)
