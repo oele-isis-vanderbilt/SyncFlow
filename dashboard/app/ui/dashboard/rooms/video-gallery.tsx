@@ -229,7 +229,7 @@ function VideoTile({
 function NoTrackMessage() {
   return (
     <div className={'flex h-full items-center justify-center'}>
-      <p className={'text-lg text-black md:text-2xl dark:text-white'}>
+      <p className={'text-black text-lg md:text-2xl dark:text-white'}>
         No Video Streams Available
       </p>
     </div>
@@ -243,10 +243,10 @@ function VideoMutedIndicator({
 }) {
   return (
     <div className={'flex h-full flex-col items-center justify-center'}>
-      <p className={'text-lg text-black md:text-2xl'}>
+      <p className={'text-black text-lg md:text-2xl'}>
         {getHelpText(trackRef)}
       </p>
-      <p className={'text-lg text-black md:text-2xl'}>Video Muted</p>
+      <p className={'text-black text-lg md:text-2xl'}>Video Muted</p>
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default async function SideNav() {
         <div className="flex-1">
           <Sidebar />
         </div>
-        <div className="flex items-center justify-center  gap-2 p-2 text-black dark:text-white">
+        <div className="flex items-center justify-center gap-2 p-2 text-black dark:text-white">
           <div>
             <DarkModeSwitcher />
           </div>
@@ -35,7 +35,7 @@ export default async function SideNav() {
                   type="submit"
                   aria-label="Toggle dark mode"
                   data-testid="dark-theme-toggle"
-                  className="rounded-lg p-2.5 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                  className="rounded-lg p-2.5 text-gray-500 text-sm hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:focus:ring-gray-700 dark:hover:bg-gray-700"
                 >
                   <FaSignOutAlt className="h-5 w-5" />
                 </button>

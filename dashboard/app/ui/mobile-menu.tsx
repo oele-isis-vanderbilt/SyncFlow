@@ -28,7 +28,7 @@ const MobileMenu = () => {
       </button>
       <div className={`${isNavOpen ? 'block' : 'hidden'} lg:hidden`}>
         <div
-          className={`absolute left-0 top-20 z-10 h-screen w-full transform bg-white shadow transition-transform duration-1000 ease-in-out dark:bg-gray-800 ${isNavOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`absolute top-20 left-0 z-10 h-screen w-full transform bg-white shadow transition-transform duration-1000 ease-in-out dark:bg-gray-800 ${isNavOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           <nav
             className="flex h-full w-full flex-col p-4"
@@ -38,7 +38,7 @@ const MobileMenu = () => {
               <Link href="/" className="bg-slate-100 dark:bg-slate-700">
                 <div className="flex items-center gap-2 px-2">
                   <IoIosHome className="h-6 w-6" />
-                  <span className="py-2 text-xl font-bold text-gray-700 transition-colors duration-300 hover:bg-gray-200 dark:text-white">
+                  <span className="py-2 font-bold text-gray-700 text-xl transition-colors duration-300 hover:bg-gray-200 dark:text-white">
                     Home
                   </span>
                 </div>
@@ -47,7 +47,7 @@ const MobileMenu = () => {
               <Link href="#" className="bg-slate-100 dark:bg-slate-700">
                 <div className="flex items-center gap-2 px-2">
                   <SiDocsdotrs className="h-6 w-6" />
-                  <span className="py-2 text-xl font-bold text-gray-700 transition-colors duration-300 hover:bg-gray-200 dark:text-white">
+                  <span className="py-2 font-bold text-gray-700 text-xl transition-colors duration-300 hover:bg-gray-200 dark:text-white">
                     Docs
                   </span>
                 </div>
@@ -56,7 +56,7 @@ const MobileMenu = () => {
               <Link href="/login" className="bg-slate-100 dark:bg-slate-700">
                 <div className="flex items-center gap-2 px-2">
                   <IoIosLogIn className="h-6 w-6" />
-                  <span className="py-2 text-xl font-bold text-gray-700 transition-colors duration-300 hover:bg-gray-200 dark:text-white">
+                  <span className="py-2 font-bold text-gray-700 text-xl transition-colors duration-300 hover:bg-gray-200 dark:text-white">
                     Login
                   </span>
                 </div>
@@ -65,7 +65,7 @@ const MobileMenu = () => {
             </div>
             <div className="mt-10">
               <Link href="#">
-                <button className="w-full items-center gap-1.5 rounded-lg bg-blue-700 p-2.5 text-lg font-medium text-white">
+                <button className="w-full items-center gap-1.5 rounded-lg bg-blue-700 p-2.5 font-medium text-lg text-white">
                   Get Started
                 </button>
               </Link>

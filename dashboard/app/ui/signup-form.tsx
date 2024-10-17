@@ -22,7 +22,7 @@ export default function SignupForm() {
 
   if (messages && messages.success) {
     return (
-      <div className="relative  mx-auto flex w-full flex-col p-4 md:w-1/3">
+      <div className="relative mx-auto flex w-full flex-col p-4 md:w-1/3">
         <div className="relative text-xl dark:text-white">
           Signup successful! Please{' '}
           <Link href={'/login'} className="underline hover:text-blue-500">
@@ -36,7 +36,7 @@ export default function SignupForm() {
 
   return (
     <form action={dispatch} className="space-y-3">
-      <div className="flex-1 rounded-lg border-2 px-6 pb-4 pt-8 shadow dark:bg-gray-900">
+      <div className="flex-1 rounded-lg border-2 px-6 pt-8 pb-4 shadow dark:bg-gray-900">
         <h1 className={`${lusitana.className} mb-3 text-2xl dark:text-white`}>
           Register to continue!
         </h1>
@@ -50,7 +50,7 @@ export default function SignupForm() {
                 placeholder="Jane"
                 required={false}
               >
-                <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                <IdentificationIcon className=" -translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
               </SignUpInput>
             </div>
             <SignUpInput
@@ -60,7 +60,7 @@ export default function SignupForm() {
               placeholder="M"
               required={false}
             >
-              <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <IdentificationIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
             </SignUpInput>
           </div>
 
@@ -71,7 +71,7 @@ export default function SignupForm() {
             placeholder="Doe"
             required={false}
           >
-            <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            <IdentificationIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
           </SignUpInput>
           <SignUpInput
             id="username"
@@ -80,7 +80,7 @@ export default function SignupForm() {
             placeholder="username"
             required={true}
           >
-            <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            <IdentificationIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
           </SignUpInput>
           <SignUpInput
             id="email"
@@ -89,7 +89,7 @@ export default function SignupForm() {
             placeholder="Doe"
             required={true}
           >
-            <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            <AtSymbolIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
           </SignUpInput>
           <SignUpInput
             id="password"
@@ -98,7 +98,7 @@ export default function SignupForm() {
             placeholder=""
             required={true}
           >
-            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            <KeyIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
           </SignUpInput>
           <SignUpInput
             id="confirmPassword"
@@ -107,7 +107,7 @@ export default function SignupForm() {
             placeholder=""
             required={true}
           >
-            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            <KeyIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
           </SignUpInput>
         </div>
         <SignUpButton />
@@ -119,7 +119,7 @@ export default function SignupForm() {
             messages.errors?.map((message, index) => (
               <p
                 key={index}
-                className="flex items-center gap-2 p-2 text-xs text-red-500"
+                className="flex items-center gap-2 p-2 text-red-500 text-xs"
               >
                 <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
                 {message}

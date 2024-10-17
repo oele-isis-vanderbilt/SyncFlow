@@ -34,13 +34,13 @@ export default function InfoModal({
         <div className="space-y-6">
           {content?.headings.map((heading, index) => (
             <div key={index}>
-              <h3 className="text-lg font-bold dark:text-white">
+              <h3 className="font-bold text-lg dark:text-white">
                 {heading.title}
               </h3>
               <div className="space-y-2">
                 {heading.items.map((item, itemIndex) => (
                   <div key={itemIndex}>
-                    <h4 className="text-md font-bold dark:text-white">
+                    <h4 className="font-bold text-md dark:text-white">
                       {item.title}
                     </h4>
                     <p className="dark:text-white">{item.content}</p>

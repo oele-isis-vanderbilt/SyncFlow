@@ -30,13 +30,13 @@ export default async function Page({
 
   return (
     <div className="flex flex-col p-2 dark:text-white">
-      <h2 className={`text-4xl font-bold ${lusitana.className}`}>
+      <h2 className={`font-bold text-4xl ${lusitana.className}`}>
         {' '}
         Project Settings{' '}
       </h2>
       <div className="mt-4 flex flex-row items-center text-center">
         <div>
-          <h3 className={`text-3xl font-semibold ${lusitana.className}`}>
+          <h3 className={`font-semibold text-3xl ${lusitana.className}`}>
             API Keys
           </h3>
         </div>
@@ -67,7 +67,7 @@ export default async function Page({
       </div>
       <div className="mt-4 flex flex-row items-center text-center">
         <div>
-          <h3 className={`text-3xl font-semibold ${lusitana.className}`}>
+          <h3 className={`font-semibold text-3xl ${lusitana.className}`}>
             Devices
           </h3>
         </div>

@@ -33,7 +33,7 @@ export default function AudioStreams(
                 {index === 0 && (
                   <div
                     className={
-                      'grid grid-cols-3 gap-4 px-6 pb-3 pt-6 text-xl font-bold dark:text-white'
+                      'grid grid-cols-3 gap-4 px-6 pt-6 pb-3 font-bold text-xl dark:text-white'
                     }
                   >
                     <span>Publisher</span>

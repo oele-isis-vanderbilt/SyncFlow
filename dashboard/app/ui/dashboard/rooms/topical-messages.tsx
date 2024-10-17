@@ -66,13 +66,13 @@ export default function TopicalMessages(
                 </div>
               </Tab>
               <Tab selectedClassName="react-tabs__tab--selected dark:bg-gray-800">
-                <div className={'flex items-center text-xl  dark:text-white'}>
+                <div className={'flex items-center text-xl dark:text-white'}>
                   <HiChat />
                   Chat
                 </div>
               </Tab>
               <Tab selectedClassName="react-tabs__tab--selected dark:bg-gray-800">
-                <div className={'flex items-center text-xl  dark:text-white'}>
+                <div className={'flex items-center text-xl dark:text-white'}>
                   <HiClipboardList />
                   Logs
                 </div>

@@ -38,7 +38,7 @@ export default async function Project({
           <div className="flex flex-row items-center text-center">
             <div>
               <h1
-                className={`${lusitana.className} mb-4 mt-4 text-3xl font-bold dark:text-white`}
+                className={`${lusitana.className} mt-4 mb-4 font-bold text-3xl dark:text-white`}
               >
                 Active Sessions
               </h1>
@@ -81,7 +81,7 @@ export default async function Project({
           <div className="flex flex-row items-center text-center">
             <div>
               <h1
-                className={`${lusitana.className} mb-4 mt-4 text-3xl font-bold dark:text-white`}
+                className={`${lusitana.className} mt-4 mb-4 font-bold text-3xl dark:text-white`}
               >
                 Stopped Sessions
               </h1>

@@ -54,7 +54,7 @@ export function CreateApiKeyModal({
         onClose();
       }}
     >
-      <Modal.Header className={`${lusitana.className} text-4xl font-bold`}>
+      <Modal.Header className={`${lusitana.className} font-bold text-4xl`}>
         Create a new API Key
       </Modal.Header>
 
@@ -69,7 +69,7 @@ export function CreateApiKeyModal({
               placeholder="Enter a description for this API key"
               required={false}
             >
-              <FaCommentAlt className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <FaCommentAlt className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
             </Input>
           </div>
           <div aria-live="polite" aria-atomic="true">
@@ -80,7 +80,7 @@ export function CreateApiKeyModal({
               messages.errors?.map((message, index) => (
                 <p
                   key={index}
-                  className="flex items-center gap-2 p-2 text-xs text-red-500"
+                  className="flex items-center gap-2 p-2 text-red-500 text-xs"
                 >
                   <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
                   {message}
@@ -88,7 +88,7 @@ export function CreateApiKeyModal({
               ))}
             {messages?.success && (
               <>
-                <p className="mt-4 text-xs text-green-500 dark:text-white">
+                <p className="mt-4 text-green-500 text-xs dark:text-white">
                   API key created successfully (copy it now, it will not be
                   shown again)
                 </p>

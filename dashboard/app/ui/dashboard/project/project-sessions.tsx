@@ -66,7 +66,7 @@ const sortedSessionsToColumns = (projectId: string) => {
               href={`/dashboard/projects/${projectId}/sessions/${session.id}/room`}
             >
               <div className="flex">
-                <div className="text-black-800 dark:text-white-200 animate-pulse rounded-full bg-blue-200 px-4 py-2 text-center text-xs font-medium leading-none dark:bg-red-700">
+                <div className="animate-pulse rounded-full bg-blue-200 px-4 py-2 text-center font-medium text-black-800 text-xs leading-none dark:bg-red-700 dark:text-white-200">
                   live
                 </div>
               </div>

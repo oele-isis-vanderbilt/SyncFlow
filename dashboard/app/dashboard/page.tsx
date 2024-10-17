@@ -40,7 +40,7 @@ export default async function Page() {
       <div className="mt-8 flex items-center p-2">
         <div>
           <h1
-            className={`${lusitana.className} mb-4 mt-4 text-xl md:text-2xl dark:text-white`}
+            className={`${lusitana.className} mt-4 mb-4 text-xl md:text-2xl dark:text-white`}
           >
             Projects
           </h1>
