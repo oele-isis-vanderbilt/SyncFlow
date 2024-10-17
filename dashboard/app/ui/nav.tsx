@@ -26,7 +26,7 @@ const Nav = () => {
           <Link
             aria-hidden
             href="/"
-            className="flex items-center gap-2 text-2xl font-semibold text-gray-900 dark:text-white"
+            className="flex items-center gap-2 font-semibold text-2xl text-gray-900 dark:text-white"
           >
             <AppLogo w={200} h={200} />
           </Link>
@@ -34,7 +34,7 @@ const Nav = () => {
             <div className="hidden items-center gap-1 xl:flex">
               <Link
                 href="#"
-                className="rounded-lg p-2.5 text-lg font-medium text-gray-900 hover:text-cyan-700 dark:text-gray-300 dark:hover:text-cyan-500"
+                className="rounded-lg p-2.5 font-medium text-gray-900 text-lg hover:text-cyan-700 dark:text-gray-300 dark:hover:text-cyan-500"
               >
                 Docs
               </Link>
@@ -44,16 +44,16 @@ const Nav = () => {
         <div className="flex items-center gap-2">
           <Link
             href="/login"
-            className="hidden rounded-lg p-2.5 text-lg font-medium text-gray-900 hover:text-cyan-700 lg:flex dark:text-gray-300 dark:hover:text-cyan-500"
+            className="hidden rounded-lg p-2.5 font-medium text-gray-900 text-lg hover:text-cyan-700 lg:flex dark:text-gray-300 dark:hover:text-cyan-500"
           >
             Login!
           </Link>
           <Link
             aria-hidden
             href="/signup"
-            className="flex items-center gap-3 text-2xl font-semibold text-gray-900 dark:text-white"
+            className="flex items-center gap-3 font-semibold text-2xl text-gray-900 dark:text-white"
           >
-            <button className="hidden items-center gap-1.5 rounded-lg bg-blue-700 p-2.5 text-lg font-medium text-white lg:flex">
+            <button className="hidden items-center gap-1.5 rounded-lg bg-blue-700 p-2.5 font-medium text-lg text-white lg:flex">
               Get Started
             </button>
           </Link>

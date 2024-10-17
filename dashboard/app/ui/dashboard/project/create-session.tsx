@@ -101,7 +101,7 @@ function CreateSessionModal({
         onClose();
       }}
     >
-      <Modal.Header className={`${lusitana.className} text-4xl font-bold`}>
+      <Modal.Header className={`${lusitana.className} font-bold text-4xl`}>
         Create a new session for project {projectName}
       </Modal.Header>
 
@@ -116,7 +116,7 @@ function CreateSessionModal({
               placeholder="leave blank for auto-generated session name"
               required={false}
             >
-              <FingerPrintIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <FingerPrintIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
             </Input>
             <Input
               id="comments"
@@ -125,7 +125,7 @@ function CreateSessionModal({
               placeholder="comments"
               required={false}
             >
-              <BsFillChatSquareTextFill className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <BsFillChatSquareTextFill className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
             </Input>
             <RangeSlider
               id="maxParticipants"
@@ -145,9 +145,9 @@ function CreateSessionModal({
               defaultValue={600}
               onChange={(e) => {}}
             />
-            <div className="mb-4 mt-4 flex flex-row items-center justify-center gap-2">
+            <div className="mt-4 mb-4 flex flex-row items-center justify-center gap-2">
               <label
-                className="block text-xs font-medium dark:text-white"
+                className="block font-medium text-xs dark:text-white"
                 htmlFor="deviceGroups"
               >
                 Device Groups to notify
@@ -178,7 +178,7 @@ function CreateSessionModal({
               messages.errors?.map((message, index) => (
                 <p
                   key={index}
-                  className="flex items-center gap-2 p-2 text-xs text-red-500"
+                  className="flex items-center gap-2 p-2 text-red-500 text-xs"
                 >
                   <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
                   {message}

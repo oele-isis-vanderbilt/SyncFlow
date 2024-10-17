@@ -90,7 +90,7 @@ export default function DataSharer({
       >
         <div className="flex h-full w-full flex-col overflow-x-hidden p-2 dark:text-white">
           <div className="mb-10 w-full text-center">
-            <h1 className="text-2xl font-bold">
+            <h1 className="font-bold text-2xl">
               Welcome to session {sessionName}, {user}!{' '}
             </h1>
             <p>

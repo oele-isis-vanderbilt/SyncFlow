@@ -1,5 +1,5 @@
 import { projectClient } from '@/app/lib/project-client';
-import type { ProjectSummary, ProjectSummary } from '@/types/project';
+import type { ProjectSummary } from '@/types/project';
 
 export async function ProjectSummaryComponent({
   projectId,
@@ -15,25 +15,25 @@ export async function ProjectSummaryComponent({
         >
           <div className="grid grid-cols-1 gap-10 md:grid-cols-4 md:gap-40">
             <div className="flex flex-col items-center justify-center p-5 ring">
-              <h2 className="text-2xl font-bold md:text-6xl">
+              <h2 className="font-bold text-2xl md:text-6xl">
                 {summary.numSessions}
               </h2>
               <p className="text-sm md:text-2xl">Sessions</p>
             </div>
             <div className="flex flex-col items-center justify-center p-5 ring">
-              <h2 className="text-2xl font-bold md:text-6xl">
+              <h2 className="font-bold text-2xl md:text-6xl">
                 {summary.numActiveSessions}
               </h2>
               <p className="text-sm md:text-2xl">Active Sessions</p>
             </div>
             <div className="flex flex-col items-center justify-center p-5 ring">
-              <h2 className="text-2xl font-bold md:text-6xl">
+              <h2 className="font-bold text-2xl md:text-6xl">
                 {summary.numParticipants}
               </h2>
               <p className="text-sm md:text-2xl">Participants</p>
             </div>
             <div className="flex flex-col items-center justify-center p-5 ring">
-              <h2 className="text-2xl font-bold md:text-6xl">
+              <h2 className="font-bold text-2xl md:text-6xl">
                 {summary.numRecordings}
               </h2>
               <p className="text-sm md:text-2xl">Recordings</p>

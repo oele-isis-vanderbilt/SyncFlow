@@ -50,7 +50,7 @@ export default async function Page({
           key={`${projectId}-${sessionId}`}
         >
           <div className="flex flex-row gap-2">
-            <h2 className={`text-4xl font-bold ${lusitana.className}`}>
+            <h2 className={`font-bold text-4xl ${lusitana.className}`}>
               {projectName} / {sessionInfo.name}
             </h2>
             {sessionInfo.status === 'Started' ? (
@@ -61,7 +61,7 @@ export default async function Page({
                     target="_blank"
                   >
                     <div className="flex items-center justify-center">
-                      <div className="text-black-800 dark:text-white-200 animate-pulse rounded-full bg-blue-200 px-4 py-2 text-center text-xs font-medium leading-none dark:bg-red-700">
+                      <div className="animate-pulse rounded-full bg-blue-200 px-4 py-2 text-center font-medium text-black-800 text-xs leading-none dark:bg-red-700 dark:text-white-200">
                         live
                       </div>
                     </div>
@@ -85,7 +85,7 @@ export default async function Page({
               <h2 className={`text-xl ${lusitana.className}`}>Participants</h2>
               {sessionInfo.status !== 'Started' ? (
                 <div className="flex h-full w-full items-center justify-center bg-gray-300 dark:bg-gray-900">
-                  <h3 className={`text-2xl font-bold ${lusitana.className}`}>
+                  <h3 className={`font-bold text-2xl ${lusitana.className}`}>
                     Session has stopped
                   </h3>
                 </div>
@@ -119,7 +119,7 @@ export default async function Page({
               <h2 className={`text-xl ${lusitana.className}`}>Tracks</h2>
               {sessionInfo.status !== 'Started' ? (
                 <div className="flex h-full w-full items-center justify-center bg-gray-300 dark:bg-gray-900">
-                  <h3 className={`text-2xl font-bold ${lusitana.className}`}>
+                  <h3 className={`font-bold text-2xl ${lusitana.className}`}>
                     Session has stopped
                   </h3>
                 </div>

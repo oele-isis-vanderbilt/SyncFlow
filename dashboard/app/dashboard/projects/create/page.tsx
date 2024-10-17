@@ -5,7 +5,7 @@ export default async function CreateProject() {
   return (
     <div className="flex h-full w-full flex-col p-2">
       <h2
-        className={`text-2xl font-bold dark:text-white ${lusitana.className}`}
+        className={`font-bold text-2xl dark:text-white ${lusitana.className}`}
       >
         Create a new project
       </h2>

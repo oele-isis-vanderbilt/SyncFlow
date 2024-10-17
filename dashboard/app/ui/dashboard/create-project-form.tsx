@@ -29,7 +29,7 @@ export default function CreateProjectForm() {
           placeholder="awesome-syncflow-project"
           required={true}
         >
-          <FingerPrintIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FingerPrintIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <TextArea
           id="description"
@@ -47,7 +47,7 @@ export default function CreateProjectForm() {
           placeholder="wss://livekit.syncflow.live"
           required={true}
         >
-          <FaGlobe className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FaGlobe className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <Input
           id="livekitServerApiKey"
@@ -56,7 +56,7 @@ export default function CreateProjectForm() {
           placeholder="livekit-api-key"
           required={true}
         >
-          <FingerPrintIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FingerPrintIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <Input
           id="livekitServerApiSecret"
@@ -65,7 +65,7 @@ export default function CreateProjectForm() {
           placeholder="livekit-api-secret"
           required={true}
         >
-          <FingerPrintIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FingerPrintIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
 
         <h3 className="mt-4 text-xl dark:text-white">S3 Bucket</h3>
@@ -76,7 +76,7 @@ export default function CreateProjectForm() {
           placeholder="syncflow-livekit"
           required={true}
         >
-          <FaGlobe className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FaGlobe className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <Input
           id="accessKey"
@@ -85,7 +85,7 @@ export default function CreateProjectForm() {
           placeholder="syncflow-livekit-s3-access-key"
           required={true}
         >
-          <FingerPrintIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FingerPrintIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <Input
           id="secretKey"
@@ -94,7 +94,7 @@ export default function CreateProjectForm() {
           placeholder="syncflow-livekit-s3-secret-key"
           required={true}
         >
-          <FingerPrintIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FingerPrintIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <Input
           id="endpoint"
@@ -103,7 +103,7 @@ export default function CreateProjectForm() {
           placeholder="syncflow-livekit-s3-endpoint"
           required={false}
         >
-          <FaGlobe className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FaGlobe className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <Input
           id="region"
@@ -112,7 +112,7 @@ export default function CreateProjectForm() {
           placeholder="syncflow-livekit-s3-region"
           required={false}
         >
-          <FaMapMarkerAlt className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <FaMapMarkerAlt className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-[18px] w-[18px] text-gray-500 peer-focus:text-gray-900" />
         </Input>
         <div aria-live="polite" aria-atomic="true">
           {messages &&
@@ -122,7 +122,7 @@ export default function CreateProjectForm() {
             messages.errors?.map((message, index) => (
               <p
                 key={index}
-                className="flex items-center gap-2 p-2 text-xs text-red-500"
+                className="flex items-center gap-2 p-2 text-red-500 text-xs"
               >
                 <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
                 {message}

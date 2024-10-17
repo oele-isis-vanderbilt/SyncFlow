@@ -21,6 +21,22 @@ repos:
     - id: mixed-line-ending
     - id: trailing-whitespace
 
+- repo: local
+  hooks:
+    - id: local-biome-format
+      name: biome format
+      entry: bash -c "cd dashboard && npm run format"
+      language: system
+      types: [text]
+      pass_filenames: false
+
+    - id: local-biome-lint
+      name: biome lint
+      entry: bash -c "cd dashboard && npm run lint"
+      language: system
+      types: [text]
+      pass_filenames: false
+
 - repo: https://github.com/umesh-timalsina/pre-commit-rust.git
   rev: '5a79375'
   hooks:

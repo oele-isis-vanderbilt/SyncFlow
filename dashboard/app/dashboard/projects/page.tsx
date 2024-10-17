@@ -8,7 +8,7 @@ export default async function Projects() {
       <div className="flex flex-row items-center p-2 dark:text-white">
         <div>
           <h1
-            className={`${lusitana.className} mb-4 mt-4 text-xl md:text-2xl dark:text-white`}
+            className={`${lusitana.className} mt-4 mb-4 text-xl md:text-2xl dark:text-white`}
           >
             Projects
           </h1>

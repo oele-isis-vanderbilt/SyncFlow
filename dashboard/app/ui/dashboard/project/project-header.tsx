@@ -12,7 +12,7 @@ export function ProjectHeader({
 }) {
   return (
     <div className="flex flex-row items-center justify-between">
-      <h2 className={`text-4xl font-bold ${lusitana.className}`}>
+      <h2 className={`font-bold text-4xl ${lusitana.className}`}>
         {projectName}
       </h2>
       <Link href={`/dashboard/projects/${projectId}/settings`}>

@@ -20,14 +20,14 @@ export function Input({
   return (
     <div>
       <label
-        className="mb-3 mt-5 block text-xs font-medium dark:text-white"
+        className="mt-5 mb-3 block font-medium text-xs dark:text-white"
         htmlFor={id}
       >
         {label}
       </label>
       <div className="relative">
         <input
-          className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm text-gray-900 outline-2 placeholder:text-gray-500"
+          className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-gray-900 text-sm outline-2 placeholder:text-gray-500"
           id={id}
           type={type}
           name={id}
@@ -56,14 +56,14 @@ export function TextArea({
   return (
     <div>
       <label
-        className="mb-3 mt-5 block text-xs font-medium dark:text-white"
+        className="mt-5 mb-3 block font-medium text-xs dark:text-white"
         htmlFor={id}
       >
         {label}
       </label>
       <div className="relative">
         <textarea
-          className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm text-gray-900 outline-2 placeholder:text-gray-500"
+          className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-gray-900 text-sm outline-2 placeholder:text-gray-500"
           id={id}
           name={id}
           placeholder={placeholder}
@@ -95,14 +95,14 @@ export function RangeSlider({
   return (
     <div>
       <label
-        className="mb-3 mt-6 block text-xs font-medium dark:text-white"
+        className="mt-6 mb-3 block font-medium text-xs dark:text-white"
         htmlFor={id}
       >
         {label}
       </label>
       <div className="relative">
         <input
-          className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm text-gray-900 outline-2 placeholder:text-gray-500"
+          className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-gray-900 text-sm outline-2 placeholder:text-gray-500"
           id={id}
           name={id}
           type="range"
@@ -116,7 +116,7 @@ export function RangeSlider({
             onChange(newValue);
           }}
         />
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-gray-500 text-xs">
           <span className="dark:text-white">{min}</span>
           <span className="font-bold dark:text-white">{value}</span>
           <span className="dark:text-white">{max}</span>
@@ -149,7 +149,7 @@ export function Checkbox({
       />
       <label
         htmlFor={id}
-        className="ml-2 block text-sm text-gray-900 dark:text-white"
+        className="ml-2 block text-gray-900 text-sm dark:text-white"
       >
         {label}
       </label>

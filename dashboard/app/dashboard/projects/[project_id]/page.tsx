@@ -40,7 +40,7 @@ export default async function Project({
       return (
         <div className="flex flex-col p-2 dark:text-white">
           <ProjectHeader projectName={project.name} projectId={project.id} />
-          <h3 className={`mt-3 text-3xl font-semibold ${lusitana.className}`}>
+          <h3 className={`mt-3 font-semibold text-3xl ${lusitana.className}`}>
             Stats
           </h3>
           <div className="p-2">
@@ -49,7 +49,7 @@ export default async function Project({
           <div className="flex flex-row items-center text-center">
             <div>
               <h1
-                className={`${lusitana.className} mb-4 mt-4 text-3xl font-bold dark:text-white`}
+                className={`${lusitana.className} mt-4 mb-4 font-bold text-3xl dark:text-white`}
               >
                 Sessions
               </h1>

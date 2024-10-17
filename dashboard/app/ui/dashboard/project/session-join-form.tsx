@@ -53,14 +53,14 @@ export default function SessionJoinForm({
 
   return (
     <Modal size="7xl" show={show} onClose={onCloseFn}>
-      <Modal.Header className={`${lusitana.className} text-4xl font-bold`}>
+      <Modal.Header className={`${lusitana.className} font-bold text-4xl`}>
         Please select an identity and data sharing options for session{' '}
         {sessionName}
       </Modal.Header>
       <Modal.Body>
         <div className={'hidden w-full text-center md:block dark:text-white'}>
           <div className={'p-2'}>
-            <h2 className={'text-xl font-bold'}>Data Sharing Options</h2>
+            <h2 className={'font-bold text-xl'}>Data Sharing Options</h2>
             <div
               className={
                 'flex h-full w-full flex-row items-center justify-center p-2'

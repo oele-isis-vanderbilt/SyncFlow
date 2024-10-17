@@ -20,7 +20,9 @@ export default async function SideNav() {
       </Link>
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
         <div className="hidden p-2 md:block dark:text-white">
-          {session?.user?.name ? `Welcome! ${session.user.id!}` : 'Welcome'}{' '}
+          {session?.user?.name
+            ? `Welcome! ${session.user.id!}`
+            : 'Welcome'}{' '}
         </div>
         <div className="dark:text-white">
           <DarkModeSwitcher />
@@ -33,7 +35,7 @@ export default async function SideNav() {
             await signOut();
           }}
         >
-          <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-200 p-3 text-sm font-medium hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-900">
+          <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-200 p-3 font-medium text-sm hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-900">
             <PowerIcon className="w-6" />
             <div className="dark hidden md:block">Sign Out</div>
           </button>

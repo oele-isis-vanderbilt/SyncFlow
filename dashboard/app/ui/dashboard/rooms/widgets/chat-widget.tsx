@@ -63,13 +63,13 @@ export function ChatViewerWidget({
   };
 
   return (
-    <div className={'-my-2 h-full w-full  p-2'}>
+    <div className={'-my-2 h-full w-full p-2'}>
       {chatMessages.length === 0 ? (
         <div className={'flex h-full w-full items-center justify-center'}>
           <p className={'text-white'}>No messages yet</p>
         </div>
       ) : (
-        <div className="-my-2 h-full w-full  flex-grow">
+        <div className="-my-2 h-full w-full flex-grow">
           <div className="h-full w-full">
             {' '}
             <AutoSizer>

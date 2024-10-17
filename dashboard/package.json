@@ -6,9 +6,8 @@
     "build": "next build",
     "create-user": "node ./scripts/create-user.js",
     "dev": "next dev",
-    "lint": "next lint",
-    "prettier": "prettier --write --ignore-unknown .",
-    "prettier:check": "prettier --check --ignore-unknown .",
+    "lint": "biome lint --write",
+    "format": "biome format --write",
     "start": "next start"
   },
   "dependencies": {
@@ -39,6 +38,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -48,12 +48,7 @@
     "autoprefixer": "^10.0.1",
     "commander": "^12.0.0",
     "dotenv": "^16.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.1.0",
-    "eslint-config-prettier": "^9.1.0",
     "postcss": "^8",
-    "prettier": "^3.2.4",
-    "prettier-plugin-tailwindcss": "^0.5.11",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

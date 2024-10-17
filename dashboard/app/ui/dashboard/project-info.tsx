@@ -78,7 +78,7 @@ export function ProjectCard({ project }: { project: Project }) {
     <Card>
       <h5
         className={clsx(
-          'text-2xl font-bold tracking-tight text-gray-900 dark:text-white',
+          'font-bold text-2xl text-gray-900 tracking-tight dark:text-white',
           lusitana.className,
         )}
       >
