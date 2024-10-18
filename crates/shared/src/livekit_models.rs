@@ -7,6 +7,7 @@ use utoipa::ToSchema;
 #[serde(rename_all = "camelCase")]
 pub struct TokenRequest {
     pub identity: String,
+    pub name: Option<String>,
     pub video_grants: VideoGrantsWrapper,
 }
 
