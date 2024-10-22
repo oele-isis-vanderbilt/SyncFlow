@@ -1,4 +1,4 @@
-import { EgressInfo, ParticipantInfo } from 'livekit-server-sdk';
+import type { EgressInfo, ParticipantInfo } from 'livekit-server-sdk';
 
 export interface Project {
   id: string;
@@ -52,4 +52,10 @@ export interface ProjectDevice {
   registeredAt: number;
   registeredBy: number;
   projectId: string;
+}
+
+export interface SessionTokenResponse {
+  token: string;
+  identity: string;
+  livekitServerUrl: string;
 }

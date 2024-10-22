@@ -1,11 +1,9 @@
 import {
   EgressInfo,
-  RoomCompositeEgressRequest,
-  TrackEgressRequest,
-  TrackCompositeEgressRequest,
+  type TrackEgressRequest,
   EgressStatus,
 } from '@livekit/protocol';
-import { JsonValue } from '@bufbuild/protobuf';
+import type { JsonValue } from '@bufbuild/protobuf';
 
 export class EgressDetails {
   private egressInfo: EgressInfo;
@@ -31,6 +29,7 @@ export class EgressDetails {
 
   isEgressActive() {
     return [EgressStatus.EGRESS_ACTIVE, EgressStatus.EGRESS_STARTING].includes(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       this.egressInfo.status!,
     );
   }

@@ -23,31 +23,31 @@ export class AuthHttpClient {
     const sessionToken = await this.getAuthToken();
     if (sessionToken === null) {
       return new Err({ message: 'Not authenticated', code: 401 });
-    } else {
-      let response = await fetch(this.base_url + url, {
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+    }
+    const response = await fetch(this.base_url + url, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (response.ok) {
-        let data = await response.json();
-        return new Ok<T>(data);
-      } else {
-        try {
-          let data = await response.json();
-          return new Err<ClientError>({
-            message: data,
-            code: response.status,
-          });
-        } catch (e) {
-          return new Err<ClientError>({
-            message: 'Unknown error',
-            code: response.status,
-          });
-        }
-      }
+    if (response.ok) {
+      const data = await response.json();
+      return new Ok<T>(data);
+    }
+    try {
+      const data = await response.json();
+      // @ts-ignore
+      return new Err<ClientError>({
+        message: data,
+        code: response.status,
+      });
+    } catch (e) {
+      // @ts-ignore
+      return new Err<ClientError>({
+        message: 'Unknown error',
+        code: response.status,
+      });
     }
   }
 
@@ -58,33 +58,33 @@ export class AuthHttpClient {
     const sessionToken = await this.getAuthToken();
     if (sessionToken === null) {
       return new Err({ message: 'Not authenticated', code: 401 });
-    } else {
-      let response = await fetch(this.base_url + url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
+    }
+    const response = await fetch(this.base_url + url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
 
-      if (response.ok) {
-        let data = await response.json();
-        return new Ok<T>(data);
-      } else {
-        try {
-          let data = await response.json();
-          return new Err<ClientError>({
-            message: data,
-            code: response.status,
-          });
-        } catch (e) {
-          return new Err<ClientError>({
-            message: 'Unknown error',
-            code: response.status,
-          });
-        }
-      }
+    if (response.ok) {
+      const data = await response.json();
+      return new Ok<T>(data);
+    }
+    try {
+      const data = await response.json();
+      // @ts-ignore
+      return new Err<ClientError>({
+        message: data,
+        code: response.status,
+      });
+    } catch (e) {
+      // @ts-ignore
+      return new Err<ClientError>({
+        message: 'Unknown error',
+        code: response.status,
+      });
     }
   }
 
@@ -92,32 +92,33 @@ export class AuthHttpClient {
     const sessionToken = await this.getAuthToken();
     if (sessionToken === null) {
       return new Err({ message: 'Not authenticated', code: 401 });
-    } else {
-      let response = await fetch(this.base_url + url, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+    }
 
-      if (response.ok) {
-        let data = await response.json();
-        return new Ok<T>(data);
-      } else {
-        try {
-          let data = await response.json();
-          return new Err<ClientError>({
-            message: data,
-            code: response.status,
-          });
-        } catch (e) {
-          return new Err<ClientError>({
-            message: 'Unknown error',
-            code: response.status,
-          });
-        }
-      }
+    const response = await fetch(this.base_url + url, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return new Ok<T>(data);
+    }
+    try {
+      const data = await response.json();
+      // @ts-ignore
+      return new Err<ClientError>({
+        message: data,
+        code: response.status,
+      });
+    } catch (e) {
+      // @ts-ignore
+      return new Err<ClientError>({
+        message: 'Unknown error',
+        code: response.status,
+      });
     }
   }
 }

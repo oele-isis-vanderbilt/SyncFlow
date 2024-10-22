@@ -25,8 +25,8 @@ class Config:
 
 @dataclass
 class DashboardConfig(Config):
-    mmla_api_url: str
-    next_public_mmla_api_url: str
+    syncflow_api_url: str
+    next_public_syncflow_api_url: str
     next_public_livekit_server_url: str
     auth_secret: str
     nextauth_url: str
@@ -37,8 +37,8 @@ class DashboardConfig(Config):
     @classmethod
     def from_json(cls, json_dict: Dict[str, Any]) -> "DashboardConfig":
         return DashboardConfig(
-            mmla_api_url=json_dict["mmla_api_url"],
-            next_public_mmla_api_url=json_dict["next_public_mmla_api_url"],
+            syncflow_api_url=json_dict["syncflow_api_url"],
+            next_public_syncflow_api_url=json_dict["syncflow_api_url"],
             next_public_livekit_server_url=json_dict["next_public_livekit_server_url"],
             auth_secret=json_dict["auth_secret"],
             nextauth_url=json_dict["nextauth_url"],
