@@ -29,10 +29,6 @@ export type SignUpState = {
   success: boolean;
 };
 
-const randomRoomName = () => {
-  return APP_NAME + '_' + Math.random().toString(36).substring(7);
-};
-
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
@@ -78,7 +74,7 @@ export async function signUp(
   prevState: SignUpState | undefined,
   formData: FormData,
 ): Promise<SignUpState> {
-  let formDataObj = Object.fromEntries(formData.entries());
+  const formDataObj = Object.fromEntries(formData.entries());
   const data = SignUpSchema.extend({
     confirmPassword: z.string().min(8),
   })
@@ -93,24 +89,22 @@ export async function signUp(
       success: false,
       errors: data.error.issues.map((issue) => issue.message),
     };
-  } else {
-    try {
-      let signUpRequest = SignUpSchema.parse(data.data);
-      let response = await authClient.signUp(signUpRequest);
-      if (response.status === 200) {
-        return { success: true };
-      } else {
-        let json = await response.json();
-        return {
-          success: false,
-          errors: [json.message],
-        };
-      }
-    } catch (error) {
-      return {
-        success: false,
-        errors: ['An error occurred while signing up. Please try again.'],
-      };
+  }
+  try {
+    const signUpRequest = SignUpSchema.parse(data.data);
+    const response = await authClient.signUp(signUpRequest);
+    if (response.status === 200) {
+      return { success: true };
     }
+    const json = await response.json();
+    return {
+      success: false,
+      errors: [json.message],
+    };
+  } catch (error) {
+    return {
+      success: false,
+      errors: ['An error occurred while signing up. Please try again.'],
+    };
   }
 }

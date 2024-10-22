@@ -27,8 +27,8 @@ export class AuthClient {
   }
 
   async loginWithGithub(token: JWT, user: User, account: Account) {
-    let serverUrl = this.auth_url;
-    let githubToken = account.access_token;
+    const serverUrl = this.auth_url;
+    const githubToken = account.access_token;
 
     const payload = {
       email: user.email,
@@ -36,7 +36,7 @@ export class AuthClient {
       login: user.login,
     };
 
-    const response = await fetch(serverUrl + '/oauth/github/login', {
+    const response = await fetch(`${serverUrl}/oauth/github/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,9 +46,9 @@ export class AuthClient {
     });
 
     if (response.ok) {
-      let data = await response.json();
-      let token = data.accessToken;
-      let decoded_jwt = jwtDecode(token);
+      const data = await response.json();
+      const token = data.accessToken;
+      const decoded_jwt = jwtDecode(token);
       return {
         id: decoded_jwt.userName,
         name: decoded_jwt.userName,
@@ -63,13 +63,13 @@ export class AuthClient {
   }
 
   async apiSignIn(id: string, password: string): Promise<SessionUser | null> {
-    let server_url = this.auth_url;
-    let credentials = {
+    const server_url = this.auth_url;
+    const credentials = {
       username_or_email: id,
       password: password,
     };
 
-    let response = await fetch(server_url + '/users/login', {
+    const response = await fetch(`${server_url}/users/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,9 +78,9 @@ export class AuthClient {
     });
 
     if (response.ok) {
-      let data = await response.json();
-      let token = data.accessToken;
-      let decoded_jwt = jwtDecode(token);
+      const data = await response.json();
+      const token = data.accessToken;
+      const decoded_jwt = jwtDecode(token);
       return {
         id: decoded_jwt.userName,
         name: decoded_jwt.userName,
@@ -100,7 +100,7 @@ export class AuthClient {
 
     const refreshToken = token.refreshToken;
 
-    let response = await fetch(serverUrl + '/users/refresh-token', {
+    const response = await fetch(`${serverUrl}/users/refresh-token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -109,8 +109,8 @@ export class AuthClient {
     });
 
     if (response.ok) {
-      let data = await response.json();
-      let decoded_jwt = jwtDecode(data.accessToken);
+      const data = await response.json();
+      const decoded_jwt = jwtDecode(data.accessToken);
       const refreshedTokens = {
         ...token,
         jwt: data.accessToken,
@@ -123,14 +123,13 @@ export class AuthClient {
         accessTokenExpires: decoded_jwt.exp * 1000,
       };
       return refreshedTokens;
-    } else {
-      return null;
     }
+    return null;
   }
 
   async signOut(token: string) {
-    let server_url = this.auth_url;
-    let response = await fetch(server_url + '/users/logout', {
+    const serverUrl = this.auth_url;
+    const response = await fetch(`${serverUrl}/users/logout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -145,8 +144,8 @@ export class AuthClient {
   }
 
   async signUp(userDetails: SignUpRequest): Promise<Response> {
-    let server_url = this.auth_url;
-    let response = await fetch(server_url + '/users/signup', {
+    const server_url = this.auth_url;
+    const response = await fetch(`${server_url}/users/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -163,4 +162,4 @@ export class AuthClient {
 }
 
 const deploymentConfig = getConfig();
-export const authClient = new AuthClient(deploymentConfig.mmla_api_url);
+export const authClient = new AuthClient(deploymentConfig.syncFlowApiUrl);

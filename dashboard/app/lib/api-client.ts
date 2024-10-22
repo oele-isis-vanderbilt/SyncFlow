@@ -1,5 +1,5 @@
 import { AuthHttpClient } from './auth-http-client';
-import {
+import type {
   ApiKeyRequest,
   ApiKeyResponse,
   ApiKeyResponseWithoutSecret,
@@ -12,10 +12,6 @@ const PREFIXES = {
 };
 
 class ApiClient extends AuthHttpClient {
-  constructor(base_url: string) {
-    super(base_url);
-  }
-
   async listApiKeys() {
     return await this.authenticatedGet<ApiKeyResponseWithoutSecret[]>(
       PREFIXES.LIST_API_KEYS,
@@ -24,7 +20,7 @@ class ApiClient extends AuthHttpClient {
 
   async deleteApiKey(key: string) {
     return await this.authenticatedDelete<ApiKeyResponseWithoutSecret>(
-      PREFIXES.DELETE_API_KEY + `/${key}`,
+      `${PREFIXES.DELETE_API_KEY}/${key}`,
     );
   }
 
@@ -38,4 +34,4 @@ class ApiClient extends AuthHttpClient {
 
 const deploymentConfig = getConfig();
 
-export const apiClient = new ApiClient(deploymentConfig.mmla_api_url);
+export const apiClient = new ApiClient(deploymentConfig.syncFlowApiUrl);

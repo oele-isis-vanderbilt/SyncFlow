@@ -1,10 +1,10 @@
 export default defineConfig({
   server: {
     proxy: {
-      '/livekit-mmlaapi': {
+      '/syncflow-api': {
         target: 'http://localhost:8081',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/livekit-mmlaapi/, ''),
+        rewrite: (path) => path.replace(/^\/syncflow-api/, ''),
         secure: false,
       },
     },

@@ -1,12 +1,13 @@
 import getConfig from '@/config';
-import { AuthHttpClient, ClientError } from './auth-http-client';
-import {
-  type LivekitSessionInfo,
-  type ProjectSession,
-  type Project,
-  type ProjectsSummary,
-  type ProjectSummary,
+import { AuthHttpClient } from './auth-http-client';
+import type {
+  LivekitSessionInfo,
+  ProjectSession,
+  Project,
+  ProjectsSummary,
+  ProjectSummary,
   ProjectDevice,
+  SessionTokenResponse,
 } from '@/types/project';
 
 const PREFIXES = {
@@ -18,9 +19,8 @@ const PREFIXES = {
 };
 
 import { z } from 'zod';
-import { TokenResponse } from '@/types/mmla';
-import { VideoGrant } from 'livekit-server-sdk';
-import { ApiKeyResponse } from '@/types/api';
+import type { VideoGrant } from 'livekit-server-sdk';
+import type { ApiKeyResponse } from '@/types/api';
 
 export const NewProjectSchema = z.object({
   name: z.string(),
@@ -45,12 +45,12 @@ export const NewSessionSchema = z.object({
     .string()
     .optional()
     .default('100')
-    .transform((v) => parseInt(v)),
+    .transform((v) => Number.parseInt(v)),
   emptyTimeout: z
     .string()
     .optional()
     .default('600')
-    .transform((v) => parseInt(v)),
+    .transform((v) => Number.parseInt(v)),
   autoRecording: z
     .string()
     .optional()
@@ -73,10 +73,6 @@ export type NewProject = z.infer<typeof NewProjectSchema>;
 export type NewSession = z.infer<typeof NewSessionSchema>;
 
 export class ProjectClient extends AuthHttpClient {
-  constructor(base_url: string) {
-    super(base_url);
-  }
-
   async listProjects() {
     return await this.authenticatedGet<Project[]>(PREFIXES.LIST_PROJECTS);
   }
@@ -155,7 +151,7 @@ export class ProjectClient extends AuthHttpClient {
     tokenRequest: VideoGrant,
   ) {
     return await this.authenticatedPost<
-      TokenResponse,
+      SessionTokenResponse,
       { identity: string; videoGrants: VideoGrant }
     >(`${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/token`, {
       identity: identity,
@@ -196,4 +192,4 @@ export class ProjectClient extends AuthHttpClient {
 }
 
 const deploymentConfig = getConfig();
-export const projectClient = new ProjectClient(deploymentConfig.mmla_api_url);
+export const projectClient = new ProjectClient(deploymentConfig.syncFlowApiUrl);
