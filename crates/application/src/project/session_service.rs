@@ -50,18 +50,19 @@ impl SessionService {
                 .map(|d| d.device_group)
                 .collect::<Vec<String>>();
         let notified_devices = session.device_groups.clone().unwrap_or_default();
+        if !notified_devices.is_empty() {
+            let unregistered_devices = notified_devices
+                .iter()
+                .filter(|grp| !registered_devices.contains(grp))
+                .cloned()
+                .collect::<Vec<String>>();
 
-        let unregistered_devices = notified_devices
-            .iter()
-            .filter(|grp| !registered_devices.contains(grp))
-            .cloned()
-            .collect::<Vec<String>>();
-
-        if !unregistered_devices.is_empty() {
-            return Err(SessionError::InvalidDeviceGroupError(format!(
-                "Invalid device groups: [{}]",
-                unregistered_devices.join(", ")
-            )));
+            if !unregistered_devices.is_empty() {
+                return Err(SessionError::InvalidDeviceGroupError(format!(
+                    "Invalid device groups: [{}]",
+                    unregistered_devices.join(", ")
+                )));
+            }
         }
 
         let new_session = session_crud::create_session(

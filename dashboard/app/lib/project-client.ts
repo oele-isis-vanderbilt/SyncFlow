@@ -60,7 +60,12 @@ export const NewSessionSchema = z.object({
     .string()
     .optional()
     .default('')
-    .transform((s) => s.split(',').map((s) => s.trim())),
+    .transform((s) =>
+      s
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => !!s),
+    ),
 });
 
 export const NewApiKeySchema = z.object({
