@@ -24,6 +24,7 @@ pub enum ProjectClientError {
     ReqwestError(#[from] reqwest::Error),
 }
 
+#[derive(Debug)]
 pub struct ProjectClient {
     base_url: String,
     api_key: String,
@@ -34,12 +35,12 @@ pub struct ProjectClient {
 }
 
 impl ProjectClient {
-    pub fn new(base_url: String, project_id: String, api_key: String, api_secret: String) -> Self {
+    pub fn new(base_url: &str, project_id: &str, api_key: &str, api_secret: &str) -> Self {
         ProjectClient {
-            base_url,
-            project_id,
-            api_key,
-            api_secret,
+            base_url: base_url.to_string(),
+            project_id: project_id.to_string(),
+            api_key: api_key.to_string(),
+            api_secret: api_secret.to_string(),
             client: Client::new(),
             api_token: Mutex::new(None),
         }
