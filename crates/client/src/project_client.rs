@@ -10,6 +10,7 @@ use shared::{
     signed_token::{generate_and_sign_jwt, verify_and_decode_jwt},
     user_models::ProjectInfo,
 };
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::Mutex;
 
@@ -24,14 +25,14 @@ pub enum ProjectClientError {
     ReqwestError(#[from] reqwest::Error),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProjectClient {
     base_url: String,
     api_key: String,
     api_secret: String,
     project_id: String,
     client: reqwest::Client,
-    api_token: Mutex<Option<String>>,
+    api_token: Arc<Mutex<Option<String>>>,
 }
 
 impl ProjectClient {
@@ -42,7 +43,7 @@ impl ProjectClient {
             api_key: api_key.to_string(),
             api_secret: api_secret.to_string(),
             client: Client::new(),
-            api_token: Mutex::new(None),
+            api_token: Arc::new(Mutex::new(None)),
         }
     }
 
