@@ -1,3 +1,3 @@
 mod project_client;
 
-pub use project_client::ProjectClient;
+pub use project_client::{ProjectClient, ProjectClientError};
