@@ -1,8 +1,9 @@
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::de::DeserializeOwned;
 use std::fmt::Display;
+use thiserror::Error;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Error)]
 pub enum SignedTokenError {
     JWTError(String),
 }

@@ -1,10 +1,11 @@
 use super::{secret, tokens_manager, user};
 use crate::project::{self, project_crud};
 use crate::users::oauth::github::{fetch_github_user, verify_user_token, GithubUser};
-use crate::users::tokens_manager::{TokenInfo, TokenTypes};
+use crate::users::tokens_manager::TokenInfo;
 use crate::users::user::UserError;
 use domain::models::User;
 use infrastructure::DbPool;
+use shared::claims::TokenTypes;
 use shared::deployment_config::DeploymentConfig;
 use shared::project_models::{ProjectSummary, ProjectsSummary};
 use shared::user_models::{

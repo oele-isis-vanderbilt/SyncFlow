@@ -6,4 +6,5 @@ members = [
     "application",
     "infrastructure",
     "shared",
+    "client",
 ]

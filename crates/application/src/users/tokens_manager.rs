@@ -1,11 +1,12 @@
 use crate::project::project_crud;
 use crate::users::secret::decrypt_string;
-use crate::users::signed_token::{decode_jwt_unsafe, generate_and_sign_jwt, verify_and_decode_jwt};
 use crate::users::user;
 use crate::users::user::{LoginSessionInfo, UserError};
 use diesel::PgConnection;
 use domain::models::ApiKey;
 use serde::{Deserialize, Serialize};
+use shared::claims::{ApiToken, LoginToken, ProjectToken, RefreshToken, TokenTypes};
+use shared::signed_token::{decode_jwt_unsafe, generate_and_sign_jwt, verify_and_decode_jwt};
 
 pub type UserTokenType = TokenTypes;
 
@@ -16,60 +17,6 @@ pub struct TokenInfo {
     pub user_name: String,
     pub login_session: Option<String>,
     pub project_id: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum TokenTypes {
-    LoginToken(LoginToken),
-    ApiToken(ApiToken),
-    RefreshToken(RefreshToken),
-    ProjectToken(ProjectToken),
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct LoginToken {
-    pub iat: usize,
-    pub exp: usize,
-    pub iss: String,
-
-    // Data
-    pub user_name: String,
-    pub user_id: i32,
-    pub login_session: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct RefreshToken {
-    pub iat: usize,
-    pub exp: usize,
-    pub iss: String,
-
-    // Data
-    pub login_session: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct ApiToken {
-    pub iat: usize,
-    pub exp: usize,
-    pub iss: String,
-
-    // Data
-    pub project: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct ProjectToken {
-    pub iat: usize,
-    pub exp: usize,
-    pub iss: String,
-
-    // Data
-    pub project_id: String,
 }
 
 pub struct JWTTokensManager {
