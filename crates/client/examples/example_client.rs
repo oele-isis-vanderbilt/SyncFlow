@@ -21,8 +21,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let syncflow_api_secret =
         std::env::var("SYNCFLOW_API_SECRET").expect("SYNCFLOW_API_SECRET must be set");
 
-    let project_client =
-        ProjectClient::new(base_url, project_id, syncflow_api_key, syncflow_api_secret);
+    let project_client = ProjectClient::new(
+        &base_url,
+        &project_id,
+        &syncflow_api_key,
+        &syncflow_api_secret,
+    );
 
     let session_request = Default::default();
 
