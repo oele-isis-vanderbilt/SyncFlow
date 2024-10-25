@@ -5,5 +5,5 @@ members = [
     "domain",
     "application",
     "infrastructure",
-    "shared",
+    "shared", "client",
 ]

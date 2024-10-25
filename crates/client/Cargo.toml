@@ -1,0 +1,22 @@
+[package]
+name = "client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+jsonwebtoken = "9.3.0"
+livekit-protocol = "0.3.5"
+reqwest = { version = "0.12.8", features = ["json", "rustls-tls"] }
+serde = "1.0.213"
+shared = { path = "../shared" }
+thiserror = "1.0.65"
+tokio = { version = "1", features = ["full"] }
+
+[dev-dependencies]
+dotenvy = "0.15.7"
+livekit-gstreamer = { version = "0.0.1", git="https://github.com/oele-isis-vanderbilt/livekit-gstreamer.git" }
+livekit-runtime = { version = "0.3.0", features = ["tokio"] }
+livekit = { git="https://github.com/livekit/rust-sdks.git", package="livekit", features = ["rustls-tls-native-roots"] }
+log = "0.4.22"
+env_logger = "0.11.5"
+gstreamer = "0.23.0"
