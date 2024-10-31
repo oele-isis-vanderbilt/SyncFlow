@@ -1,0 +1,8 @@
+site_name: SyncFlow
+docs_dir: docs
+theme:
+  name: material
+  locale: en
+nav:
+  - Home: index.md
+  - Introduction: introduction.md

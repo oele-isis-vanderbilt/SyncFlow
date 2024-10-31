@@ -1,3 +1,4 @@
 .idea
 .env
 deployment_config*.json
+site/
