@@ -3,6 +3,8 @@ docs_dir: docs
 theme:
   name: material
   locale: en
+  logo: images/syncflow.png
+  favicon: images/icon.svg
 nav:
   - Home: index.md
   - Introduction: introduction.md

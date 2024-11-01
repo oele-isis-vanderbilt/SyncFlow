@@ -1,6 +1,6 @@
 # SyncFlow
 
-![SyncFlow](./dashboard/public/syncflow.png)
+![SyncFlow](./docs/images/syncflow.png)
 
 Tyring to implement a server manager for LiveKit, named `SyncFlow` to be used for MMLA applications. This project has two main parts:
 
