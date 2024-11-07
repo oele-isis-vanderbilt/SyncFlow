@@ -33,6 +33,7 @@
     "react-select": "^5.8.0",
     "react-tabs": "^6.0.2",
     "react-virtualized": "^9.22.5",
+    "sharp": "^0.33.5",
     "ts-monads": "github:umesh-timalsina/ts-monads#main",
     "ts-node": "^10.9.2",
     "zod": "^3.22.4"
