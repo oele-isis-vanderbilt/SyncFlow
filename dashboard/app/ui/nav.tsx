@@ -33,7 +33,7 @@ const Nav = () => {
           <div className="ml-4 hidden lg:flex">
             <div className="hidden items-center gap-1 xl:flex">
               <Link
-                href="#"
+                href="/docs"
                 className="rounded-lg p-2.5 font-medium text-gray-900 text-lg hover:text-cyan-700 dark:text-gray-300 dark:hover:text-cyan-500"
               >
                 Docs
