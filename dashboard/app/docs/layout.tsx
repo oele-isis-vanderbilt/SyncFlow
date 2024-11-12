@@ -2,8 +2,8 @@
 
 import { PropsWithChildren, useState } from 'react';
 import { useEffect } from 'react';
-
 import { HiMenuAlt1, HiX } from 'react-icons/hi';
+import { FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 import { DOCS_SIDEBAR, type DocsSidebarItem } from '@/data/docs-sidebar';
@@ -11,10 +11,11 @@ import Link from 'next/link';
 import { Navbar, Tooltip } from 'flowbite-react';
 import AppLogo from '../ui/app-logo';
 import { BsGithub } from 'react-icons/bs';
-
 import '@/styles/docs.css';
 import { DarkModeSwitcher } from '../ui/dark-mode-switcher';
 import FooterComp from '../landing-page/Footer';
+import { SessionProvider, useSession } from 'next-auth/react';
+import { signOut } from '@/app/lib/actions';
 
 interface DocsLayoutState {
   isCollapsed: boolean;
@@ -32,7 +33,9 @@ export default function DocsLayout({ children }: PropsWithChildren) {
   return (
     <div className="mx-auto w-full max-w-8xl lg:flex dark:bg-gray-800">
       <div className="relative">
-        <DocsNavbar {...state} />
+        <SessionProvider>
+          <DocsNavbar {...state} />
+        </SessionProvider>
         <div className="mx-auto w-full max-w-8xl lg:flex">
           <DocsSidebar {...state} />
           <div className="w-full min-w-0">{children}</div>
@@ -46,6 +49,7 @@ export default function DocsLayout({ children }: PropsWithChildren) {
 }
 
 function DocsNavbar({ isCollapsed, setCollapsed }: DocsLayoutState) {
+  const { data: session } = useSession();
   return (
     <Navbar
       fluid
@@ -92,6 +96,33 @@ function DocsNavbar({ isCollapsed, setCollapsed }: DocsLayoutState) {
       </div>
       <div className="flex items-center gap-2">
         <DarkModeSwitcher />
+        {session?.user ? (
+          <form action={signOut}>
+            <Tooltip
+              content={`Sign Out (${session.user.name})`}
+              placement="top"
+            >
+              <button
+                type="submit"
+                aria-label="Toggle dark mode"
+                data-testid="dark-theme-toggle"
+                className="rounded-lg p-2.5 text-gray-500 text-sm hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:focus:ring-gray-700 dark:hover:bg-gray-700"
+              >
+                <FaSignOutAlt className="h-5 w-5" />
+              </button>
+            </Tooltip>
+          </form>
+        ) : (
+          <Tooltip content={`Sign In`} placement="top">
+            <Link
+              href="/login"
+              className="rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 lg:block dark:text-gray-300 dark:focus:ring-gray-700 dark:hover:bg-gray-700"
+            >
+              <FaSignInAlt className="h-5 w-5" />
+            </Link>
+          </Tooltip>
+        )}
+
         <Tooltip animation={false} content="View on GitHub">
           <a
             rel="noopener"

@@ -2,13 +2,18 @@
 title: Introduction - SyncFlow
 description: Harmonize your multimodal data collection and analysis with SyncFlow
 ---
-<div className="text-center p-2">
-    <img src="/docs/syncflow-logo.png" alt="SyncFlow" className="w-1/2 mx-auto" />
+<div className="text-center p-2 bg-white">
+    <img src="/docs/syncflow-logo.png" alt="SyncFlow" className="mx-auto" />
 </div>
 
 ## MMLA Collection and Processing
 Multi-modal learning analytics uses data streams of different modalities to analyze and provide feedback to researchers/educators on overall performance of students performing a learning activity, typically using computers. Depending on the nature of the activity, analyses can range from affect detection, log analysis, audio transcription etc… among others. Some of these analytics methods are available in realtime.
-
+<br/>
+<div className="flex flex-col items-center p-10">
+    <img src="/docs/mmla.png"/>
+    <p className="dark:text-white italic mt-2">Typical MMLA Collection Setup in different classroom environments</p>
+</div>
+<br/>
 MM collection in a typical classroom research project(usually ranging from few days to months), for each session, students are assigned a particular learning experience, these learning experiences are usually gamified(some are even games) that the students play. For each session, depending on the kinds of analysis needed, researchers usually collect application logs, students' audio and video, overall classroom video/audio, teacher/researchers' interviews, data from a wide array of sensors like eye trackers, heartbeat sensors, positional data etc… Well, That's a lot right? Complicating things, the systems generating this volume of data are isolated, controlled by different actors and are built using a wide array of tools/technologies and usually there isn't a level of synergy between them. Additionally, for a session(running from a few minutes to an hour or two), a unified timeline is needed to do a segmented analysis, such that all the collected data can be analyzed as a whole or in segments.
 
 
@@ -30,7 +35,7 @@ Here, we have itemized a list of challenges on collecting and analyzing multi mo
 Overall, these challenges need to be addressed when developing systems for multi modal data collection for learning analytics. To that end, our goal is to provide a platform that addresses these challenges and provides a seamless experience for researchers and educators to collect and analyze multimodal data in real-time.
 
 
-## SyncFlow
+## What is SyncFlow?
 SyncFlow is a platform that aims to address the challenges of collecting and analyzing multi-modal data for learning analytics. It provides a set of APIs and SDKs to build reliable data streaming/collection channels from various systems and sensors. SyncFlow is designed to be a scalable and secure platform to collect, store and analyze multimodal data in real-time. Levarging modern webrtc stack used in video conferencing applications with [LiveKit](https://livekit.io/), SyncFlow provides a robust platform for building live video and audio streaming integrations from various sources. There are two main components of SyncFlow platform (see the `SyncFlow` [Architecture](/docs/introduction/architecture) for details):
 
 1. **Dashboard**: A Next.js application that will can be used to create and manage livekit sesssions, manage users and preview/record data streams for various projects that are integrated with SyncFlow.

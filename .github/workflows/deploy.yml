@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 170-documentation-template
 
   release: # Trigger the workflow on release events
     types: [published]
@@ -58,6 +59,7 @@ jobs:
             mkdir SyncFlowDeploymentProd && cd SyncFlowDeploymentProd
             git clone git@github.com:oele-isis-vanderbilt/SyncFlow.git
             cd SyncFlow
+            git checkout -b 170-documentation-template origin/170-documentation-template
             latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
             git checkout $latest_tag
             cp $HOME/.deployment_config_prod_cloud.json  deployment_config_prod_cloud.json

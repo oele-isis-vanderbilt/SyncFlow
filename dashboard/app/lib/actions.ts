@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { signIn } from '@/auth';
+import { signIn, signOut as authSignOut } from '@/auth';
 
 import { AuthError } from 'next-auth';
 import { authClient, SignUpSchema } from './auth-client';
@@ -49,7 +49,7 @@ export async function authenticate(
 }
 
 export async function signOut() {
-  await signIn('signout');
+  await authSignOut();
 }
 
 export const providerLogin = async (provider: 'google' | 'github') => {
