@@ -3,13 +3,31 @@ title: SyncFlow and Livekit
 description: Livekit is a platform for building live video and audio applications. It provides a set of APIs and SDKs to build applications that can be used for video conferencing, live streaming, and more.
 ---
 
-# Livekit
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ornare arcu lorem. Quisque nec magna euismod, faucibus nulla vel, feugiat tellus. Ut ultrices in felis non consequat. Proin molestie ante eu vehicula blandit. Quisque dignissim a elit et auctor. Duis porta lorem eu pretium suscipit. Praesent semper nisi finibus tellus rutrum accumsan. Nam non consequat massa, at egestas mi. Curabitur lacinia dui sit amet tortor porttitor, non scelerisque erat suscipit. Praesent placerat turpis ac mauris sagittis, sit amet porta lectus dictum. Nunc lacinia erat bibendum, condimentum velit vehicula, molestie nulla. Nam porttitor faucibus lobortis. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+## MMLA Collection and Video Conferencing
+ MMLA collection and analysis requirements are similar to those of video/audio conferencing applications, with an added level of complexity due to the need to support different hierarchies for group and individual audio, peripheral IoT devices, and other kinds of data discussed above. The one difference is that a video conferencing application has true peer-to-peer delivery from the get-go, whether using pure P2P protocols or an [SFU](https://trueconf.com/blog/wiki/sfu), while data collection in an MMLA setup requires centralized collection and processing with selective peer-to-peer delivery. However, this is beyond the point of analogy between video conferencing and MMLA collection.
 
-Quisque pulvinar magna et consectetur imperdiet. Fusce auctor ex lacus, vitae elementum augue semper et. Cras sed tortor pellentesque lectus sodales consequat. Nullam in sem in est lobortis volutpat a at metus. Aliquam non orci efficitur, condimentum felis vitae, semper eros. Etiam fringilla eleifend dolor, vitae pharetra est viverra a. Donec non mauris risus. Praesent vel justo mi. Proin rhoncus dignissim risus, at dignissim arcu iaculis ut. In sed ipsum eget libero pulvinar venenatis. Maecenas finibus metus commodo nibh elementum faucibus. Etiam pharetra enim massa, et maximus nunc scelerisque at. Donec vitae massa a nunc viverra rutrum.
+**First**, similar to video conferencing applications, both contexts involve multiple participants (humans as well as bots).
 
-Vestibulum ultricies et eros vel posuere. Aenean suscipit gravida nunc eget ultricies. Praesent rutrum ut nibh eget imperdiet. Nunc malesuada est et dignissim iaculis. Nulla quis tempus ex. Quisque varius elementum tincidunt. Sed interdum volutpat turpis eu scelerisque. Nunc venenatis, mauris sit amet congue consectetur, nisl nunc varius nisi, in faucibus ipsum ligula eget nibh.
+**Second**, both require real-time data processing and delivery.
 
-Pellentesque quis ligula eleifend, facilisis risus ullamcorper, consectetur libero. In urna tellus, facilisis posuere lacinia quis, lacinia nec massa. Donec eleifend, ex nec euismod ultrices, magna quam blandit arcu, ac molestie ante arcu ac augue. Sed luctus vel turpis id sagittis. Praesent placerat eleifend laoreet. Quisque condimentum urna a libero egestas semper. Curabitur elementum tortor lorem, et rhoncus sapien efficitur et. Morbi egestas sagittis justo quis tempus. Sed elit mauris, aliquet quis fermentum at, porta sit amet ex. Donec turpis arcu, vulputate in faucibus nec, egestas sit amet purus. Vivamus justo enim, dictum in consequat nec, pellentesque vitae arcu.
+**Third**, depending on the application requirements, the software facilitating both should be scalable and delivered from the cloud.
 
-Etiam nunc leo, suscipit sit amet ex non, eleifend maximus erat. Duis odio leo, egestas faucibus sem sed, rhoncus rutrum odio. Maecenas volutpat risus in laoreet sagittis. Fusce in urna eget ex elementum faucibus eget ut lacus. Mauris sit amet commodo neque. Nullam lorem lorem, dictum vitae condimentum et, dignissim a metus. Nam viverra mi ac nunc varius, quis vehicula nunc ornare. Suspendisse in dictum
+**Fourth**, and probably the most similar aspect, is that both fundamentally include streaming audio, video, and data from multiple sources and processing them in real-time.
+
+Similar to a timed video call in conferencing, a classroom study in MMLA has a start and end time, and the data collected during this period is saved (similar to recording online meetings), and can be processed both in real time and post-hoc. On the other side, synchronization and data quality are likely more important in MMLA collection than in video conferencing, as the data collected in MMLA should be mapped to a unified timeline and be of high quality to be used for analysis. This was probably the biggest selling point for LiveKit, as it supported all these features out of the box, and we could leverage it to fit our use case.
+
+## LiveKit
+[LiveKit](https://livekit.io) is an open-source project that enables the creation of scalable, real-time video and audio applications. It essentially allows developers to build an open-source tool similar to Zoom or Google Meet. At its core, the LiveKit server functions as a Selective Forwarding Unit ([SFU](https://trueconf.com/blog/wiki/sfu)) media server. This setup allows participants to join a LiveKit "Room" and send or receive video/audio/data to and from other peers in the room. It supports both streaming and video conferencing.
+
+<div className="text-center p-2">
+    <img src="/docs/livekit.png" alt="Livekit" className="w-1/2 mx-auto" />
+    <p className="italic dark:text-white mt-2">
+        A visual representation of LiveKit's SFU architecture
+    </p>
+</div>
+
+One of the standout features of the LiveKit ecosystem is that it is completely open-source, and there is comprehensive documentation available on how to deploy it. LiveKit also offers a wide range of SDKs and APIs, allowing for the development of applications in languages and frameworks such as JavaScript, Python, Rust, Unity, and more. Essentially, it provides a one-stop solution for building video and audio applications. With the diversity of systems used in MMLA research, having a lot of out-of-box support is ideal.
+
+In our specific context, the most significant advantage was LiveKit's out-of-the-box support for video, audio, and screen, as well as data streaming from the browser, which had been a major bottleneck in our ChimeraPy project. Additionally, LiveKit's Egress feature allows for saving the streams to cloud storage, with synchronization achieved via seconds from the Unix epoch as timestamps for audio and video data. Furthermore, the Agents framework in LiveKit offers a streamlined solution for processing and providing feedback on participants' streams.
+
+## Livekit and SyncFlow Integration

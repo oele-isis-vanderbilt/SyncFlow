@@ -466,7 +466,7 @@ code.language-html .token.comment {
   #mainContent > div > ul > li > a,
   #mainContent > ol > li > a,
   #mainContent > div > ol > li > a {
-    @apply text-gray-300 decoration-cyan-700;
+    @apply text-white decoration-cyan-700;
   }
 
   #mainContent > p > code,
@@ -496,7 +496,7 @@ code.language-html .token.comment {
   #mainContent > div > ul > li,
   #mainContent > ol > li,
   #mainContent > div > ol > li {
-    @apply text-gray-400;
+    @apply text-white;
   }
 
   /* prism styles */

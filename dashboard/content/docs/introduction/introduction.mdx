@@ -1,24 +1,40 @@
 ---
 title: Introduction - SyncFlow
-description: Introduction to SyncFlow, a server manager for LiveKit, named SyncFlow to be used for MMLA applications.
+description: Harmonize your multimodal data collection and analysis with SyncFlow
 ---
 <div className="text-center p-2">
     <img src="/docs/syncflow-logo.png" alt="SyncFlow" className="w-1/2 mx-auto" />
 </div>
 
-## Problem Statement
+## MMLA Collection and Processing
+Multi-modal learning analytics uses data streams of different modalities to analyze and provide feedback to researchers/educators on overall performance of students performing a learning activity, typically using computers. Depending on the nature of the activity, analyses can range from affect detection, log analysis, audio transcription etc… among others. Some of these analytics methods are available in realtime.
 
-Learning Analytics or any Analytics domain for that matter largely relies on the individual modalities used for the analysis routines for that are readily available. With the advent of multimodal AI as well as large language models, most fields are pivoting towards data hungry analysis routines often powered by deep learning.
-
-To that end, modernizing the tech stack used in traditional MMLA settings for data collection and analysis is pivotal to continued evolution of the domain and bringing the latest of the ML world to MMLA.
-
-`SyncFlow` is a platform for multimodal data streaming and collection based on [LiveKit](https://livekit.io). The SyncFlow platform, leverages video conferencing and data channel based data streaming to monitor and collect data from different learning/training environments.
-
-SyncFlow aims to be a complete multimedia solution for collecting/analyzing multimodal data from learning/training environments, with:
-
-1. Support for multimedia streaming between consumer and IoT devices
-2. Non login devices integration with SyncFlow IOT Client App
-3. Full stack AI Deoployment (planned)
+MM collection in a typical classroom research project(usually ranging from few days to months), for each session, students are assigned a particular learning experience, these learning experiences are usually gamified(some are even games) that the students play. For each session, depending on the kinds of analysis needed, researchers usually collect application logs, students' audio and video, overall classroom video/audio, teacher/researchers' interviews, data from a wide array of sensors like eye trackers, heartbeat sensors, positional data etc… Well, That's a lot right? Complicating things, the systems generating this volume of data are isolated, controlled by different actors and are built using a wide array of tools/technologies and usually there isn't a level of synergy between them. Additionally, for a session(running from a few minutes to an hour or two), a unified timeline is needed to do a segmented analysis, such that all the collected data can be analyzed as a whole or in segments.
 
 
-Our Platform is designed to provide you all the batteries you need to deliver/monitor AI driven multimodal applications in realtime.
+## Challenges
+Here, we have itemized a list of challenges on collecting and analyzing multi modal data for learning analytics. Some of these are purely technical in nature, while others are philosophical concerns affecting the technical implementations at a fundamental level.
+
+1. **Integration**: Combining data from diverse sources and formats is probably the most tedious aspect of collecting multi-modal data. Firstly, there are a wide range of devices and sensors (multi-modal) used in MMLA research. Anecdotally, here at OELE, we have worked with different sensors including but not limited to audio interfaces, Tobii glasses, web cameras, wireless microphones, stereo cameras, Kinect, etc. The first integration challenge is to write appropriate streaming and control software to get data from the device(s) because of the diversity in devices and their control SDK encompassing various programming languages, frameworks, and software patterns. The second integration challenge arises in getting application logs/other data from a wide array of learning environments (mentioned above). Not only are these learning environments themselves built using a plethora of technologies, but they also employ various strategies for user management and differ in their business logic, such that a unified interface to getting application logs is challenging. A silver lining in this context, however, is that most of these applications are served from the browser, so, a single JavaScript SDK can provide a solution, especially if we intended to use client-side JavaScript. The integration of multi-modal data for classroom research is further complicated by its hierarchical structure, which may include both group and individual data layers, and these boundaries are not so well defined.
+<br/>
+2. **Synchronization**: Aligning data streams to a unified timeline poses another significant challenge in multimodal data collection, especially when there are multiple sensors streaming data at different bit rates and with actors (both human and sensors) having different times of entry and exit. Any MMLA data collection ecosystem should be deemed useless if it doesn’t guarantee synchronization of the modalities such that all the collected data can be analyzed as a whole or in segments.
+<br/>
+3. **Privacy**: Managing sensitive information, especially with audio and video recordings, poses another set of challenges in multimodal data collection. To an external observer, a multimodal data collection system for MMLA can appear no different from an advanced surveillance system, bringing with it all the associated privacy concerns. There should be sufficient privacy guardrails in place such that participants are anonymized from the outset, and we should follow proper guidelines on how identifiable data is collected and shared, adhering to IRB and compliance policies. This domain cannot and should not operate like a leeching corporation, where a 100-page privacy policy document allows one to get away with daylight robbery. While this is not a direct technical concern or challenge, addressing privacy concerns can and should guide the architecture of an MMLA data collection system.
+<br/>
+4. **Scalability**: Handling large volumes of data generated from multiple modalities and users poses a technical challenge, similar to other software engineering domains, when issues of scale must be addressed. Scaling becomes particularly challenging with video and audio data, as they tend to consume substantial system bandwidth and require significant disk storage.
+<br/>
+5. **Data Quality**: Maintaining high standards of accuracy and reliability in data poses significant challenges, including addressing device failures and bugs in various closed, lightly coupled systems. Ensuring consistency across different modalities, especially when they are subject to variable environmental conditions or differing operational standards, further complicates this issue.
+<br/>
+6. **Ethical Concerns**: Addressing ethical issues around surveillance and consent in educational settings is critical. It involves navigating privacy laws, securing informed consent from participants, and maintaining transparency about data use. These concerns are especially acute given the intrusive nature of some data collection methods, such as continuous video and audio monitoring, which can raise significant privacy and ethical red flags.
+
+Overall, these challenges need to be addressed when developing systems for multi modal data collection for learning analytics. To that end, our goal is to provide a platform that addresses these challenges and provides a seamless experience for researchers and educators to collect and analyze multimodal data in real-time.
+
+
+## SyncFlow
+SyncFlow is a platform that aims to address the challenges of collecting and analyzing multi-modal data for learning analytics. It provides a set of APIs and SDKs to build reliable data streaming/collection channels from various systems and sensors. SyncFlow is designed to be a scalable and secure platform to collect, store and analyze multimodal data in real-time. Levarging modern webrtc stack used in video conferencing applications with [LiveKit](https://livekit.io/), SyncFlow provides a robust platform for building live video and audio streaming integrations from various sources. There are two main components of SyncFlow platform (see the `SyncFlow` [Architecture](/docs/introduction/architecture) for details):
+
+1. **Dashboard**: A Next.js application that will can be used to create and manage livekit sesssions, manage users and preview/record data streams for various projects that are integrated with SyncFlow.
+<br/>
+2. **Server**: An actix web application that will be used to control/manage the LiveKit services, manage users and sessions, and provide APIs for the dashboard to interact with the LiveKit services.
+
+The syncflow platform can be accessed at [https://syncflow.live](https://syncflow.live) and is currently in development.

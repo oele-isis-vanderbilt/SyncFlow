@@ -5,7 +5,6 @@
   "scripts": {
     "build": "npm run build:content && next build",
     "build:content": "contentlayer2 build",
-    "create-user": "node ./scripts/create-user.js",
     "dev": "next dev",
     "lint": "biome lint --write",
     "format": "biome format --write",
