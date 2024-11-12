@@ -30,4 +30,16 @@ One of the standout features of the LiveKit ecosystem is that it is completely o
 
 In our specific context, the most significant advantage was LiveKit's out-of-the-box support for video, audio, and screen, as well as data streaming from the browser, which had been a major bottleneck in our ChimeraPy project. Additionally, LiveKit's Egress feature allows for saving the streams to cloud storage, with synchronization achieved via seconds from the Unix epoch as timestamps for audio and video data. Furthermore, the Agents framework in LiveKit offers a streamlined solution for processing and providing feedback on participants' streams.
 
-## Livekit and SyncFlow Integration
+## Livekit Integration
+A LiveKit server can either be self-hosted or accessed via the LiveKit Cloud for an already operational LiveKit deployment. Typically, a server has a ws(s) URL that clients need to connect to. Additionally, to send authenticated requests to the server, a set of API key-secret pairs must be generated.
+
+The LiveKit SDKs are divided into two main categories:
+
+**Server SDKs**: These are used for backend operations such as creating rooms, generating join tokens, and managing room recordings.
+
+**Realtime SDKs**: These are used on the client side for streaming media to the room.
+
+For successful integration, the backend should enable clients in the system to request room join tokens, complete with customizable [video grants](https://docs.livekit.io/reference/server-sdk-js/VideoGrant/), which clients can then use to enter the LiveKit room via the Realtime SDKs. The server-side SDKs manage tasks such as creating rooms, deleting rooms, listing rooms, and starting room egress, among others. Meanwhile, the Realtime SDK includes utilities for streaming from media devices, functions for joining and leaving rooms, setting room presets, streaming data, and more. This comprehensive setup allows for robust and versatile interaction within the LiveKit ecosystem. Further details on this can be found in the LiveKit [documentation](https://docs.livekit.io).
+
+
+Basically, we created a backend for generating user tokens and managing room recordings, as well as comprehensive user management. A dashboard would be used to preview and record data, and an IoT client for streaming from local peripheral devices, as well as integration channels for various learning environments to join LiveKit rooms. Additionally, `SyncFlow` offers multi-tenancy, where in multiple livekit servers can be managed from a single dashboard, and different integrations can be managed from a single server, via projects in `SyncFlow`.
