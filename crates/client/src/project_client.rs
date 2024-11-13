@@ -54,7 +54,9 @@ impl ProjectClient {
             *token_lock = Some(self.generate_api_token()?);
         }
 
-        let has_token_expired = self.is_expired(token_lock.as_ref().unwrap())?;
+        let has_token_expired = self
+            .is_expired(token_lock.as_ref().unwrap())
+            .unwrap_or(true);
 
         if has_token_expired {
             *token_lock = Some(self.generate_api_token()?);
