@@ -20,7 +20,7 @@ export default function CreateProjectForm() {
 
   return (
     <form action={dispatch}>
-      <div className="w-full">
+      <div className="mx-auto w-full md:w-1/2">
         <h3 className="text-xl dark:text-white">Project Details</h3>
         <Input
           id="name"

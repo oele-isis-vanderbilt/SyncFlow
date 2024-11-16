@@ -3,7 +3,7 @@ import { lusitana } from '@/app/ui/fonts';
 import { ProjectSummaryComponent } from '@/app/ui/dashboard/project/summary-components';
 import { CreateSession } from '@/app/ui/dashboard/project/create-session';
 import ErrorComponent from '@/app/ui/dashboard/project/error-component';
-import { ProjectSession } from '@/types/project';
+import type { ProjectSession } from '@/types/project';
 import { CiCirclePlus } from 'react-icons/ci';
 
 import dynamic from 'next/dynamic';
@@ -38,9 +38,11 @@ export default async function Project({
       ).unwrapOr([]);
 
       return (
-        <div className="flex flex-col p-2 dark:text-white">
+        <div className="flex h-full w-full flex-col p-2 dark:text-white">
           <ProjectHeader projectName={project.name} projectId={project.id} />
-          <h3 className={`mt-3 font-semibold text-3xl ${lusitana.className}`}>
+          <h3
+            className={`mt-3 font-semibold text-xl lg:text-3xl ${lusitana.className}`}
+          >
             Stats
           </h3>
           <div className="p-2">
@@ -49,7 +51,7 @@ export default async function Project({
           <div className="flex flex-row items-center text-center">
             <div>
               <h1
-                className={`${lusitana.className} mt-4 mb-4 font-bold text-3xl dark:text-white`}
+                className={`${lusitana.className} mt-4 mb-4 font-bold text-xl lg:text-3xl dark:text-white`}
               >
                 Sessions
               </h1>
@@ -64,15 +66,15 @@ export default async function Project({
               </Tooltip>
             </Link>
           </div>
-          <div>
+          <div className="h-full w-full">
             {(
               await (
                 await projectClient.getSessions(project.id)
               ).mapAsync(async (sessions) => {
                 const activeSessions = sessions.filter(isActive);
-                let participantsCount = {};
+                const participantsCount = {};
                 for (const session of activeSessions) {
-                  let sessionInfo = await projectClient.getLivekitSessionInfo(
+                  const sessionInfo = await projectClient.getLivekitSessionInfo(
                     project.id,
                     session.id,
                   );

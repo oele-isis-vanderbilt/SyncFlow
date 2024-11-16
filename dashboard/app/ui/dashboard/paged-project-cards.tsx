@@ -17,7 +17,7 @@ export default async function ProjectCards() {
 
       return (
         <div
-          className="grid h-full w-full grid-cols-1 gap-5 p-2 md:grid-cols-4"
+          className="grid h-full w-full grid-cols-1 gap-5 p-2 lg:grid-cols-4"
           key="projects"
         >
           {projects.sort(lastUpdatedProjectComparator).map((project) => {

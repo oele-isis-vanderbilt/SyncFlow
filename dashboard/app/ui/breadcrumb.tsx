@@ -4,6 +4,7 @@ import React, { ReactNode } from 'react';
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import AppLogo from './app-logo';
 
 type TBreadCrumbProps = {
   homeElement: ReactNode;
@@ -29,14 +30,17 @@ const NextBreadcrumb = ({
     <div>
       <ul className={containerClasses}>
         <li className={listClasses}>
+          <AppLogo w={120} h={75} />
+        </li>
+        <li className={listClasses}>
           <Link href={'/'}>{homeElement}</Link>
         </li>
         {pathNames.length > 0 && separator}
         {pathNames.map((link, index) => {
-          let href = `/${pathNames.slice(0, index + 1).join('/')}`;
-          let itemClasses =
+          const href = `/${pathNames.slice(0, index + 1).join('/')}`;
+          const itemClasses =
             paths === href ? `${listClasses} ${activeClasses}` : listClasses;
-          let itemLink = capitalizeLinks
+          const itemLink = capitalizeLinks
             ? link[0].toUpperCase() + link.slice(1, link.length)
             : link;
           return (
