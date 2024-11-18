@@ -33,12 +33,12 @@ export default async function Project({
       await projectClient.getProject(id)
     ).mapAsync(async (project) => {
       return (
-        <div className="flex flex-col p-2 dark:text-white">
+        <div className="flex h-full w-full flex-col p-2 dark:text-white">
           <ProjectHeader projectName={project.name} projectId={project.id} />
           <div className="flex flex-row items-center text-center">
             <div>
               <h1
-                className={`${lusitana.className} mt-4 mb-4 font-bold text-3xl dark:text-white`}
+                className={`${lusitana.className} mt-4 mb-4 font-bold text-xl lg:text-3xl dark:text-white`}
               >
                 Active Sessions
               </h1>

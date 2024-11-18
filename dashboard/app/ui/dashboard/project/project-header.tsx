@@ -12,11 +12,11 @@ export function ProjectHeader({
 }) {
   return (
     <div className="flex flex-row items-center justify-between">
-      <h2 className={`font-bold text-4xl ${lusitana.className}`}>
+      <h2 className={`font-bold text-2xl lg:text-4xl ${lusitana.className}`}>
         {projectName}
       </h2>
       <Link href={`/dashboard/projects/${projectId}/settings`}>
-        <Tooltip content="Project Settings">
+        <Tooltip content="Project Settings" placement="bottom">
           <CiSettings className="text-2xl hover:text-red-700" />
         </Tooltip>
       </Link>

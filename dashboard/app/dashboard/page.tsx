@@ -22,13 +22,13 @@ export default async function Page() {
   });
 
   return (
-    <main className="dark:bg-gray-800">
+    <main className="mx-auto dark:bg-gray-800">
       <h1
         className={`${lusitana.className} mb-4 p-2 text-xl md:text-2xl dark:text-white`}
       >
         Welcome to SyncFlow, {session?.user?.name ? session.user.name : 'User'}!
       </h1>
-      <div className="grid gap-6 p-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 p-2 sm:grid-cols-2 lg:grid-cols-3">
         <Suspense fallback={<CardsSkeleton />}>
           <UserSummaryCards
             numProjects={summary.numProjects}
