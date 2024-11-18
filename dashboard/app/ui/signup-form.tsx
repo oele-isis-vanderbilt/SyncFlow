@@ -1,7 +1,8 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { signUp, SignUpState } from '@/app/lib/actions';
+import { signUp } from '@/app/lib/actions';
+import type { SignUpState } from '@/app/lib/actions';
 import { lusitana } from '@/app/ui/fonts';
 import {
   ArrowRightIcon,

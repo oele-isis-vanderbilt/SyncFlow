@@ -11,12 +11,12 @@ export default async function Layout({
   return (
     <>
       <NavBar session={session} withBreadCrumb={true} />
-      <div className="mx-auto flex">
+      <div className="mx-auto flex px-2">
         <SideNav />
         <div className="flex w-full flex-col">
           <div className="w-full flex-1 overflow-x-auto">
             <div className="overflow-auto sm:h-[calc(99vh-150px)] ">
-              <div className="- 240px)] relative mx-auto flex h-[calc(100vh w-full justify-center overflow-auto overflow-y-auto">
+              <div className="relative mx-auto flex h-[calc(100vh-240px)] w-full justify-center overflow-auto overflow-y-auto">
                 <div className="w-full md:max-w-8xl">{children}</div>
               </div>
             </div>
