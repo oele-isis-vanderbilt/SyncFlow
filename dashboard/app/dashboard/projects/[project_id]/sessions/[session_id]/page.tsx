@@ -18,7 +18,7 @@ export default async function Page({
   };
 }) {
   const { project_id: projectId, session_id: sessionId } = params;
-  let session = await auth();
+  const session = await auth();
   const user = session?.user;
 
   if (!user) {
@@ -32,7 +32,7 @@ export default async function Page({
   }
   const projectRes = await projectClient.getProject(projectId);
 
-  let projectName = projectRes
+  const projectName = projectRes
     .map((project) => project.name)
     .unwrapOr('Unknown Project');
 
@@ -40,7 +40,7 @@ export default async function Page({
     await (
       await projectClient.getSession(projectId, sessionId)
     ).map(async (sessionInfo) => {
-      let lkSessionInfoResult = await projectClient.getLivekitSessionInfo(
+      const lkSessionInfoResult = await projectClient.getLivekitSessionInfo(
         projectId,
         sessionId,
       );
@@ -50,7 +50,9 @@ export default async function Page({
           key={`${projectId}-${sessionId}`}
         >
           <div className="flex flex-row gap-2">
-            <h2 className={`font-bold text-4xl ${lusitana.className}`}>
+            <h2
+              className={`font-bold text-lg lg:text-4xl ${lusitana.className}`}
+            >
               {projectName} / {sessionInfo.name}
             </h2>
             {sessionInfo.status === 'Started' ? (

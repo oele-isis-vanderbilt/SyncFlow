@@ -13,9 +13,9 @@ import FooterComp from './landing-page/Footer';
 export default function Page() {
   const deploymentConfig = getConfig();
   return (
-    <div className="relative w-full">
+    <div className="relative flex w-full flex-col">
       <Header />
-      <main className="min-w-0 flex-auto divide-y dark:divide-gray-700">
+      <main className="min-w-0 flex-1 divide-y dark:divide-gray-700">
         <Hero />
         <Features />
         <About />
