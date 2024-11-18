@@ -7,14 +7,18 @@ import AppLogo from '@/app/ui/app-logo';
 import { DarkModeSwitcher } from '@/app/ui/dark-mode-switcher';
 import { signOut } from '@/app/lib/actions';
 import type { Session } from 'next-auth';
+import NextBreadcrumb from '../breadcrumb';
 
-export function NavBar({ session }: { session: Session | null }) {
+export function NavBar({
+  session,
+  withBreadCrumb,
+}: { session: Session | null; withBreadCrumb: boolean }) {
   return (
     <Navbar
       fluid
       theme={{
         root: {
-          base: 'sticky top-0 z-[30] mx-auto flex w-full items-center justify-between border-b border-gray-200 bg-white text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
+          base: 'sticky top-0 z-[30] h-16 mx-auto flex w-full items-center justify-between border-b border-gray-200 bg-white text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
           inner: {
             base: 'mx-auto flex w-full max-w-8xl flex-wrap items-center justify-between px-4 py-2.5 lg:px-4',
           },
@@ -28,6 +32,15 @@ export function NavBar({ session }: { session: Session | null }) {
         >
           <AppLogo w={200} h={200} />
         </Link>
+        {withBreadCrumb && (
+          <NextBreadcrumb
+            homeElement={'Home'}
+            separator={<span className="font-bold text-xs"> {'-'} </span>}
+            activeClasses="dark:text-amber-500 underline text-blue-900"
+            containerClasses="flex py-2 dark:bg-gray-800 dark:dark:text-white"
+            listClasses="hover:underline mx-2 font-bold text-xs"
+          />
+        )}
       </div>
       <div className="flex items-center gap-2">
         <DarkModeSwitcher />
