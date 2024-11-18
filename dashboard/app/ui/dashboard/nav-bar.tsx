@@ -30,7 +30,7 @@ export function NavBar({
           href="/"
           className="flex items-center gap-3 font-semibold text-2xl text-gray-900 dark:text-white"
         >
-          <AppLogo w={200} h={200} />
+          <AppLogo w={100} h={100} />
         </Link>
         {withBreadCrumb && (
           <NextBreadcrumb

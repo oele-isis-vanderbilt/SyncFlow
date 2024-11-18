@@ -83,11 +83,11 @@ export default function SideNav() {
   };
 
   return (
-    <div className="pr-4">
+    <div className="md:pr-4">
       <div
         className={cn(
-          isSidebarExpanded ? 'w-[200px]' : 'w-[68px]',
-          'hidden h-full transform border-r bg-accent pb-10 transition-all duration-300 ease-in-out sm:flex',
+          isSidebarExpanded ? 'w-[200px]' : 'w-[64px]',
+          'hidden h-full transform border-r bg-accent transition-all duration-300 ease-in-out sm:flex',
         )}
       >
         <aside className="flex h-full w-full columns-1 flex-col overflow-x-hidden break-words px-4">
@@ -187,7 +187,12 @@ export function ProjectMenu({
 
   return (
     <div className="mt-[50px] dark:text-neutral-50">
-      <h2 className={clsx('p-2 font-bold', isExpanded ? 'block' : 'hidden')}>
+      <h2
+        className={clsx(
+          'overflow-ellipsis p-2 font-bold',
+          isExpanded ? 'block' : 'hidden',
+        )}
+      >
         {projectName}
       </h2>
 
