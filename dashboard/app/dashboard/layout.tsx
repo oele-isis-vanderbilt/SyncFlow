@@ -11,14 +11,41 @@ export default async function Layout({
   return (
     <>
       <NavBar session={session} withBreadCrumb={true} />
-      <div className="flex">
+      <div className="mx-auto flex">
         <SideNav />
-        <div className="w-full overflow-x-auto">
-          <div className="overflow-auto sm:h-[calc(99vh-60px)] ">
-            <div className="- 120px)] relative mx-auto flex h-[calc(100vh w-full justify-center overflow-auto overflow-y-auto">
-              <div className="w-full md:max-w-8xl">{children}</div>
+        <div className="flex w-full flex-col">
+          <div className="w-full flex-1 overflow-x-auto">
+            <div className="overflow-auto sm:h-[calc(99vh-150px)] ">
+              <div className="- 240px)] relative mx-auto flex h-[calc(100vh w-full justify-center overflow-auto overflow-y-auto">
+                <div className="w-full md:max-w-8xl">{children}</div>
+              </div>
             </div>
           </div>
+          <footer className="py-6 md:px-8 md:py-0 dark:border-border dark:text-white">
+            <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+              <p className="text-balance text-center text-muted-foreground text-sm leading-loose md:text-left">
+                Built by{' '}
+                <a
+                  href="https://teachableagents.org"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium underline underline-offset-4"
+                >
+                  OELE, ISIS, Vanderbilt University
+                </a>
+                . The source code is available on{' '}
+                <a
+                  href="https://github.com/oele-isis-vanderbilt/syncflow.git"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium underline underline-offset-4"
+                >
+                  GitHub
+                </a>
+                .
+              </p>
+            </div>
+          </footer>
         </div>
       </div>
     </>

@@ -71,7 +71,7 @@ export function ProjectCard({ project }: { project: Project }) {
     };
   };
 
-  let [infoModalContent, setInfoModalContent] =
+  const [infoModalContent, setInfoModalContent] =
     useState<InfoModalContent | null>(projectToInfoModalContent(project));
 
   return (
@@ -118,7 +118,7 @@ export function ProjectCard({ project }: { project: Project }) {
         <Button
           color="failure"
           onClick={async () => {
-            let result = await deleteProject(project.id);
+            const result = await deleteProject(project.id);
             if (result.status !== 'success') {
               setInfoModalContent({
                 title: 'Error',
