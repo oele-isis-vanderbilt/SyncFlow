@@ -8,6 +8,7 @@ import { DarkModeSwitcher } from '@/app/ui/dark-mode-switcher';
 import { signOut } from '@/app/lib/actions';
 import type { Session } from 'next-auth';
 import NextBreadcrumb from '../breadcrumb';
+import MobileMenu from './mobile-menu';
 
 export function NavBar({
   session,
@@ -42,7 +43,7 @@ export function NavBar({
           />
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="hidden items-center gap-2 md:flex">
         <DarkModeSwitcher />
         {session?.user ? (
           <form action={signOut}>
@@ -70,6 +71,9 @@ export function NavBar({
             </Link>
           </Tooltip>
         )}
+      </div>
+      <div className="md:hidden">
+        <MobileMenu />
       </div>
     </Navbar>
   );
