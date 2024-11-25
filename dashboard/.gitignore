@@ -39,3 +39,6 @@ next-env.d.ts
 # IDE
 .idea
 docker/egress-out
+
+# contentlayer
+.contentlayer

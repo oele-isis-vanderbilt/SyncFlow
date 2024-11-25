@@ -29,7 +29,6 @@ export class EgressDetails {
 
   isEgressActive() {
     return [EgressStatus.EGRESS_ACTIVE, EgressStatus.EGRESS_STARTING].includes(
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       this.egressInfo.status!,
     );
   }
