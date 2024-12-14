@@ -4,14 +4,200 @@ description: Development of SyncFlow Clients
 ---
 
 
-# SyncFlow Python Client
+# Syncflow Node Client Development
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ornare arcu lorem. Quisque nec magna euismod, faucibus nulla vel, feugiat tellus. Ut ultrices in felis non consequat. Proin molestie ante eu vehicula blandit. Quisque dignissim a elit et auctor. Duis porta lorem eu pretium suscipit. Praesent semper nisi finibus tellus rutrum accumsan. Nam non consequat massa, at egestas mi. Curabitur lacinia dui sit amet tortor porttitor, non scelerisque erat suscipit. Praesent placerat turpis ac mauris sagittis, sit amet porta lectus dictum. Nunc lacinia erat bibendum, condimentum velit vehicula, molestie nulla. Nam porttitor faucibus lobortis. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+## Overview
 
-Quisque pulvinar magna et consectetur imperdiet. Fusce auctor ex lacus, vitae elementum augue semper et. Cras sed tortor pellentesque lectus sodales consequat. Nullam in sem in est lobortis volutpat a at metus. Aliquam non orci efficitur, condimentum felis vitae, semper eros. Etiam fringilla eleifend dolor, vitae pharetra est viverra a. Donec non mauris risus. Praesent vel justo mi. Proin rhoncus dignissim risus, at dignissim arcu iaculis ut. In sed ipsum eget libero pulvinar venenatis. Maecenas finibus metus commodo nibh elementum faucibus. Etiam pharetra enim massa, et maximus nunc scelerisque at. Donec vitae massa a nunc viverra rutrum.
+A real-time collaboration application using:
+- ExpressJS backend
+- Vite-Express rendering
+- Syncflow token management
+- LiveKit WebRTC communication
 
-Vestibulum ultricies et eros vel posuere. Aenean suscipit gravida nunc eget ultricies. Praesent rutrum ut nibh eget imperdiet. Nunc malesuada est et dignissim iaculis. Nulla quis tempus ex. Quisque varius elementum tincidunt. Sed interdum volutpat turpis eu scelerisque. Nunc venenatis, mauris sit amet congue consectetur, nisl nunc varius nisi, in faucibus ipsum ligula eget nibh.
+## File Structure
 
-Pellentesque quis ligula eleifend, facilisis risus ullamcorper, consectetur libero. In urna tellus, facilisis posuere lacinia quis, lacinia nec massa. Donec eleifend, ex nec euismod ultrices, magna quam blandit arcu, ac molestie ante arcu ac augue. Sed luctus vel turpis id sagittis. Praesent placerat eleifend laoreet. Quisque condimentum urna a libero egestas semper. Curabitur elementum tortor lorem, et rhoncus sapien efficitur et. Morbi egestas sagittis justo quis tempus. Sed elit mauris, aliquet quis fermentum at, porta sit amet ex. Donec turpis arcu, vulputate in faucibus nec, egestas sit amet purus. Vivamus justo enim, dictum in consequat nec, pellentesque vitae arcu.
+### Backend Components
+- Server configuration with Syncflow Node Client
+- Token generation endpoint
+- Session management
 
-Etiam nunc leo, suscipit sit amet ex non, eleifend maximus erat. Duis odio leo, egestas faucibus sem sed, rhoncus rutrum odio. Maecenas volutpat risus in laoreet sagittis. Fusce in urna eget ex elementum faucibus eget ut lacus. Mauris sit amet commodo neque. Nullam lorem lorem, dictum vitae condimentum et, dignissim a metus. Nam viverra mi ac nunc varius, quis vehicula nunc ornare. Suspendisse in dictum
+### Frontend Components
+- Dynamic HTML rendering
+- Interactive room joining interface
+- LiveKit-powered video communication
+
+## Server Implementation
+
+### Key Server Features
+
+#### Environment and Middleware
+- Loads environment variables
+- Configures JSON body parsing
+- Creates Express application
+
+#### Response Utility Functions
+```javascript
+const jsonOkResponse = (res, data) => {
+    return res.status(200).json(data);
+};
+
+const errorResponse = (res, error) => {
+    return res.status(500).json({ error: error.message });
+};
+```
+
+#### Token Generation Endpoint
+- Handles room and identity token requests
+- Checks for existing active sessions
+- Creates new sessions if needed
+- Generates comprehensive video grants
+
+#### Session Management Logic
+- Filters active sessions
+- Supports dynamic room creation
+- Generates tokens with extensive permissions
+
+### Project Client Initialization
+```javascript
+const projectClient = new ProjectClientBuilder()
+    .setServerUrl(process.env.SYNCFLOW_SERVER_URL)
+    .setApiKey(process.env.SYNCFLOW_API_KEY)
+    .setApiSecret(process.env.SYNCFLOW_API_SECRET)
+    .setProjectId(process.env.SYNCFLOW_PROJECT_ID)
+    .build();
+```
+# Client-Side Implementation
+
+## Client File Structure
+- `main.js`: Handles initial page rendering and room joining setup
+- `room.js`: Contains room connection and video handling logic
+
+## Main.js
+
+### Responsibilities
+- Dynamically generates HTML structure
+- Initializes room joining functionality
+
+### Key Implementation
+```javascript
+import { joinRoom } from './room';
+import './style.css';
+
+// Dynamically inject HTML content
+document.querySelector('#app').innerHTML = `...`;
+
+// Attach room joining event listener
+joinRoom(document.querySelector('#join_room'));
+```
+
+#### HTML Structure
+- Left Panel: Session joining controls
+  - Identity input
+  - Room name input
+  - Join Room button
+  - Participants list placeholder
+- Main Panel: Video container
+
+## Room.js
+
+### Room Joining Mechanism
+
+#### Token Acquisition Workflow
+```javascript
+fetch('/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identity, roomName })
+})
+```
+
+#### LiveKit Room Configuration
+```javascript
+const livekitRoom = new Room({
+    adaptiveStream: true,     // Dynamic video quality management
+    dynacast: true,           // Bandwidth optimization
+    videoCaptureDefaults: {
+        resolution: VideoPresets.h720.resolution
+    },
+    stopLocalTrackOnUnpublish: true
+});
+```
+
+### Connection Process
+1. Validate user inputs
+2. Request token from server
+3. Prepare LiveKit room connection
+4. Connect to room
+5. Enable local camera
+6. Display local video
+
+### Video Display Function
+```javascript
+function displayLocalVideo(participant, trackPublication) {
+    const video = trackPublication.track.attach();
+    
+    // Set metadata attributes
+    video.setAttribute('data-identity', participant.identity);
+    video.setAttribute('data-participant-sid', participant.sid);
+    
+    // Configure video dimensions
+    video.setAttribute('width', '300');
+    video.setAttribute('height', '300');
+    
+    // Append to video container
+    document.querySelector('#video-container').appendChild(video);
+}
+```
+
+## Key Features
+- Dynamic HTML rendering
+- Token-based authentication
+- LiveKit WebRTC integration
+- Adaptive video streaming
+- Error handling
+- Metadata tracking
+
+## Error Handling
+- Input validation
+- Token request error catching
+- Connection error management
+- Camera/microphone activation errors
+
+## Performance Optimizations
+- Adaptive streaming
+- Dynacast bandwidth optimization
+- 720p default video resolution
+
+## Potential Enhancements
+1. Add participant list population
+2. Implement leave room functionality
+3. Create device selection controls
+4. Add more granular video/audio settings
+
+## Browser Compatibility
+- Requires modern browsers supporting:
+  - WebRTC
+  - ES6+ JavaScript
+  - Fetch API
+
+## Key Technologies
+- Backend: Node.js, Express
+- Frontend: Vanilla JavaScript
+- WebRTC: LiveKit
+- Rendering: Vite-Express
+
+## Deployment Considerations
+- Environment variable configuration
+- Port configuration (default: 3000)
+- Secure token management
+
+## Potential Improvements
+1. Enhanced error handling
+2. Session expiration logic
+3. Advanced authentication
+4. Comprehensive logging
+
+## Security Notes
+- Token-based authentication
+- Server-side token generation
+- Controlled room access
