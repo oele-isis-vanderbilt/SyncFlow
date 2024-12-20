@@ -9,7 +9,7 @@ import { FaInfoCircle } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import type { Project } from '@/types/project';
 import { useState } from 'react';
-import InfoModal, { InfoModalContent } from './info-modal';
+import InfoModal, { type InfoModalContent } from './info-modal';
 import { deleteProject } from '@/app/lib/project-actions';
 import { dateFromTimestamp } from '../utils';
 
@@ -71,7 +71,7 @@ export function ProjectCard({ project }: { project: Project }) {
     };
   };
 
-  let [infoModalContent, setInfoModalContent] =
+  const [infoModalContent, setInfoModalContent] =
     useState<InfoModalContent | null>(projectToInfoModalContent(project));
 
   return (
@@ -97,9 +97,9 @@ export function ProjectCard({ project }: { project: Project }) {
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-1 items-center gap-2">
         <Link href={`/dashboard/projects/${project.id}`}>
-          <Button color="success">
+          <Button color="success" className="w-full">
             Open
             <FaArrowRight className="ml-2 h-5 w-5" />
           </Button>
@@ -114,11 +114,10 @@ export function ProjectCard({ project }: { project: Project }) {
           Details
           <FaInfoCircle className="ml-2 h-5 w-5" />
         </Button>
-
         <Button
           color="failure"
           onClick={async () => {
-            let result = await deleteProject(project.id);
+            const result = await deleteProject(project.id);
             if (result.status !== 'success') {
               setInfoModalContent({
                 title: 'Error',

@@ -53,6 +53,7 @@ const Nav = () => {
             href="/signup"
             className="flex items-center gap-3 font-semibold text-2xl text-gray-900 dark:text-white"
           >
+            {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
             <button className="hidden items-center gap-1.5 rounded-lg bg-blue-700 p-2.5 font-medium text-lg text-white lg:flex">
               Get Started
             </button>

@@ -13,7 +13,7 @@ export async function ProjectSummaryComponent({
           className="gap:20 flex w-full flex-row items-center justify-center md:gap-40"
           key={projectId}
         >
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-4 md:gap-40">
+          <div className="grid grid-cols-2 gap-10 lg:grid-cols-4 lg:gap-40">
             <div className="flex flex-col items-center justify-center p-5 ring">
               <h2 className="font-bold text-2xl md:text-6xl">
                 {summary.numSessions}

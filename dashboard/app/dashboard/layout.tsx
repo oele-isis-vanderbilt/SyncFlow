@@ -1,42 +1,53 @@
-import SideNav from '@/app/ui/dashboard/sidenav2';
-import { SessionProvider } from 'next-auth/react';
-import NextBreadcrumb from '../ui/breadcrumb';
+import { NavBar } from '@/app/ui/dashboard/nav-bar';
+import { auth } from '@/auth';
+import SideNav from '../ui/side-nav';
 
 export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
   return (
-    <div className="flex h-full flex-row overflow-hidden dark:bg-gray-800">
-      <SessionProvider>
+    <>
+      <NavBar session={session} withBreadCrumb={true} />
+      <div className="mx-auto flex px-2">
         <SideNav />
-      </SessionProvider>
-      <div className="flex flex-1 flex-col md:overflow-y-auto">
-        <NextBreadcrumb
-          homeElement={'Home'}
-          separator={<span> {'>'} </span>}
-          activeClasses="dark:text-amber-500 underline text-blue-900"
-          containerClasses="flex py-5 dark:bg-gray-900 dark:text-white bg-gray-200"
-          listClasses="hover:underline mx-2 font-bold"
-        />
-        <main className="flex-1 overflow-y-auto p-5">{children}</main>
-        <div className="w-full text-center">
-          <footer className="p-5 dark:text-white">
-            <p className="text-sm">
-              &copy; {new Date().getFullYear()}{' '}
-              <a
-                href="https://wp0.vanderbilt.edu/oele/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={'hover:text-blue-400 hover:underline'}
-              >
-                Vanderbilt University, Open Ended Learning Environments Lab
-              </a>
-            </p>
+        <div className="flex w-full flex-col">
+          <div className="w-full flex-1 overflow-x-auto">
+            <div className="overflow-auto sm:h-[calc(99vh-150px)] ">
+              <div className="relative mx-auto flex h-[calc(100vh-240px)] w-full justify-center overflow-auto overflow-y-auto">
+                <div className="w-full md:max-w-8xl">{children}</div>
+              </div>
+            </div>
+          </div>
+          <footer className="py-6 md:px-8 md:py-0 dark:border-border dark:text-white">
+            <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+              <p className="text-balance text-center text-muted-foreground text-sm leading-loose md:text-left">
+                Built by{' '}
+                <a
+                  href="https://teachableagents.org"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium underline underline-offset-4"
+                >
+                  OELE, ISIS, Vanderbilt University
+                </a>
+                . The source code is available on{' '}
+                <a
+                  href="https://github.com/oele-isis-vanderbilt/syncflow.git"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium underline underline-offset-4"
+                >
+                  GitHub
+                </a>
+                .
+              </p>
+            </div>
           </footer>
         </div>
       </div>
-    </div>
+    </>
   );
 }

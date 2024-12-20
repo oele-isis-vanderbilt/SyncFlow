@@ -29,14 +29,16 @@ export default async function Page({
   let projectDevicesResult = await projectClient.listDevices(projectId);
 
   return (
-    <div className="flex flex-col p-2 dark:text-white">
-      <h2 className={`font-bold text-4xl ${lusitana.className}`}>
+    <div className="flex h-full w-full flex-col p-2 dark:text-white">
+      <h2 className={`font-bold text-2xl md:text-4xl ${lusitana.className}`}>
         {' '}
         Project Settings{' '}
       </h2>
       <div className="mt-4 flex flex-row items-center text-center">
         <div>
-          <h3 className={`font-semibold text-3xl ${lusitana.className}`}>
+          <h3
+            className={`font-semibold text-xl md:text-3xl ${lusitana.className}`}
+          >
             API Keys
           </h3>
         </div>
@@ -67,7 +69,9 @@ export default async function Page({
       </div>
       <div className="mt-4 flex flex-row items-center text-center">
         <div>
-          <h3 className={`font-semibold text-3xl ${lusitana.className}`}>
+          <h3
+            className={`font-semibold text-xl md:text-3xl ${lusitana.className}`}
+          >
             Devices
           </h3>
         </div>
