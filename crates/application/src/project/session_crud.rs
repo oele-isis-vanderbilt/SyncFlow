@@ -42,6 +42,9 @@ pub enum SessionError {
     #[error("Configuration Error: {0}")]
     ConfigurationError(String),
 
+    #[error("Duplication Session Name: {0}")]
+    DuplicateSessionNameError(String),
+
     #[error("Inactive Session Error: {0}")]
     InactiveSessionError(String),
 
@@ -136,6 +139,10 @@ impl From<SessionError> for shared::response_models::Response {
                 status: 500,
                 message: e.to_string(),
             },
+            SessionError::DuplicateSessionNameError(e) => shared::response_models::Response {
+                status: 400,
+                message: e.to_string(),
+            },
             SessionError::InvalidDeviceGroupError(e) => shared::response_models::Response {
                 status: 400,
                 message: e,
@@ -159,6 +166,22 @@ pub async fn create_session(
     let room_service: RoomService = (&project).into();
     let room_opts: RoomOptions = session.clone().into();
     let room_name = session.get_name();
+    let rooms = room_service
+        .list_rooms(Some(vec![room_name.clone()]))
+        .await?;
+    let duplicate_room_exists = rooms
+        .iter()
+        .find(|room| room.name == room_name)
+        .map(|_| true)
+        .unwrap_or(false);
+
+    if duplicate_room_exists {
+        return Err(SessionError::DuplicateSessionNameError(format!(
+            "Session name {:?} session already exists and is active, please stop the session",
+            room_name
+        )));
+    }
+
     let room = room_service.create_room(&room_name, room_opts).await?;
 
     let new_session = NewProjectSession {
