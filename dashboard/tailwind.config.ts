@@ -18,6 +18,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [plugin()],
+  plugins: [plugin(), require('tailwind-scrollbar')],
 };
 export default config;
