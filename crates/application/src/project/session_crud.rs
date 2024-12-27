@@ -8,7 +8,7 @@ use crate::{livekit, project};
 
 use diesel::{prelude::*, PgConnection};
 use domain::models::{NewProjectSession, ProjectSession, ProjectSessionStatus};
-use livekit_api::services::{room, ServiceError};
+use livekit_api::services::ServiceError;
 use livekit_client::RoomError;
 use livekit_protocol::ParticipantInfo;
 use shared::livekit_models::{RoomOptions, TokenRequest, TokenResponse};
@@ -176,13 +176,10 @@ pub async fn create_session(
         .unwrap_or(false);
 
     if duplicate_room_exists {
-        return Err(SessionError::DuplicateSessionNameError(
-            format!(
-                "Session name {:?} session already exists and is active, please stop the session",
-                room_name
-            )
-            .into(),
-        ));
+        return Err(SessionError::DuplicateSessionNameError(format!(
+            "Session name {:?} session already exists and is active, please stop the session",
+            room_name
+        )));
     }
 
     let room = room_service.create_room(&room_name, room_opts).await?;
