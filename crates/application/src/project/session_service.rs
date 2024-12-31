@@ -1,5 +1,9 @@
-use std::sync::Arc;
+use std::{
+    sync::Arc,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
+use domain::models::SessionEgress;
 use infrastructure::DbPool;
 use livekit_protocol::ParticipantInfo;
 
@@ -7,11 +11,14 @@ use crate::{
     livekit::{egress::EgressService, room::RoomService},
     project::session_crud::{self, SessionError},
     rmq::session_notifier::SessionNotifier,
+    s3::storage_service::StorageService,
 };
 use shared::{
     device_models::NewSessionMessage,
     livekit_models::{TokenRequest, TokenResponse},
-    project_models::{LivekitSessionInfo, NewSessionRequest, ProjectSessionResponse},
+    project_models::{
+        EgressMediaDownloadResponse, LivekitSessionInfo, NewSessionRequest, ProjectSessionResponse,
+    },
 };
 
 use super::{
@@ -217,6 +224,44 @@ impl SessionService {
         .await;
 
         Ok(session?.into())
+    }
+
+    pub async fn list_egresses(
+        &self,
+        _project_id: &str,
+        session_id: &str,
+    ) -> Result<Vec<SessionEgress>, SessionError> {
+        let conn = &mut self.pool.get().unwrap();
+        let egresses = session_crud::get_session_egresses(session_id, conn)?;
+
+        Ok(egresses)
+    }
+
+    pub async fn get_egress_download_url(
+        &self,
+        project_id: &str,
+        path: &str,
+    ) -> Result<EgressMediaDownloadResponse, SessionError> {
+        let mut project =
+            project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
+        project.decrypt(&self.encryption_key)?;
+
+        let storage_service: StorageService = (&project).into();
+
+        let url = storage_service
+            .generate_presigned_url(path, Some(300))
+            .await?;
+
+        Ok(EgressMediaDownloadResponse {
+            bucket_name: project.bucket_name.clone(),
+            expires_in: SystemTime::now()
+                .checked_add(Duration::from_secs(300))
+                .and_then(|time| time.duration_since(UNIX_EPOCH).ok())
+                .map(|duration| duration.as_secs())
+                .unwrap_or(0),
+            media_path: path.to_string(),
+            media_url: url,
+        })
     }
 }
 

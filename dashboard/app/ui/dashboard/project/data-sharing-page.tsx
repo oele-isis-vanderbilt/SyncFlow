@@ -576,7 +576,6 @@ function ScreenSharer({ preset }: { preset: keyof typeof VideoPresets }) {
       await participantInfo.localParticipant.publishTrack(screenTrack[0], {
         name: `${participantInfo.localParticipant.name}-ScreenShare`,
       });
-    // console.log('localTrackPublication', localTrackPublication);
     setPlublication(localTrackPublication);
     setIsSharing(true);
   };

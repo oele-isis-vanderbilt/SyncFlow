@@ -95,3 +95,18 @@ pub struct LivekitSessionInfo {
     pub recordings: Vec<EgressInfo>,
     pub duration: i64,
 }
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct EgressMediaPath {
+    pub path: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct EgressMediaDownloadResponse {
+    pub media_path: String,
+    pub media_url: String,
+    pub bucket_name: String,
+    pub expires_in: u64,
+}

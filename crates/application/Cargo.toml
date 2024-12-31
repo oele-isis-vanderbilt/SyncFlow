@@ -31,3 +31,6 @@ livekit-api = "0.4.0"
 livekit-protocol = "0.3.5"
 livekit-runtime = { version = "0.3.0", features = ["tokio"] }
 amqprs = { version = "2.1.0", features = ["tls"] }
+rusoto_core = "0.48.0"
+rusoto_credential = "0.48.0"
+rusoto_s3 = "0.48.0"

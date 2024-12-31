@@ -11,6 +11,14 @@ pub mod syncflow {
         pub struct ProjectSessionStatus;
 
         #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+        #[diesel(postgres_type(name = "session_egress_status", schema = "syncflow"))]
+        pub struct SessionEgressStatus;
+
+        #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+        #[diesel(postgres_type(name = "session_egress_type", schema = "syncflow"))]
+        pub struct SessionEgressType;
+
+        #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
         #[diesel(postgres_type(name = "StorageType", schema = "syncflow"))]
         pub struct StorageType;
     }
@@ -114,6 +122,27 @@ pub mod syncflow {
     }
 
     diesel::table! {
+        use diesel::sql_types::*;
+        use super::sql_types::SessionEgressType;
+        use super::sql_types::SessionEgressStatus;
+
+        syncflow.session_egresses (id) {
+            id -> Uuid,
+            #[max_length = 50]
+            track_id -> Varchar,
+            #[max_length = 50]
+            egress_id -> Varchar,
+            started_at -> Int8,
+            egress_type -> Nullable<SessionEgressType>,
+            status -> SessionEgressStatus,
+            destination -> Nullable<Text>,
+            #[max_length = 250]
+            room_name -> Varchar,
+            session_id -> Uuid,
+        }
+    }
+
+    diesel::table! {
         syncflow.users (id) {
             id -> Int4,
             #[max_length = 255]
@@ -148,6 +177,7 @@ pub mod syncflow {
     diesel::joinable!(project_devices -> users (registered_by));
     diesel::joinable!(project_sessions -> projects (project_id));
     diesel::joinable!(projects -> users (user_id));
+    diesel::joinable!(session_egresses -> project_sessions (session_id));
 
     diesel::allow_tables_to_appear_in_same_query!(
         api_keys,
@@ -156,6 +186,7 @@ pub mod syncflow {
         project_devices,
         project_sessions,
         projects,
+        session_egresses,
         users,
     );
 }
