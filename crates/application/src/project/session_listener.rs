@@ -86,8 +86,6 @@ pub async fn session_listener(
             })
             .collect::<Vec<_>>();
 
-        println!("Creating session egresses: {:#?}", session_egress_records);
-
         session_crud::create_session_egresses(session_egress_records, conn)?;
     }
     Ok(())
