@@ -1,5 +1,6 @@
 use crate::schema::syncflow::{
-    api_keys, login_sessions, project_api_keys, project_devices, project_sessions, projects, users,
+    api_keys, login_sessions, project_api_keys, project_devices, project_sessions, projects,
+    session_egresses, users,
 };
 use diesel::prelude::*;
 use diesel_derive_enum::DbEnum;
@@ -388,4 +389,95 @@ pub struct NewProjectDevice {
     pub comments: Option<String>,
     pub project_id: Uuid,
     pub registered_by: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, DbEnum, Clone, Eq, PartialEq)]
+#[ExistingTypePath = "crate::schema::syncflow::sql_types::SessionEgressStatus"]
+#[DbValueStyle = "SCREAMING_SNAKE_CASE"]
+pub enum SessionEgressStatus {
+    #[serde(rename = "EGRESS_STARTING")]
+    EgressStarting,
+    #[serde(rename = "EGRESS_ACTIVE")]
+    EgressActive,
+    #[serde(rename = "EGRESS_ENDING")]
+    EgressEnding,
+    #[serde(rename = "EGRESS_COMPLETE")]
+    EgressComplete,
+    #[serde(rename = "EGRESS_FAILED")]
+    EgressAborted,
+    #[serde(rename = "EGRESS_ABORTED")]
+    EgressFailed,
+    #[serde(rename = "EGRESS_LIMIT_REACHED")]
+    EgressLimitReached,
+}
+
+impl SessionEgressStatus {
+    pub fn from_str_name(value: &str) -> Option<Self> {
+        match value {
+            "EGRESS_STARTING" => Some(Self::EgressStarting),
+            "EGRESS_ACTIVE" => Some(Self::EgressActive),
+            "EGRESS_ENDING" => Some(Self::EgressEnding),
+            "EGRESS_COMPLETE" => Some(Self::EgressComplete),
+            "EGRESS_FAILED" => Some(Self::EgressFailed),
+            "EGRESS_ABORTED" => Some(Self::EgressAborted),
+            "EGRESS_LIMIT_REACHED" => Some(Self::EgressLimitReached),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SessionEgressStatus::EgressStarting => "EGRESS_STARTING",
+            SessionEgressStatus::EgressActive => "EGRESS_ACTIVE",
+            SessionEgressStatus::EgressEnding => "EGRESS_ENDING",
+            SessionEgressStatus::EgressComplete => "EGRESS_COMPLETE",
+            SessionEgressStatus::EgressFailed => "EGRESS_FAILED",
+            SessionEgressStatus::EgressAborted => "EGRESS_ABORTED",
+            SessionEgressStatus::EgressLimitReached => "EGRESS_LIMIT_REACHED",
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, DbEnum, Clone, Eq, PartialEq)]
+#[ExistingTypePath = "crate::schema::syncflow::sql_types::SessionEgressType"]
+#[DbValueStyle = "SCREAMING_SNAKE_CASE"]
+pub enum SessionEgressType {
+    #[serde(rename = "ROOM_COMPOSITE")]
+    RoomComposite,
+    #[serde(rename = "PARTICIPANT")]
+    Participant,
+    #[serde(rename = "WEB")]
+    Web,
+    #[serde(rename = "TRACK_COMPOSITE")]
+    TrackComposite,
+    #[serde(rename = "TRACK")]
+    Track,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
+#[diesel(table_name = session_egresses)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionEgress {
+    pub id: Uuid,
+    pub track_id: String,
+    pub egress_id: String,
+    pub started_at: i64,
+    pub egress_type: Option<SessionEgressType>,
+    pub status: SessionEgressStatus,
+    pub destination: Option<String>,
+    pub room_name: String,
+    pub session_id: Uuid,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
+#[diesel(table_name = session_egresses)]
+pub struct NewSessionEgress {
+    pub track_id: String,
+    pub egress_id: String,
+    pub started_at: i64,
+    pub egress_type: Option<SessionEgressType>,
+    pub status: SessionEgressStatus,
+    pub destination: Option<String>,
+    pub room_name: String,
+    pub session_id: Uuid,
 }

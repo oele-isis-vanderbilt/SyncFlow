@@ -15,7 +15,7 @@ use application::{
 use shared::{
     device_models::DeviceRegisterRequest,
     livekit_models::TokenRequest,
-    project_models::NewSessionRequest,
+    project_models::{EgressMediaPath, NewSessionRequest},
     user_models::{ApiKeyRequest, ProjectRequest},
 };
 
@@ -302,6 +302,35 @@ async fn stop_session(
         .unwrap_or_else(error_response)
 }
 
+#[get("/{project_id}/sessions/{session_id}/egresses")]
+async fn get_session_egresses(
+    path: web::Path<(String, String)>,
+    session_service: web::Data<SessionService>,
+) -> HttpResponse {
+    let (project_id, session_id) = path.into_inner();
+    session_service
+        .list_egresses(&project_id, &session_id)
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
+#[post("/{project_id}/sessions/{session_id}/get-media-url")]
+async fn get_egress_media_download_url(
+    path: web::Path<(String, String)>,
+    session_service: web::Data<SessionService>,
+    media_path_request: web::Json<EgressMediaPath>,
+) -> HttpResponse {
+    let request = media_path_request.into_inner();
+    let (project_id, _session_id) = path.into_inner();
+
+    session_service
+        .get_egress_download_url(&project_id, &request.path)
+        .await
+        .map(json_ok_response)
+        .unwrap_or_else(error_response)
+}
+
 #[post("/{project_id}/settings/create-api-key")]
 async fn create_api_key(
     project_id: web::Path<String>,
@@ -421,6 +450,8 @@ pub fn init_routes(
         .service(get_sessions)
         .service(get_session)
         .service(stop_session)
+        .service(get_session_egresses)
+        .service(get_egress_media_download_url)
         .service(get_livekit_session_info)
         .service(create_api_key)
         .service(get_all_api_keys)

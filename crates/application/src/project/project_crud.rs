@@ -15,6 +15,8 @@ use shared::{
     user_models::ProjectRequest,
 };
 
+use super::super::s3::storage_service::StorageService;
+
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -434,6 +436,20 @@ impl From<&Project> for EgressService {
             value.livekit_server_api_secret.clone(),
             config,
         )
+    }
+}
+
+impl From<&Project> for StorageService {
+    fn from(value: &Project) -> Self {
+        let config = S3Config {
+            bucket: value.bucket_name.clone(),
+            region: value.region.clone().unwrap_or_default(),
+            access_key: value.access_key.clone(),
+            secret_key: value.secret_key.clone(),
+            endpoint: value.endpoint.clone(),
+        };
+
+        StorageService::new(&config)
     }
 }
 

@@ -234,3 +234,27 @@ export async function deleteDevice(projectId: string, deviceId: string) {
 
   return result;
 }
+
+export async function getEgressMediaDownloadUrl(
+  projectId: string,
+  sessionId: string,
+  path: string,
+) {
+  const result = (
+    await projectClient.getEgressMediaDownloadUrl(projectId, sessionId, path)
+  )
+    .map((mediaDownloadResponse) => {
+      return {
+        success: true,
+        data: mediaDownloadResponse,
+      };
+    })
+    .unwrapOrElse((error) => {
+      return {
+        success: false,
+        error: JSON.stringify(error, null, 2),
+      };
+    });
+
+  return result;
+}

@@ -7,7 +7,9 @@ use crate::users::secret::SecretError;
 use crate::{livekit, project};
 
 use diesel::{prelude::*, PgConnection};
-use domain::models::{NewProjectSession, ProjectSession, ProjectSessionStatus};
+use domain::models::{
+    NewProjectSession, NewSessionEgress, ProjectSession, ProjectSessionStatus, SessionEgress,
+};
 use livekit_api::services::ServiceError;
 use livekit_client::RoomError;
 use livekit_protocol::ParticipantInfo;
@@ -53,6 +55,9 @@ pub enum SessionError {
 
     #[error("Invalid Device Group Error: {0}")]
     InvalidDeviceGroupError(String),
+
+    #[error("Storage Service Error: {0}")]
+    StorageServiceError(#[from] rusoto_credential::CredentialsError),
 }
 
 #[derive(Debug, Clone)]
@@ -146,6 +151,10 @@ impl From<SessionError> for shared::response_models::Response {
             SessionError::InvalidDeviceGroupError(e) => shared::response_models::Response {
                 status: 400,
                 message: e,
+            },
+            SessionError::StorageServiceError(e) => shared::response_models::Response {
+                status: 500,
+                message: e.to_string(),
             },
         }
     }
@@ -388,4 +397,33 @@ pub fn update_session_status(
 
     let session = session?;
     Ok(session)
+}
+
+pub fn create_session_egresses(
+    egresses: Vec<NewSessionEgress>,
+    conn: &mut PgConnection,
+) -> Result<Vec<SessionEgress>, SessionError> {
+    use domain::schema::syncflow::session_egresses::dsl::*;
+
+    let egresses = diesel::insert_into(session_egresses)
+        .values(&egresses)
+        .get_results::<SessionEgress>(conn)?;
+
+    Ok(egresses)
+}
+
+pub fn get_session_egresses(
+    sess_id: &str,
+    conn: &mut PgConnection,
+) -> Result<Vec<SessionEgress>, SessionError> {
+    use domain::schema::syncflow::session_egresses::dsl::*;
+    let sess_uuid = Uuid::parse_str(sess_id)
+        .map_err(|_| SessionError::ConfigurationError("Invalid session id".to_string()))?;
+
+    let egresses = session_egresses
+        .filter(session_id.eq(sess_uuid))
+        .load::<SessionEgress>(conn)
+        .unwrap();
+
+    Ok(egresses)
 }
