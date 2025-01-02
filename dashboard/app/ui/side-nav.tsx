@@ -11,7 +11,7 @@ import { FaChevronRight, FaChevronLeft } from 'react-icons/fa';
 import { FaBriefcase as Briefcase } from 'react-icons/fa';
 import { FaHome as Home } from 'react-icons/fa';
 import { FaCog as Settings } from 'react-icons/fa';
-import { SiSession } from 'react-icons/si';
+import { SiSession, SiGoogledocs } from 'react-icons/si';
 import { CiSettings } from 'react-icons/ci';
 
 import { Tooltip } from 'flowbite-react';
@@ -42,6 +42,13 @@ export const NavItems = () => {
       href: '/dashboard/projects',
       icon: <Briefcase size={20} />,
       active: isNavItemActive(pathname, '/dashboard/projects'),
+      position: 'top',
+    },
+    {
+      name: 'Docs',
+      href: '/docs',
+      icon: <SiGoogledocs size={20} />,
+      active: false,
       position: 'top',
     },
     {
