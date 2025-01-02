@@ -4,200 +4,107 @@ description: Development of SyncFlow Clients
 ---
 
 
-# Syncflow Node Client Development
+# Client Development for SyncFlow
+`SyncFlow` clients are available for [`NodeJS`](https://github.com/oele-isis-vanderbilt/syncflow-node-client), [Rust](https://github.com/oele-isis-vanderbilt/SyncFlow/crates/client) and [Python](https://github.com/oele-isis-vanderbilt/syncflow-python-client). These client provide a simple and easy way to interact with the SyncFlow API and manage as `SyncFlow` project and sessions and can be used by the learning/training environment to create and manage sessions programmatically. If there's a custom client that you would like to develop in a language of your choice, you can follow the steps below to get started. We will use the Rust client as a reference implementation. Basically, there are three steps to developing a client for SyncFlow:
 
-## Overview
+1. Creating `JWT` signing functionality
+2. Creating Request and Response Models
+3. Implementing the API client
 
-A real-time collaboration application using:
-- ExpressJS backend
-- Vite-Express rendering
-- Syncflow token management
-- LiveKit WebRTC communication
+## Creating JWT Signing Functionality
+As shown in the Rust client implementation, the first step is to create a function that signs a `JWT` token using the Project's API key and Secret. The following dictionary structure is used as the claims for the `JWT` token:
 
-## File Structure
-
-### Backend Components
-- Server configuration with Syncflow Node Client
-- Token generation endpoint
-- Session management
-
-### Frontend Components
-- Dynamic HTML rendering
-- Interactive room joining interface
-- LiveKit-powered video communication
-
-## Server Implementation
-
-### Key Server Features
-
-#### Environment and Middleware
-- Loads environment variables
-- Configures JSON body parsing
-- Creates Express application
-
-#### Response Utility Functions
-```javascript
-const jsonOkResponse = (res, data) => {
-    return res.status(200).json(data);
-};
-
-const errorResponse = (res, error) => {
-    return res.status(500).json({ error: error.message });
-};
-```
-
-#### Token Generation Endpoint
-- Handles room and identity token requests
-- Checks for existing active sessions
-- Creates new sessions if needed
-- Generates comprehensive video grants
-
-#### Session Management Logic
-- Filters active sessions
-- Supports dynamic room creation
-- Generates tokens with extensive permissions
-
-### Project Client Initialization
-```javascript
-const projectClient = new ProjectClientBuilder()
-    .setServerUrl(process.env.SYNCFLOW_SERVER_URL)
-    .setApiKey(process.env.SYNCFLOW_API_KEY)
-    .setApiSecret(process.env.SYNCFLOW_API_SECRET)
-    .setProjectId(process.env.SYNCFLOW_PROJECT_ID)
-    .build();
-```
-# Client-Side Implementation
-
-## Client File Structure
-- `main.js`: Handles initial page rendering and room joining setup
-- `room.js`: Contains room connection and video handling logic
-
-## Main.js
-
-### Responsibilities
-- Dynamically generates HTML structure
-- Initializes room joining functionality
-
-### Key Implementation
-```javascript
-import { joinRoom } from './room';
-import './style.css';
-
-// Dynamically inject HTML content
-document.querySelector('#app').innerHTML = `...`;
-
-// Attach room joining event listener
-joinRoom(document.querySelector('#join_room'));
-```
-
-#### HTML Structure
-- Left Panel: Session joining controls
-  - Identity input
-  - Room name input
-  - Join Room button
-  - Participants list placeholder
-- Main Panel: Video container
-
-## Room.js
-
-### Room Joining Mechanism
-
-#### Token Acquisition Workflow
-```javascript
-fetch('/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ identity, roomName })
-})
-```
-
-#### LiveKit Room Configuration
-```javascript
-const livekitRoom = new Room({
-    adaptiveStream: true,     // Dynamic video quality management
-    dynacast: true,           // Bandwidth optimization
-    videoCaptureDefaults: {
-        resolution: VideoPresets.h720.resolution
-    },
-    stopLocalTrackOnUnpublish: true
-});
-```
-
-### Connection Process
-1. Validate user inputs
-2. Request token from server
-3. Prepare LiveKit room connection
-4. Connect to room
-5. Enable local camera
-6. Display local video
-
-### Video Display Function
-```javascript
-function displayLocalVideo(participant, trackPublication) {
-    const video = trackPublication.track.attach();
-    
-    // Set metadata attributes
-    video.setAttribute('data-identity', participant.identity);
-    video.setAttribute('data-participant-sid', participant.sid);
-    
-    // Configure video dimensions
-    video.setAttribute('width', '300');
-    video.setAttribute('height', '300');
-    
-    // Append to video container
-    document.querySelector('#video-container').appendChild(video);
+```json
+{
+    "iat": "<current time in milli seconds>",
+    "exp": "<expiry time in milli seconds>",
+    "iss": "<Project API Key>",
+    "projectId": "<Project ID>"
 }
 ```
 
-## Key Features
-- Dynamic HTML rendering
-- Token-based authentication
-- LiveKit WebRTC integration
-- Adaptive video streaming
-- Error handling
-- Metadata tracking
+Then, once you have the claims, you can use the Project's API Secret to sign the token and use it as the `Authorization` header in your requests to the `SyncFlow` backend server.
 
-## Error Handling
-- Input validation
-- Token request error catching
-- Connection error management
-- Camera/microphone activation errors
 
-## Performance Optimizations
-- Adaptive streaming
-- Dynacast bandwidth optimization
-- 720p default video resolution
+## Creating Request and Response Models
+The next step is to create request and response models for the API endpoints that you want to interact with. For example, if you want to create a new session, you would need a request model that contains the session name and description. Similarly, you would need a response model that contains the session ID, name, and other details. These models are available as a separate crate in the [SyncFlow repository](https://github.com/oele-isis-vanderbilt/SyncFlow/tree/main/crates/shared/src), keep in mind these models are camel cased during serialization and deserialization and can be used in your client implementation.
 
-## Potential Enhancements
-1. Add participant list population
-2. Implement leave room functionality
-3. Create device selection controls
-4. Add more granular video/audio settings
 
-## Browser Compatibility
-- Requires modern browsers supporting:
-  - WebRTC
-  - ES6+ JavaScript
-  - Fetch API
+## Implementing the API Client
+Finally, you can implement the API client using the request and response models and the `JWT` signing functionality. The API client should have functions to interact with the SyncFlow API endpoints, such as creating a new session, joining a session, and managing resources. The client should also handle the serialization and deserialization of the request and response models and the signing of the `JWT` token for authentication. You can refer to the Rust client [implementation](https://github.com/oele-isis-vanderbilt/SyncFlow/blob/main/crates/client/src/project_client.rs) for the API routes and the request methods that are available in the SyncFlow API. For example, see this snippet for creating a new session:
 
-## Key Technologies
-- Backend: Node.js, Express
-- Frontend: Vanilla JavaScript
-- WebRTC: LiveKit
-- Rendering: Vite-Express
+```rust
+...
+    pub async fn create_session(
+        &self,
+        new_session_request: &NewSessionRequest,
+    ) -> Result<ProjectSessionResponse, ProjectClientError> {
+        let path = format!("projects/{}/create-session", self.project_id);
 
-## Deployment Considerations
-- Environment variable configuration
-- Port configuration (default: 3000)
-- Secure token management
+        self.authenticated_post(&path, new_session_request).await
+    }
 
-## Potential Improvements
-1. Enhanced error handling
-2. Session expiration logic
-3. Advanced authentication
-4. Comprehensive logging
+    pub async fn authenticated_post<T: serde::de::DeserializeOwned, E: serde::Serialize>(
+        &self,
+        path: &str,
+        body: &E,
+    ) -> Result<T, ProjectClientError> {
+        let token = self.get_api_token().await?;
+        let url = format!("{}/{}", self.base_url, path);
+        let response = self
+            .client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", token))
+            .header("Content-Type", "application/json")
+            .header("User-Agent", "SyncFlow Project Client/ V0.1.0")
+            .json(body)
+            .send()
+            .await?;
 
-## Security Notes
-- Token-based authentication
-- Server-side token generation
-- Controlled room access
+
+        let response_json = response.json::<T>().await?;
+        Ok(response_json)
+    }
+
+    pub async fn get_api_token(&self) -> Result<String, ProjectClientError> {
+        let mut token_lock: tokio::sync::MutexGuard<'_, Option<String>> =
+            self.api_token.lock().await;
+        if token_lock.is_none() {
+            *token_lock = Some(self.generate_api_token()?);
+        }
+
+
+        let has_token_expired = self
+            .is_expired(token_lock.as_ref().unwrap())
+            .unwrap_or(true);
+
+
+        if has_token_expired {
+            *token_lock = Some(self.generate_api_token()?);
+        }
+
+        Ok(token_lock.as_ref().unwrap().clone())
+    }
+
+
+    pub fn generate_api_token(&self) -> Result<String, ProjectClientError> {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as usize;
+        let claims = ProjectToken {
+            iat: now,
+            exp: now + 3600, // 1 hour expiration
+            iss: self.api_key.clone(),
+            project_id: self.project_id.clone(),
+        };
+
+
+        let token = generate_and_sign_jwt::<ProjectToken>(&claims, &self.api_secret)?;
+
+        Ok(token)
+    }
+...
+```
+
+Other reference implementations are available in the [SyncFlow Python Client repository](https://github.com/oele-isis-vanderbilt/syncflow-python-client) and the [SyncFlow NodeJS Client repository](https://github.com/oele-isis-vanderbilt/syncflow-node-client). You can use these as a reference to develop a client in your preferred language.
