@@ -17,7 +17,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className="scrollbar-thub-sky-700 scrollbar-track-sky-300 scrollbar-thin"
+    >
       <head>
         <ThemeModeScript />
       </head>

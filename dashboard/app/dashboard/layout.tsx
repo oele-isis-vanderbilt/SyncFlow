@@ -1,6 +1,7 @@
 import { NavBar } from '@/app/ui/dashboard/nav-bar';
 import { auth } from '@/auth';
 import SideNav from '../ui/side-nav';
+import { Footer, FooterCopyright } from 'flowbite-react';
 
 export default async function Layout({
   children,
@@ -11,43 +12,29 @@ export default async function Layout({
   return (
     <>
       <NavBar session={session} withBreadCrumb={true} />
-      <div className="mx-auto flex px-2">
+      <div className="mx-auto flex px-2 md:max-w-8xl">
         <SideNav />
-        <div className="flex w-full flex-col">
-          <div className="w-full flex-1 overflow-x-auto">
-            <div className="overflow-auto sm:h-[calc(99vh-150px)] ">
-              <div className="relative mx-auto flex h-[calc(100vh-240px)] w-full justify-center overflow-auto overflow-y-auto">
+        <div className="flex w-full h-full flex-col md:mb-0 mb-24">
+          <div className="w-full h-full flex-1 overflow-x-auto">
+            <div className="overflow-auto sm:h-[calc(99vh-150px)]">
+              <div className="relative mx-auto flex h-full w-full justify-center overflow-auto overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-300">
                 <div className="w-full md:max-w-8xl">{children}</div>
               </div>
             </div>
           </div>
-          <footer className="py-6 md:px-8 md:py-0 dark:border-border dark:text-white">
-            <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
-              <p className="text-balance text-center text-muted-foreground text-sm leading-loose md:text-left">
-                Built by{' '}
-                <a
-                  href="https://teachableagents.org"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium underline underline-offset-4"
-                >
-                  OELE, ISIS, Vanderbilt University
-                </a>
-                . The source code is available on{' '}
-                <a
-                  href="https://github.com/oele-isis-vanderbilt/syncflow.git"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium underline underline-offset-4"
-                >
-                  GitHub
-                </a>
-                .
-              </p>
-            </div>
-          </footer>
         </div>
       </div>
+      <Footer className="fixed bottom-0 w-full bg-white dark:bg-gray-900">
+        <div className="w-full mx-auto flex flex-col py-6 lg:py-6">
+          <div className="flex items-center justify-center px-4 text-center">
+            <FooterCopyright
+              href="https://teachableagents.org"
+              by="Open Ended Learning Environments Lab, Vanderbilt University"
+              year={new Date().getFullYear()}
+            />
+          </div>
+        </div>
+      </Footer>
     </>
   );
 }

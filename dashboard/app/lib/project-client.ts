@@ -1,13 +1,16 @@
 import getConfig from '@/config';
 import { AuthHttpClient } from './auth-http-client';
-import type {
-  LivekitSessionInfo,
-  ProjectSession,
-  Project,
-  ProjectsSummary,
-  ProjectSummary,
-  ProjectDevice,
-  SessionTokenResponse,
+import {
+  type LivekitSessionInfo,
+  type ProjectSession,
+  type Project,
+  type ProjectsSummary,
+  type ProjectSummary,
+  type ProjectDevice,
+  type SessionTokenResponse,
+  type SessionEgress,
+  EgressMediaDownloadResponse,
+  EgressMediaPath,
 } from '@/types/project';
 
 const PREFIXES = {
@@ -124,6 +127,12 @@ export class ProjectClient extends AuthHttpClient {
     );
   }
 
+  async listEgresses(projectId: string, sessionId: string) {
+    return await this.authenticatedGet<SessionEgress[]>(
+      `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/egresses`,
+    );
+  }
+
   async deleteSession(projectId: string, sessionId: string) {
     return await this.authenticatedDelete<ProjectSession>(
       `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}`,
@@ -192,6 +201,22 @@ export class ProjectClient extends AuthHttpClient {
   async deleteDevice(projectId: string, deviceId: string) {
     return await this.authenticatedDelete<ProjectDevice>(
       `${PREFIXES.GET_PROJECT}/${projectId}/devices/${deviceId}`,
+    );
+  }
+
+  async getEgressMediaDownloadUrl(
+    projectId: string,
+    sessionId: string,
+    path: string,
+  ) {
+    return await this.authenticatedPost<
+      EgressMediaDownloadResponse,
+      EgressMediaPath
+    >(
+      `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/get-media-url`,
+      {
+        path,
+      },
     );
   }
 }

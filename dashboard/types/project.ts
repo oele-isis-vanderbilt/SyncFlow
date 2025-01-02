@@ -59,3 +59,26 @@ export interface SessionTokenResponse {
   identity: string;
   livekitServerUrl: string;
 }
+
+export interface SessionEgress {
+  id: string;
+  trackId: string;
+  egressId: string;
+  startedAt: number;
+  egressType: string;
+  status: string;
+  destination: string;
+  roomName: string;
+  sessionId: string;
+}
+
+export interface EgressMediaPath {
+  path: string;
+}
+
+export interface EgressMediaDownloadResponse {
+  mediaPath: string;
+  mediaUrl: string;
+  bucketName: string;
+  expiresIn: number;
+}

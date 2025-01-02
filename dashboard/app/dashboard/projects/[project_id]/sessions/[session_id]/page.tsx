@@ -1,5 +1,6 @@
 import { projectClient } from '@/app/lib/project-client';
 import DataSharingPrompt from '@/app/ui/dashboard/project/data-sharing-prompt';
+import { EgressesInfo } from '@/app/ui/dashboard/project/egresses-info';
 import ErrorComponent from '@/app/ui/dashboard/project/error-component';
 import ParticipantsInfo from '@/app/ui/dashboard/project/participants-info';
 import RecordingsInfo from '@/app/ui/dashboard/project/recordings-info';
@@ -44,6 +45,14 @@ export default async function Page({
         projectId,
         sessionId,
       );
+      let sessionEgressResult = null;
+      if (sessionInfo.status === 'Stopped') {
+        sessionEgressResult = await projectClient.listEgresses(
+          projectId,
+          sessionId,
+        );
+      }
+
       return (
         <div
           className="flex h-full w-full flex-col p-2 dark:text-white"
@@ -152,27 +161,55 @@ export default async function Page({
           <div className="mt-10 flex h-full w-full flex-row md:h-12">
             <h2 className={`text-xl ${lusitana.className}`}>Recordings</h2>
           </div>
-          <div className="flex h-full w-full flex-col gap-2">
-            {lkSessionInfoResult
-              .map((lkSessionInfo) => {
-                return (
-                  <RecordingsInfo
-                    egresses={lkSessionInfo.recordings}
-                    participants={lkSessionInfo.participants}
-                    key={`${projectId}-${sessionId}`}
-                  />
-                );
-              })
-              .unwrapOrElse((error) => {
-                return (
-                  <ErrorComponent
-                    title="Error fetching recordings"
-                    error={error}
-                    projectId={projectId}
-                  />
-                );
-              })}
-          </div>
+          {sessionInfo.status === 'Stopped' ? (
+            <div className="flex h-full w-full flex-col gap-2">
+              {sessionEgressResult ? (
+                sessionEgressResult
+                  .map((egresses) => {
+                    return (
+                      <EgressesInfo
+                        egresses={egresses}
+                        projectId={projectId}
+                        sessionId={sessionId}
+                      />
+                    );
+                  })
+                  .unwrapOrElse((err) => {
+                    console.error(err);
+                    return (
+                      <ErrorComponent
+                        title="Error fetching recordings"
+                        error={err}
+                        projectId={projectId}
+                      />
+                    );
+                  })
+              ) : (
+                <></>
+              )}
+            </div>
+          ) : (
+            <div className="flex h-full w-full flex-col gap-2">
+              {lkSessionInfoResult
+                .map((lkSessionInfo) => {
+                  return (
+                    <RecordingsInfo
+                      egresses={lkSessionInfo.recordings}
+                      key={`${projectId}-${sessionId}`}
+                    />
+                  );
+                })
+                .unwrapOrElse((error) => {
+                  return (
+                    <ErrorComponent
+                      title="Error fetching recordings"
+                      error={error}
+                      projectId={projectId}
+                    />
+                  );
+                })}
+            </div>
+          )}
         </div>
       );
     })
