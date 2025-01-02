@@ -1,7 +1,3 @@
----
-title: Contributing Guidelines
-description: Contributing Guidelines
----
 # SyncFlow Contributing Guide
 
 SyncFlow is an open-source project and we welcome contributions from the community. This guide outlines the process for contributing to `SyncFlow`. 
@@ -200,7 +196,10 @@ Once the containers are successfully started, you can start the SyncFlow API by 
 
 ```bash
 $ cd crates 
-$ cargo run --bin api
+$ cd infrastructure
+$ diesel migration run # Run the migrations
+$ cd ..
+$ cargo run --bin api # Start the API
 ```
 
 This will start the SyncFlow API on the specified host and port. You can access the API at `http://localhost:8081` or the specified host and port in the configuration file.
