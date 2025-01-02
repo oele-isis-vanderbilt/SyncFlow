@@ -49,6 +49,8 @@ const components: MDXComponents = {
       </a>
     </h3>
   ),
+  ul: (props) => <ul className="list-disc ml-4" {...props} />,
+  li: (props) => <li className="py-2" {...props} />,
 };
 
 export function Mdx({ code }: { code: string }) {

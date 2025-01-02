@@ -1,0 +1,1 @@
+dashboard/content/docs/contributing/contributing-guidelines.mdx
