@@ -1,6 +1,7 @@
 name: Deploy to Jetstream / Docker Cleanup
 
 on:
+  workflow_dispatch: # Allows manual triggering of the workflow
   push:
     branches:
       - main
