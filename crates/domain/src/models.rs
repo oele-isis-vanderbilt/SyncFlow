@@ -110,6 +110,7 @@ impl From<ApiKey> for ApiKeyResponse {
                 .created_at
                 .map(|c| c.and_utc().timestamp() as usize)
                 .unwrap_or_default(),
+            project_id: None,
         }
     }
 }
@@ -124,6 +125,7 @@ impl From<ApiKey> for ApiKeyResponseWithoutSecret {
                 .created_at
                 .map(|c| c.and_utc().timestamp() as usize)
                 .unwrap_or_default(),
+            project_id: None,
         }
     }
 }
@@ -312,6 +314,7 @@ impl From<ProjectAPIKey> for ApiKeyResponse {
             secret: value.api_secret,
             comment: value.comments.unwrap_or_default(),
             created_at: value.created_at.and_utc().timestamp() as usize,
+            project_id: Some(value.project_id.to_string()),
         }
     }
 }
@@ -323,6 +326,7 @@ impl From<ProjectAPIKey> for ApiKeyResponseWithoutSecret {
             key: value.api_key,
             comment: value.comments.unwrap_or_default(),
             created_at: value.created_at.and_utc().timestamp() as usize,
+            project_id: Some(value.project_id.to_string()),
         }
     }
 }

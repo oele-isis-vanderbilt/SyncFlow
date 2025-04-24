@@ -10,7 +10,7 @@ import {
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import type { Project } from '@/types/project';
-
+import getConfig from '@/config';
 export type FormSubmissionState<T> = {
   errors?: string[];
   success: boolean;
@@ -179,9 +179,18 @@ export async function createApiKey(
   const state = (await projectClient.createApiKeys(projectId, apiKeyRequest))
     .map((apiKey) => {
       revalidatePath(`/dashboard/projects/${projectId}`);
+      const serverUrl = getConfig().syncFlowApiUrl;
       return {
         success: true,
-        data: apiKey,
+        data: {
+          json: { ...apiKey, serverUrl },
+          env: [
+            `SYNCFLOW_API_KEY="${apiKey.key}"`,
+            `SYNCFLOW_API_SECRET="${apiKey.secret}"`,
+            `SYNCFLOW_PROJECT_ID="${projectId}"`,
+            `SYNCFLOW_SERVER_URL="${serverUrl}"`,
+          ],
+        },
       };
     })
     .unwrapOrElse((error) => {

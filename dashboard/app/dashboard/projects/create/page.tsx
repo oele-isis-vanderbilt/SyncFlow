@@ -3,7 +3,7 @@ import { lusitana } from '@/app/ui/fonts';
 
 export default async function CreateProject() {
   return (
-    <div className="flex flex-col p-2 mb-24">
+    <div className="mb-24 flex flex-col p-2">
       <h2
         className={`font-bold text-2xl dark:text-white ${lusitana.className}`}
       >

@@ -25,7 +25,7 @@ export default function AudioStreams(
           {title}
         </h2>
       </div>
-      <div className={'flex-1 overflow-y-auto scrollbar-thin'}>
+      <div className={'scrollbar-thin flex-1 overflow-y-auto'}>
         {tracks.length > 0 &&
           tracks.map((track, index) => {
             return (
