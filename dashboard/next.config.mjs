@@ -4,6 +4,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   output: 'standalone',
+  transpilePackages: ['@utimalsina/ts-monads'],
 };
 
 export default nextConfig;
