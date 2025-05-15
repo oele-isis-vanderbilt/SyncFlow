@@ -2,7 +2,9 @@ use livekit_api::services::room::{CreateRoomOptions, RoomClient};
 use livekit_api::services::ServiceResult;
 use livekit_protocol::{self as proto, AutoTrackEgress, RoomEgress, S3Upload};
 use shared::deployment_config::StorageConfig;
-use shared::livekit_models::RoomOptions;
+use shared::livekit_models::{RoomOptions, TokenRequest};
+
+use super::token::create_token;
 
 #[derive(Debug)]
 pub struct RoomService {

@@ -139,6 +139,8 @@ pub mod syncflow {
             #[max_length = 250]
             room_name -> Varchar,
             session_id -> Uuid,
+            #[max_length = 50]
+            participant_id -> Nullable<Varchar>,
         }
     }
 

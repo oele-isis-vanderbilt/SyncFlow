@@ -67,6 +67,16 @@ pub struct ProjectSessionResponse {
     pub livekit_room_name: String,
     pub project_id: String,
     pub status: String,
+    pub session_tracks: Vec<SessionTrackResponse>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionTrackResponse {
+    pub track_id: String,
+    pub track_type: String,
+    pub media_destination: String,
+    pub presigned_url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]

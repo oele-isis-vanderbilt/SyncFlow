@@ -2,6 +2,7 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 use crate::livekit::room::RoomService;
+use crate::livekit::room_listener;
 use crate::project::project_crud::Encryptable;
 use crate::users::secret::SecretError;
 use crate::{livekit, project};
@@ -58,6 +59,9 @@ pub enum SessionError {
 
     #[error("Storage Service Error: {0}")]
     StorageServiceError(#[from] rusoto_credential::CredentialsError),
+
+    #[error("Room Listener Error: {0}")]
+    RoomListenerError(#[from] room_listener::RoomListenerError),
 }
 
 #[derive(Debug, Clone)]
@@ -153,6 +157,10 @@ impl From<SessionError> for shared::response_models::Response {
                 message: e,
             },
             SessionError::StorageServiceError(e) => shared::response_models::Response {
+                status: 500,
+                message: e.to_string(),
+            },
+            SessionError::RoomListenerError(e) => shared::response_models::Response {
                 status: 500,
                 message: e.to_string(),
             },

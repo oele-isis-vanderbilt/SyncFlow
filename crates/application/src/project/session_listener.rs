@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use domain::models::{
     NewSessionEgress, Project, ProjectSessionStatus, SessionEgressStatus, SessionEgressType,
@@ -6,9 +6,15 @@ use domain::models::{
 
 use diesel::prelude::PgConnection;
 use livekit_protocol::{egress_info::Request, EgressInfo, EgressStatus};
+use shared::livekit_models::{TokenRequest, VideoGrantsWrapper};
 use uuid::Uuid;
 
-use crate::livekit::{egress::EgressService, room::RoomService};
+use crate::livekit::{
+    egress::EgressService,
+    room::RoomService,
+    room_listener::{self, RoomListenerService},
+    token::create_token,
+};
 
 use super::session_crud::{self, RoomMetadata, SessionError};
 
@@ -47,6 +53,31 @@ pub async fn session_listener(
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
     }
 
+    let join_token = create_token(
+        &TokenRequest {
+            identity: "room_listener".to_string(),
+            name: None,
+            video_grants: VideoGrantsWrapper {
+                room_create: false,
+                room_list: false,
+                room_record: false,
+                room_admin: true,
+                room_join: true,
+                room: livekit_room_name.to_string(),
+                can_publish: false,
+                can_subscribe: true,
+                hidden: true,
+                ..Default::default()
+            },
+        },
+        &project.livekit_server_api_key,
+        &project.livekit_server_api_secret,
+    )?;
+
+    let mut room_listener = RoomListenerService::new(&project.livekit_server_url, &join_token);
+
+    let session_info = room_listener.listen().await?;
+
     session_crud::update_session_status(session_id, ProjectSessionStatus::Stopped, conn)?;
     tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     let egress_service: EgressService = (&project).into();
@@ -73,16 +104,23 @@ pub async fn session_listener(
 
         let session_egress_records = egresses
             .iter()
-            .map(|egress| NewSessionEgress {
-                egress_id: egress.egress_id.clone(),
-                track_id: get_track_id_from_egress(egress),
-                started_at: egress.started_at,
-                destination: get_egress_destination(egress),
-                status: SessionEgressStatus::from_str_name(egress.status().as_str_name())
-                    .unwrap_or(SessionEgressStatus::EgressFailed),
-                egress_type: get_egress_type(egress),
-                session_id: *session_id,
-                room_name: livekit_room_name.to_string(),
+            .map(|egress| {
+                let track_id = get_track_id_from_egress(egress);
+                let participant_id = session_info
+                    .get(&track_id)
+                    .map(|info| info.identity().to_string());
+                NewSessionEgress {
+                    egress_id: egress.egress_id.clone(),
+                    track_id: get_track_id_from_egress(egress),
+                    started_at: egress.started_at,
+                    destination: get_egress_destination(egress),
+                    status: SessionEgressStatus::from_str_name(egress.status().as_str_name())
+                        .unwrap_or(SessionEgressStatus::EgressFailed),
+                    egress_type: get_egress_type(egress),
+                    session_id: *session_id,
+                    room_name: livekit_room_name.to_string(),
+                    participant_id: participant_id,
+                }
             })
             .collect::<Vec<_>>();
 

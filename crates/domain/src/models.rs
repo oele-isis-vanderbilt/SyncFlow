@@ -291,6 +291,9 @@ impl From<ProjectSession> for ProjectSessionResponse {
             max_participants: value.max_participants,
             livekit_room_name: value.livekit_room_name,
             project_id: value.project_id.to_string(),
+            session_tracks: {
+                let mut tracks = 
+            },
         }
     }
 }
@@ -458,7 +461,8 @@ pub enum SessionEgressType {
     Track,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset, Associations)]
+#[belongs_to(ProjectSession, foreign_key = "session_id")]
 #[diesel(table_name = session_egresses)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionEgress {
@@ -471,6 +475,7 @@ pub struct SessionEgress {
     pub destination: Option<String>,
     pub room_name: String,
     pub session_id: Uuid,
+    pub participant_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Insertable, Queryable, AsChangeset)]
@@ -484,4 +489,5 @@ pub struct NewSessionEgress {
     pub destination: Option<String>,
     pub room_name: String,
     pub session_id: Uuid,
+    pub participant_id: Option<String>,
 }
