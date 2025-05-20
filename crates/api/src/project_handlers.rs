@@ -221,6 +221,7 @@ async fn get_sessions(
 ) -> HttpResponse {
     session_service
         .get_sessions(&project_id)
+        .await
         .map(json_ok_response)
         .unwrap_or_else(error_response)
 }
@@ -233,6 +234,7 @@ async fn get_session(
     let (project_id, session_id) = path.into_inner();
     session_service
         .get_session(&project_id, &session_id)
+        .await
         .map(json_ok_response)
         .unwrap_or_else(error_response)
 }
@@ -258,19 +260,6 @@ async fn get_participants(
     let (project_id, session_id) = path.into_inner();
     session_service
         .get_participants(&project_id, &session_id)
-        .await
-        .map(json_ok_response)
-        .unwrap_or_else(error_response)
-}
-
-#[get("/{project_id}/sessions/{session_id}/livekit-session-info")]
-async fn get_livekit_session_info(
-    path: web::Path<(String, String)>,
-    session_service: web::Data<SessionService>,
-) -> HttpResponse {
-    let (project_id, session_id) = path.into_inner();
-    session_service
-        .livekit_session_info(&project_id, &session_id)
         .await
         .map(json_ok_response)
         .unwrap_or_else(error_response)
@@ -452,7 +441,6 @@ pub fn init_routes(
         .service(stop_session)
         .service(get_session_egresses)
         .service(get_egress_media_download_url)
-        .service(get_livekit_session_info)
         .service(create_api_key)
         .service(get_all_api_keys)
         .service(delete_api_key)

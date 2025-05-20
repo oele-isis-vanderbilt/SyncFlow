@@ -34,14 +34,30 @@ export interface ProjectSession {
   livekitRoomName: string;
   projectId: string;
   status: string;
+  numParticipants: number;
+  numRecordings: number;
+  participants?: SessionParticipant[];
+  recordings?: SessionEgress[];
 }
 
-export interface LivekitSessionInfo {
-  roomName: string;
-  roomSid: string;
-  participants: ParticipantInfo[];
-  recordings: EgressInfo[];
-  duration: number;
+export interface SessionParticipant {
+  id: string;
+  identity: string;
+  name?: string;
+  joinedAt: number;
+  leftAt: number;
+  sessionId: string;
+  tracks: SessionTrack[];
+}
+
+export interface SessionTrack {
+  id: string;
+  sid: String;
+  name?: string;
+  kind: string;
+  source: string;
+  participantId: string;
+  multimediaDetails?: MultimediaDetails;
 }
 
 export interface ProjectDevice {
@@ -81,4 +97,14 @@ export interface EgressMediaDownloadResponse {
   mediaUrl: string;
   bucketName: string;
   expiresIn: number;
+}
+
+export interface MultimediaDetails {
+  destination: string;
+  fileName: string;
+  presignedUrl: string;
+  presignedUrlExpires: number;
+  publisher: string;
+  recordingStartTime: number;
+  trackId: string;
 }

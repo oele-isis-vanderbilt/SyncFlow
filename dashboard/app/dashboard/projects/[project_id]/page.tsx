@@ -70,22 +70,11 @@ export default async function Project({
             {(
               await (
                 await projectClient.getSessions(project.id)
-              ).mapAsync(async (sessions) => {
-                const activeSessions = sessions.filter(isActive);
-                const participantsCount = {};
-                for (const session of activeSessions) {
-                  const sessionInfo = await projectClient.getLivekitSessionInfo(
-                    project.id,
-                    session.id,
-                  );
-                  participantsCount[session.id] = sessionInfo.unwrapOr(null);
-                }
-
+              ).mapAsync(async (sessions: ProjectSession[]) => {
                 return (
                   <ProjectSessions
                     sessions={sessions}
                     projectId={project.id}
-                    livekitSessionInfo={participantsCount}
                     projectName={project.name}
                   />
                 );

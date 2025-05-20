@@ -21,6 +21,14 @@ pub mod syncflow {
         #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
         #[diesel(postgres_type(name = "StorageType", schema = "syncflow"))]
         pub struct StorageType;
+
+        #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+        #[diesel(postgres_type(name = "track_kind", schema = "syncflow"))]
+        pub struct TrackKind;
+
+        #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+        #[diesel(postgres_type(name = "track_source", schema = "syncflow"))]
+        pub struct TrackSource;
     }
 
     diesel::table! {
@@ -46,6 +54,23 @@ pub mod syncflow {
             session_id -> Uuid,
             user_id -> Int4,
             created_at -> Nullable<Timestamptz>,
+        }
+    }
+
+    diesel::table! {
+        use diesel::sql_types::*;
+        use super::sql_types::TrackKind;
+        use super::sql_types::TrackSource;
+
+        syncflow.participant_tracks (id) {
+            id -> Uuid,
+            #[max_length = 255]
+            sid -> Varchar,
+            #[max_length = 255]
+            name -> Nullable<Varchar>,
+            kind -> TrackKind,
+            source -> TrackSource,
+            participant_id -> Uuid,
         }
     }
 
@@ -92,6 +117,7 @@ pub mod syncflow {
             updated_at -> Nullable<Timestamptz>,
             status -> ProjectSessionStatus,
             project_id -> Uuid,
+            stopped_at -> Nullable<Timestamptz>,
         }
     }
 
@@ -139,8 +165,21 @@ pub mod syncflow {
             #[max_length = 250]
             room_name -> Varchar,
             session_id -> Uuid,
-            #[max_length = 50]
-            participant_id -> Nullable<Varchar>,
+            participant_id -> Nullable<Uuid>,
+            db_track_id -> Nullable<Uuid>,
+        }
+    }
+
+    diesel::table! {
+        syncflow.session_participants (id) {
+            id -> Uuid,
+            #[max_length = 255]
+            participant_identity -> Varchar,
+            #[max_length = 255]
+            participant_name -> Varchar,
+            joined_at -> Int8,
+            left_at -> Nullable<Int8>,
+            session_id -> Uuid,
         }
     }
 
@@ -173,22 +212,28 @@ pub mod syncflow {
 
     diesel::joinable!(api_keys -> users (user_id));
     diesel::joinable!(login_sessions -> users (user_id));
+    diesel::joinable!(participant_tracks -> session_participants (participant_id));
     diesel::joinable!(project_api_keys -> projects (project_id));
     diesel::joinable!(project_api_keys -> users (user_id));
     diesel::joinable!(project_devices -> projects (project_id));
     diesel::joinable!(project_devices -> users (registered_by));
     diesel::joinable!(project_sessions -> projects (project_id));
     diesel::joinable!(projects -> users (user_id));
+    diesel::joinable!(session_egresses -> participant_tracks (db_track_id));
     diesel::joinable!(session_egresses -> project_sessions (session_id));
+    diesel::joinable!(session_egresses -> session_participants (participant_id));
+    diesel::joinable!(session_participants -> project_sessions (session_id));
 
     diesel::allow_tables_to_appear_in_same_query!(
         api_keys,
         login_sessions,
+        participant_tracks,
         project_api_keys,
         project_devices,
         project_sessions,
         projects,
         session_egresses,
+        session_participants,
         users,
     );
 }
