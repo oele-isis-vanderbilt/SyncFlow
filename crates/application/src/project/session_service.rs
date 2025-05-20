@@ -236,43 +236,6 @@ impl SessionService {
                     })
                     .collect();
 
-                // session_response.participants.iter_mut().for_each(|p| {
-                //     p.tracks.iter_mut().for_each(|track| {
-                //         let session_egress = session_response
-                //             .recordings
-                //             .iter()
-                //             .find(|egress| egress.track_id == track.sid);
-
-                //         if let Some(egress) = session_egress {
-                //             if egress.status == "EGRESS_COMPLETE" {
-                //                 track.multimedia_details = Some(MultimediaDetails {
-                //                     file_name: egress
-                //                         .destination
-                //                         .as_ref()
-                //                         .map(|d| d.split("/").last().map(|s| s.to_string()))
-                //                         .flatten(),
-                //                     destination: egress.destination.clone(),
-                //                     publisher: Some(p.identity.clone()),
-                //                     track_id: Some(track.sid.clone()),
-                //                     presigned_url: None,
-                //                     presigned_url_expires: None,
-                //                     recording_start_time: Some(egress.started_at as i64),
-                //                 })
-                //             }
-                //         }
-                //     });
-                //     p
-                // });
-
-                // let all_media = session_response
-                //     .participants.iter().flat_map(|p| {
-                //         p.tracks.iter().filter_map(|t| {
-                //             match t.multimedia_details {
-
-                //             }
-                //         })
-                //     })
-
                 for participant in session_response.participants.iter_mut() {
                     for track in participant.tracks.iter_mut() {
                         if let Some(egress) = recordings
