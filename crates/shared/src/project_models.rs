@@ -141,7 +141,7 @@ impl From<LivekitSessionInfo> for (Vec<SessionParticipantResponse>, Vec<EgressRe
                     id: participant.sid.clone(),
                     identity: participant.identity.clone(),
                     name: participant.name.clone(),
-                    joined_at: participant.joined_at * 1E9 as i64,
+                    joined_at: participant.joined_at * 1_000_000_000,
                     left_at: None,
                     session_id: value.room_sid.clone(),
                     tracks: participant
