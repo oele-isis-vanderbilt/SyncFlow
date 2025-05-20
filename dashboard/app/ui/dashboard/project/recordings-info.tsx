@@ -1,92 +1,116 @@
 'use client';
 
-import type { EgressInfo } from 'livekit-server-sdk';
+import type { SessionEgress } from '@/types/project';
+
 import { CustomDataTable } from './data-table';
 import { getDateFromTimeStampNs } from '../utils';
-import Link from 'next/link';
 import { Tooltip } from 'flowbite-react';
 import { TiCloudStorageOutline } from 'react-icons/ti';
+import { getEgressMediaDownloadUrl } from '@/app/lib/project-actions';
 
-const egressesToColumns = (egresses: EgressInfo[]) => {
+const getFileName = (path: string) => {
+  const parts = path.split('/');
+  return parts[parts.length - 1];
+};
+
+const egressesToColumns = (
+  egresses: SessionEgress[],
+  projectId: string,
+  sessionId: string,
+) => {
   return [
     {
-      name: 'Egress ID',
-      selector: (egress) => egress.id,
-      sortable: true,
+      name: 'Egress Id',
+      selector: (egress: SessionEgress) => egress.egressId,
     },
     {
       name: 'Started At',
-      selector: (egress) => getDateFromTimeStampNs(egress.startedAt),
+      selector: (egress: SessionEgress) =>
+        getDateFromTimeStampNs(egress.startedAt),
       sortable: true,
     },
     {
       name: 'Track ID',
-      selector: (egress) => egress.track,
+      selector: (egress: SessionEgress) => egress.trackId,
     },
     {
       name: 'Status',
-      selector: (egress) => egress.status,
+      selector: (egress: SessionEgress) => egress.status,
       sortable: false,
     },
     {
       name: 'Type',
-      selector: (egress) => egress.type,
+      selector: (egresses: SessionEgress) => egresses.egressType,
     },
     {
       name: 'Room Name',
-      selector: (egress) => egress.roomName,
+      selector: (egress: SessionEgress) => egress.roomName,
+    },
+    {
+      name: 'File Name',
+      selector: (egress: SessionEgress) => getFileName(egress.destination),
+      cell: (egress: SessionEgress) => {
+        return (
+          <span>
+            {egress.destination ? getFileName(egress.destination) : 'N/A'}
+          </span>
+        );
+      },
     },
     {
       name: 'Destination',
-      cell: (egress) => {
+      cell: (egress: SessionEgress) => {
         return (
           <div>
             {egress.status === 'EGRESS_COMPLETE' ? (
-              <Tooltip content={egress.destination}>
-                <Link href={egress.destination} target="_blank">
-                  <TiCloudStorageOutline className="text-2xl hover:text-red-700" />
-                </Link>
-              </Tooltip>
+              <>
+                <Tooltip content="Download File">
+                  <button
+                    onClick={async () => {
+                      let result = await getEgressMediaDownloadUrl(
+                        projectId,
+                        sessionId,
+                        egress.destination,
+                      );
+                      if (result.success) {
+                        window.open(result.data.mediaUrl, '_blank');
+                      } else {
+                        console.error(result.error);
+                      }
+                    }}
+                  >
+                    <TiCloudStorageOutline className="text-2xl hover:text-red-700" />
+                  </button>
+                </Tooltip>
+              </>
             ) : (
-              <span>{egress.destination}</span>
+              <span>N/A</span>
             )}
           </div>
         );
       },
     },
-    {
-      name: 'Actions',
-      selector: (egress) => 'ToDo',
-    },
   ];
 };
 
-const egressesToData = (egresses: EgressInfo[]) => {
+const egressToData = (egresses: SessionEgress[]) => {
   return egresses.map((egress) => {
     return {
-      id: egress.egressId,
-      startedAt: egress.startedAt,
-      status: egress.status,
-      track: egress.track.trackId,
-      type: egress.egressType || 'Track',
-      roomName: egress.roomName,
-      destination: egress.file?.location || 'Pending',
+      ...egress,
     };
   });
 };
 
-export default function RecordingsInfo({
+export const RecordingsInfo = ({
   egresses,
-  emptyMessage,
-}: {
-  egresses: EgressInfo[];
-  emptyMessage?: string;
-}) {
+  projectId,
+  sessionId,
+}: { egresses: SessionEgress[]; projectId: string; sessionId: string }) => {
   return (
     <CustomDataTable
-      columns={egressesToColumns(egresses)}
-      data={egressesToData(egresses)}
-      noDataComponent={emptyMessage || 'No Recordings found'}
+      columns={egressesToColumns(egresses, projectId, sessionId)}
+      data={egressToData(egresses)}
+      noDataComponent="No recordings found"
     />
   );
-}
+};

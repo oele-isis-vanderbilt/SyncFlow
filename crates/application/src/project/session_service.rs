@@ -3,7 +3,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use domain::models::SessionEgress;
+use domain::{models::ProjectSessionStatus, models::SessionEgressStatus};
 use infrastructure::DbPool;
 use livekit_protocol::ParticipantInfo;
 
@@ -17,7 +17,8 @@ use shared::{
     device_models::NewSessionMessage,
     livekit_models::{TokenRequest, TokenResponse},
     project_models::{
-        EgressMediaDownloadResponse, LivekitSessionInfo, NewSessionRequest, ProjectSessionResponse,
+        EgressMediaDownloadResponse, EgressResponse, LivekitSessionInfo, MultimediaDetails,
+        NewSessionRequest, ProjectSessionResponse, SessionParticipantResponse,
     },
 };
 
@@ -90,7 +91,13 @@ impl SessionService {
 
         tokio::spawn(async move {
             let mut conn = pool.get().unwrap();
-            let _ = session_listener(project, &session_id, &livekit_room_name, &mut conn).await;
+            let _ = session_listener(
+                project,
+                &session_id.to_string(),
+                &livekit_room_name,
+                &mut conn,
+            )
+            .await;
         });
 
         for grp in notified_devices {
@@ -108,12 +115,44 @@ impl SessionService {
         Ok(new_session.into())
     }
 
-    pub fn get_sessions(
+    pub async fn get_sessions(
         &self,
         project_id: &str,
     ) -> Result<Vec<ProjectSessionResponse>, SessionError> {
-        let sessions = session_crud::get_sessions(project_id, &mut self.pool.get().unwrap())?;
-        Ok(sessions.into_iter().map(Into::into).collect())
+        let conn = &mut self.pool.get().unwrap();
+        let mut project = project_crud::get_project_by_id(project_id, conn)?;
+        let sessions = session_crud::get_sessions(project_id, conn)?;
+        let mut session_response: Vec<ProjectSessionResponse> =
+            sessions.into_iter().map(Into::into).collect();
+
+        project.decrypt(&self.encryption_key)?;
+
+        let room_service: RoomService = (&project).into();
+        let egress_service: EgressService = (&project).into();
+        for session_response in session_response.iter_mut() {
+            if session_response.status == "Started" {
+                let num_participants = room_service
+                    .list_participants(&session_response.livekit_room_name)
+                    .await?
+                    .len() as i64;
+
+                let num_recordings = egress_service
+                    .list_egresses(&session_response.livekit_room_name)
+                    .await?
+                    .len() as i64;
+
+                session_response.num_participants = num_participants;
+                session_response.num_recordings = num_recordings;
+            } else {
+                let (num_participants, num_recordings) =
+                    session_crud::get_num_participants_and_egresses(&session_response.id, conn)?;
+
+                session_response.num_participants = num_participants;
+                session_response.num_recordings = num_recordings;
+            }
+        }
+
+        Ok(session_response)
     }
 
     pub async fn get_participants(
@@ -135,14 +174,8 @@ impl SessionService {
     pub async fn livekit_session_info(
         &self,
         project_id: &str,
-        session_id: &str,
+        room_name: &str,
     ) -> Result<LivekitSessionInfo, SessionError> {
-        let session = session_crud::get_session_if_active(
-            project_id,
-            session_id,
-            &mut self.pool.get().unwrap(),
-        )?;
-
         let mut project =
             project_crud::get_project_by_id(project_id, &mut self.pool.get().unwrap())?;
         project.decrypt(&self.encryption_key)?;
@@ -151,7 +184,7 @@ impl SessionService {
         let egress_service: EgressService = (&project).into();
 
         let room: Vec<livekit_protocol::Room> = room_service
-            .list_rooms(Some(vec![session.livekit_room_name.clone()]))
+            .list_rooms(Some(vec![room_name.to_string()]))
             .await?;
         let room = room
             .into_iter()
@@ -169,14 +202,89 @@ impl SessionService {
         })
     }
 
-    pub fn get_session(
+    pub async fn get_session(
         &self,
         project_id: &str,
         session_id: &str,
     ) -> Result<ProjectSessionResponse, SessionError> {
-        let session =
-            session_crud::get_session(project_id, session_id, &mut self.pool.get().unwrap());
-        Ok(session?.into())
+        let conn = &mut self.pool.get().unwrap();
+        let session = session_crud::get_session(project_id, session_id, conn)?;
+
+        match session.status {
+            ProjectSessionStatus::Stopped => {
+                let mut project = project_crud::get_project_by_id(project_id, conn)?;
+                project.decrypt(&self.encryption_key)?;
+
+                let storage_service: StorageService = (&project).into();
+
+                let (participants, recordings) =
+                    session_crud::load_session_participant_tracks_recordings(
+                        &session,
+                        &mut self.pool.get().unwrap(),
+                    )?;
+
+                let mut session_response: ProjectSessionResponse = session.into();
+
+                session_response.participants = participants
+                    .into_iter()
+                    .map(|(participant, tracks)| {
+                        let mut participant_response: SessionParticipantResponse =
+                            participant.into();
+
+                        participant_response.tracks = tracks.into_iter().map(Into::into).collect();
+                        participant_response
+                    })
+                    .collect();
+
+                for participant in session_response.participants.iter_mut() {
+                    for track in participant.tracks.iter_mut() {
+                        if let Some(egress) = recordings
+                            .iter()
+                            .find(|egress| egress.track_id == track.sid)
+                        {
+                            if egress.status == SessionEgressStatus::EgressComplete
+                                && egress.destination.is_some()
+                            {
+                                let url = storage_service
+                                    .generate_presigned_url(
+                                        egress.destination.as_ref().unwrap(),
+                                        Some(500),
+                                    )
+                                    .await?;
+
+                                track.multimedia_details = Some(MultimediaDetails {
+                                    file_name: egress
+                                        .destination
+                                        .as_ref()
+                                        .and_then(|d| d.split("/").last().map(|s| s.to_string())),
+                                    destination: egress.destination.clone(),
+                                    publisher: Some(participant.identity.clone()),
+                                    track_id: Some(track.sid.clone()),
+                                    presigned_url: Some(url),
+                                    presigned_url_expires: Some(500),
+                                    recording_start_time: Some(egress.started_at),
+                                });
+                            }
+                        }
+                    }
+                }
+                session_response.recordings = recordings.into_iter().map(Into::into).collect();
+
+                Ok(session_response)
+            }
+            _ => {
+                let mut session_response: ProjectSessionResponse = session.into();
+
+                let lk_session_info = self
+                    .livekit_session_info(project_id, &session_response.livekit_room_name)
+                    .await?;
+                let (participants, egresses) = lk_session_info.into();
+                session_response.participants = participants;
+                session_response.recordings = egresses;
+
+                Ok(session_response)
+            }
+        }
     }
 
     pub fn get_session_token(
@@ -230,11 +338,11 @@ impl SessionService {
         &self,
         _project_id: &str,
         session_id: &str,
-    ) -> Result<Vec<SessionEgress>, SessionError> {
+    ) -> Result<Vec<EgressResponse>, SessionError> {
         let conn = &mut self.pool.get().unwrap();
         let egresses = session_crud::get_session_egresses(session_id, conn)?;
 
-        Ok(egresses)
+        Ok(egresses.into_iter().map(Into::into).collect())
     }
 
     pub async fn get_egress_download_url(

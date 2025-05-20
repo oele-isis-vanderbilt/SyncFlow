@@ -1,12 +1,12 @@
 import { projectClient } from '@/app/lib/project-client';
 import DataSharingPrompt from '@/app/ui/dashboard/project/data-sharing-prompt';
-import { EgressesInfo } from '@/app/ui/dashboard/project/egresses-info';
 import ErrorComponent from '@/app/ui/dashboard/project/error-component';
 import ParticipantsInfo from '@/app/ui/dashboard/project/participants-info';
-import RecordingsInfo from '@/app/ui/dashboard/project/recordings-info';
+import { RecordingsInfo } from '@/app/ui/dashboard/project/recordings-info';
 import { TracksInfo } from '@/app/ui/dashboard/project/tracks-info';
 import { lusitana } from '@/app/ui/fonts';
 import { auth } from '@/auth';
+import { Project, ProjectSession } from '@/types/project';
 import { Tooltip } from 'flowbite-react';
 import Link from 'next/link';
 
@@ -34,25 +34,13 @@ export default async function Page({
   const projectRes = await projectClient.getProject(projectId);
 
   const projectName = projectRes
-    .map((project) => project.name)
+    .map((project: Project) => project.name)
     .unwrapOr('Unknown Project');
 
   return (
     await (
       await projectClient.getSession(projectId, sessionId)
-    ).map(async (sessionInfo) => {
-      const lkSessionInfoResult = await projectClient.getLivekitSessionInfo(
-        projectId,
-        sessionId,
-      );
-      let sessionEgressResult = null;
-      if (sessionInfo.status === 'Stopped') {
-        sessionEgressResult = await projectClient.listEgresses(
-          projectId,
-          sessionId,
-        );
-      }
-
+    ).map((sessionInfo: ProjectSession) => {
       return (
         <div
           className="flex h-full w-full flex-col p-2 dark:text-white"
@@ -94,122 +82,34 @@ export default async function Page({
           <div className="mt-2 flex h-full w-full flex-col gap-2 md:h-1/2 md:flex-row">
             <div className="h-full md:w-1/2">
               <h2 className={`text-xl ${lusitana.className}`}>Participants</h2>
-              {sessionInfo.status !== 'Started' ? (
-                <div className="flex h-full w-full items-center justify-center bg-gray-300 dark:bg-gray-900">
-                  <h3 className={`font-bold text-2xl ${lusitana.className}`}>
-                    Session has stopped
-                  </h3>
-                </div>
-              ) : (
+              <div className="flex h-full w-full flex-col gap-2">
                 <div className="flex h-full w-full flex-col gap-2">
-                  <div className="flex h-full w-full flex-col gap-2">
-                    {lkSessionInfoResult
-                      .map((lkSessionInfo) => {
-                        return (
-                          <ParticipantsInfo
-                            participants={lkSessionInfo.participants}
-                            roomName={lkSessionInfo.roomName}
-                            key={`${projectId}-${sessionId}`}
-                          />
-                        );
-                      })
-                      .unwrapOrElse((error) => {
-                        return (
-                          <ErrorComponent
-                            title="Error fetching livekit session Info"
-                            error={error}
-                            projectId={projectId}
-                          />
-                        );
-                      })}
-                  </div>
+                  <ParticipantsInfo
+                    participants={sessionInfo.participants || []}
+                    roomName={sessionInfo.livekitRoomName}
+                    key={`${projectId}-${sessionId}`}
+                  />
                 </div>
-              )}
+              </div>
             </div>
             <div className="mt-10 h-full md:mt-0 md:w-1/2">
               <h2 className={`text-xl ${lusitana.className}`}>Tracks</h2>
-              {sessionInfo.status !== 'Started' ? (
-                <div className="flex h-full w-full items-center justify-center bg-gray-300 dark:bg-gray-900">
-                  <h3 className={`font-bold text-2xl ${lusitana.className}`}>
-                    Session has stopped
-                  </h3>
-                </div>
-              ) : (
-                <div className="flex h-full w-full flex-col gap-2">
-                  {lkSessionInfoResult
-                    .map((lkSessionInfo) => {
-                      return (
-                        <TracksInfo
-                          participants={lkSessionInfo.participants}
-                          key={`${projectId}-${sessionId}`}
-                        />
-                      );
-                    })
-                    .unwrapOrElse((error) => {
-                      return (
-                        <ErrorComponent
-                          title="Error fetching livekit session Info"
-                          error={error}
-                          projectId={projectId}
-                        />
-                      );
-                    })}
-                </div>
-              )}
+              <div className="flex h-full w-full flex-col gap-2">
+                <TracksInfo participants={sessionInfo.participants || []} />
+              </div>
             </div>
           </div>
           <div className="mt-10 flex h-full w-full flex-row md:h-12">
             <h2 className={`text-xl ${lusitana.className}`}>Recordings</h2>
           </div>
-          {sessionInfo.status === 'Stopped' ? (
-            <div className="flex h-full w-full flex-col gap-2">
-              {sessionEgressResult ? (
-                sessionEgressResult
-                  .map((egresses) => {
-                    return (
-                      <EgressesInfo
-                        egresses={egresses}
-                        projectId={projectId}
-                        sessionId={sessionId}
-                      />
-                    );
-                  })
-                  .unwrapOrElse((err) => {
-                    console.error(err);
-                    return (
-                      <ErrorComponent
-                        title="Error fetching recordings"
-                        error={err}
-                        projectId={projectId}
-                      />
-                    );
-                  })
-              ) : (
-                <></>
-              )}
-            </div>
-          ) : (
-            <div className="flex h-full w-full flex-col gap-2">
-              {lkSessionInfoResult
-                .map((lkSessionInfo) => {
-                  return (
-                    <RecordingsInfo
-                      egresses={lkSessionInfo.recordings}
-                      key={`${projectId}-${sessionId}`}
-                    />
-                  );
-                })
-                .unwrapOrElse((error) => {
-                  return (
-                    <ErrorComponent
-                      title="Error fetching recordings"
-                      error={error}
-                      projectId={projectId}
-                    />
-                  );
-                })}
-            </div>
-          )}
+          <div className="flex h-full w-full flex-col gap-2">
+            <RecordingsInfo
+              egresses={sessionInfo.recordings || []}
+              key={`${projectId}-${sessionId}`}
+              projectId={projectId}
+              sessionId={sessionId}
+            />
+          </div>
         </div>
       );
     })

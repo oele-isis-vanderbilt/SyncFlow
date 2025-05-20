@@ -1,4 +1,6 @@
 use dotenvy::dotenv;
+use livekit_protocol::egress_info::Request;
+use livekit_protocol::{EgressInfo, EgressStatus};
 use log;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -55,4 +57,37 @@ pub fn generate_random_session_name() -> String {
         .collect();
 
     format!("{}-{}-{}", prefix, session_name1, session_name2)
+}
+
+pub fn get_track_id_from_egress(egress: &EgressInfo) -> String {
+    if let Some(request) = egress.request.clone() {
+        match request {
+            Request::RoomComposite(_) => "RoomComposite".to_string(),
+            Request::Participant(_) => "Participant".to_string(),
+            Request::Track(req) => req.track_id.clone(),
+            Request::TrackComposite(req) => {
+                format!(
+                    "TrackComposite-{}-{}",
+                    req.audio_track_id, req.video_track_id
+                )
+            }
+            Request::Web(_) => "Web".to_string(),
+        }
+    } else {
+        "Unknown".to_string()
+    }
+}
+
+pub fn get_egress_destination(egress: &EgressInfo) -> Option<String> {
+    if egress.status() == EgressStatus::EgressComplete {
+        let all_destinations = egress
+            .file_results
+            .iter()
+            .map(|dest| dest.filename.clone())
+            .collect::<Vec<String>>();
+
+        Some(all_destinations.join(","))
+    } else {
+        None
+    }
 }
