@@ -79,10 +79,6 @@ impl RoomInfoCapturer {
     }
 
     pub fn mark_participant_joined(&mut self, participant: RemoteParticipant) {
-        // if participant.kind() == ParticipantKind::Standard {
-        //     // To Do: Account for rejoin/quit times...
-        //     self.room_info.participants.push(participant.into());
-        // }
         match participant.kind() {
             ParticipantKind::Standard | ParticipantKind::Ingress => {
                 self.room_info.participants.push(participant.into());
