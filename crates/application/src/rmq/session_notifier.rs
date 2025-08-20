@@ -59,18 +59,8 @@ impl SessionNotifier {
         })
     }
 
-    pub async fn bind_routing_key(&self, routing_key: &str) -> Result<(), SessionNotifierError> {
-        let exchange_name = &self.rabbitmq_config.exchange_name;
-        let queue_name = &self.rabbitmq_config.queue_name;
-
-        self.channel
-            .queue_bind(QueueBindArguments::new(
-                queue_name,
-                exchange_name,
-                routing_key,
-            ))
-            .await?;
-
+    #[deprecated(note = "Producer should not bind queues; consumers must declare/bind their own.")]
+    pub async fn bind_routing_key(&self, _routing_key: &str) -> Result<(), SessionNotifierError> {
         Ok(())
     }
 
@@ -96,23 +86,23 @@ impl SessionNotifier {
         Ok(())
     }
 
-    pub async fn initialize(&self) -> Result<String, SessionNotifierError> {
+    pub async fn initialize(&self) -> Result<(), SessionNotifierError> {
         let exchange_name = &self.rabbitmq_config.exchange_name;
-        let queue_name = &self.rabbitmq_config.queue_name;
+        // let queue_name = &self.rabbitmq_config.queue_name;
 
-        let queue_declare_result = self
-            .channel
-            .queue_declare(QueueDeclareArguments::durable_client_named(queue_name))
-            .await?;
-        let queue_details = queue_declare_result.ok_or(SessionNotifierError::QueueDeclareError(
-            format!("Failed to declare queue: {}", queue_name),
-        ))?;
+        // let queue_declare_result = self
+        //     .channel
+        //     .queue_declare(QueueDeclareArguments::durable_client_named(queue_name))
+        //     .await?;
+        // let queue_details = queue_declare_result.ok_or(SessionNotifierError::QueueDeclareError(
+        //     format!("Failed to declare queue: {}", queue_name),
+        // ))?;
 
         self.channel
             .exchange_declare(ExchangeDeclareArguments::new(exchange_name, "topic"))
             .await?;
 
-        Ok(queue_details.0)
+        Ok(())
     }
 }
 

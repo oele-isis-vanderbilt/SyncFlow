@@ -63,14 +63,14 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to create session notifier");
 
-    let queue_name = session_notifier_service
+    session_notifier_service
         .initialize()
         .await
         .unwrap_or_else(|e| {
             panic!("Failed to initialize session notifier: {}", e);
         });
 
-    info!("Session notifier initialized with queue: {:?}", queue_name);
+    info!("Session notifier initialized with queue");
 
     HttpServer::new(move || {
         let mut app = App::new()
