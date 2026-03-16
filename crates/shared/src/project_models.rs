@@ -72,9 +72,9 @@ pub struct ProjectSessionResponse {
     pub status: String,
     pub num_participants: i64,
     pub num_recordings: i64,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub participants: Vec<SessionParticipantResponse>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub recordings: Vec<EgressResponse>,
     pub duration: i64,
 }
@@ -100,7 +100,7 @@ pub struct ParticipantTrackResponse {
     pub kind: String,
     pub source: String,
     pub participant_id: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub multimedia_details: Option<MultimediaDetails>,
 }
 
