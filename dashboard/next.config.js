@@ -6,6 +6,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   output: 'standalone',
+  transpilePackages: ['@utimalsina/ts-monads'],
   async redirects() {
     return [
       {
