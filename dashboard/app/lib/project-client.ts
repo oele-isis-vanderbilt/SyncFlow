@@ -121,12 +121,6 @@ export class ProjectClient extends AuthHttpClient {
     );
   }
 
-  async getLivekitSessionInfo(projectId: string, sessionId: string) {
-    return await this.authenticatedGet<LivekitSessionInfo>(
-      `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/livekit-session-info`,
-    );
-  }
-
   async listEgresses(projectId: string, sessionId: string) {
     return await this.authenticatedGet<SessionEgress[]>(
       `${PREFIXES.GET_PROJECT}/${projectId}/sessions/${sessionId}/egresses`,

@@ -93,10 +93,19 @@ export function CreateApiKeyModal({
                   shown again)
                 </p>
                 <CopyBlock
-                  text={JSON.stringify(messages?.data, null, 2)}
+                  text={JSON.stringify(messages?.data.json, null, 2)}
                   language={'javascript'}
                   theme={dracula}
-                  showLineNumbers={false}
+                  showLineNumbers={true}
+                />
+                <p className="mt-4 text-green-500 text-xs dark:text-white">
+                  ENV Format to use in your .env file
+                </p>
+                <CopyBlock
+                  text={messages?.data.env.join('\n')}
+                  language={'bash'}
+                  theme={dracula}
+                  showLineNumbers={true}
                 />
               </>
             )}

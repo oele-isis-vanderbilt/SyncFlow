@@ -1,14 +1,17 @@
+use diesel::prelude::*;
 use std::fmt::Display;
 use std::str::FromStr;
 
 use crate::livekit::room::RoomService;
+use crate::livekit::room_listener;
 use crate::project::project_crud::Encryptable;
 use crate::users::secret::SecretError;
 use crate::{livekit, project};
 
-use diesel::{prelude::*, PgConnection};
+use diesel::PgConnection;
 use domain::models::{
-    NewProjectSession, NewSessionEgress, ProjectSession, ProjectSessionStatus, SessionEgress,
+    NewParticipantTrack, NewProjectSession, NewSessionEgress, NewSessionParticipant,
+    ParticipantTrack, ProjectSession, ProjectSessionStatus, SessionEgress, SessionParticipant,
 };
 use livekit_api::services::ServiceError;
 use livekit_client::RoomError;
@@ -58,6 +61,9 @@ pub enum SessionError {
 
     #[error("Storage Service Error: {0}")]
     StorageServiceError(#[from] rusoto_credential::CredentialsError),
+
+    #[error("Room Listener Error: {0}")]
+    RoomListenerError(#[from] room_listener::RoomListenerError),
 }
 
 #[derive(Debug, Clone)]
@@ -153,6 +159,10 @@ impl From<SessionError> for shared::response_models::Response {
                 message: e,
             },
             SessionError::StorageServiceError(e) => shared::response_models::Response {
+                status: 500,
+                message: e.to_string(),
+            },
+            SessionError::RoomListenerError(e) => shared::response_models::Response {
                 status: 500,
                 message: e.to_string(),
             },
@@ -308,7 +318,7 @@ pub async fn delete_session(
         room_service.delete_room(&session.livekit_room_name).await?;
 
         let session_status = ProjectSessionStatus::Stopped;
-        let _ = update_session_status(&session.id, session_status, conn);
+        let _ = update_session_status(session_id, session_status, conn);
     }
 
     Ok(session)
@@ -386,12 +396,14 @@ pub async fn stop_session(
 }
 
 pub fn update_session_status(
-    session_id: &Uuid,
+    session_id: &str,
     session_status: ProjectSessionStatus,
     conn: &mut PgConnection,
 ) -> Result<ProjectSession, SessionError> {
     use domain::schema::syncflow::project_sessions::dsl::*;
-    let session = diesel::update(project_sessions.filter(id.eq(session_id)))
+    let session_uuid = Uuid::parse_str(session_id)
+        .map_err(|_| SessionError::ConfigurationError("Invalid session id".to_string()))?;
+    let session = diesel::update(project_sessions.filter(id.eq(session_uuid)))
         .set(status.eq(session_status))
         .get_result::<ProjectSession>(conn);
 
@@ -426,4 +438,81 @@ pub fn get_session_egresses(
         .unwrap();
 
     Ok(egresses)
+}
+
+pub fn add_session_participants(
+    participants: Vec<NewSessionParticipant>,
+    sess_id: &str,
+    conn: &mut PgConnection,
+) -> Result<Vec<SessionParticipant>, SessionError> {
+    use domain::schema::syncflow::session_participants::dsl::*;
+
+    let _sess_uuid = Uuid::parse_str(sess_id)
+        .map_err(|_| SessionError::ConfigurationError("Invalid session id".to_string()))?;
+
+    let participants = diesel::insert_into(session_participants)
+        .values(&participants)
+        .get_results::<SessionParticipant>(conn)?;
+
+    Ok(participants)
+}
+
+#[allow(clippy::type_complexity)]
+pub fn load_session_participant_tracks_recordings(
+    session: &ProjectSession,
+    conn: &mut PgConnection,
+) -> Result<
+    (
+        Vec<(SessionParticipant, Vec<ParticipantTrack>)>,
+        Vec<SessionEgress>,
+    ),
+    SessionError,
+> {
+    let participants =
+        SessionParticipant::belonging_to(session).load::<SessionParticipant>(conn)?;
+
+    let tracks = ParticipantTrack::belonging_to(&participants)
+        .load::<ParticipantTrack>(conn)?
+        .grouped_by(&participants);
+
+    let egresses = SessionEgress::belonging_to(session).load::<SessionEgress>(conn)?;
+
+    let particpant_and_tracks = participants.into_iter().zip(tracks).collect::<Vec<_>>();
+
+    Ok((particpant_and_tracks, egresses))
+}
+
+pub fn add_participant_tracks(
+    tracks: Vec<NewParticipantTrack>,
+    conn: &mut PgConnection,
+) -> Result<Vec<ParticipantTrack>, SessionError> {
+    use domain::schema::syncflow::participant_tracks::dsl::*;
+    let tracks = diesel::insert_into(participant_tracks)
+        .values(&tracks)
+        .get_results::<ParticipantTrack>(conn)?;
+
+    Ok(tracks)
+}
+
+pub fn get_num_participants_and_egresses(
+    sess_id: &str,
+    conn: &mut PgConnection,
+) -> Result<(i64, i64), SessionError> {
+    use domain::schema::syncflow::session_egresses::dsl as session_egresses_dsl;
+    use domain::schema::syncflow::session_participants::dsl as session_participants_dsl;
+
+    let sess_uuid = Uuid::parse_str(sess_id)
+        .map_err(|_| SessionError::ConfigurationError("Invalid session id".to_string()))?;
+
+    let num_participants = session_participants_dsl::session_participants
+        .filter(session_participants_dsl::session_id.eq(sess_uuid))
+        .count()
+        .get_result::<i64>(conn)?;
+
+    let num_recordings = session_egresses_dsl::session_egresses
+        .filter(session_egresses_dsl::session_id.eq(sess_uuid))
+        .count()
+        .get_result::<i64>(conn)?;
+
+    Ok((num_participants, num_recordings))
 }

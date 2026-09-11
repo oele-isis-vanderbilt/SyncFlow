@@ -46,6 +46,7 @@ pub struct ApiKeyResponse {
     pub secret: String,
     pub comment: String,
     pub created_at: usize,
+    pub project_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -55,6 +56,7 @@ pub struct ApiKeyResponseWithoutSecret {
     pub key: String,
     pub comment: String,
     pub created_at: usize,
+    pub project_id: Option<String>,
 }
 
 impl TokenResponse {

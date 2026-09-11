@@ -52,18 +52,18 @@ export const DOCS_SIDEBAR: DocsSidebarSection[] = [
         title: 'Integration Guide',
         href: '/docs/tutorials/integration-guide',
       },
-      {
-        title: 'Non Login Client Interaction',
-        href: '/docs/tutorials/non-login-client-interaction',
-      },
+      // {
+      //   title: 'Non Login Client Interaction',
+      //   href: '/docs/tutorials/non-login-client-interaction',
+      // },
     ],
   },
   {
     title: 'The SyncFlow EcoSystem',
     items: [
       {
-        title: 'SyncFlow IOT App',
-        href: '/docs/syncflow-ecosystem/syncflow-iot-app',
+        title: 'SyncFlow App',
+        href: '/docs/syncflow-ecosystem/syncflow-app',
       },
       {
         title: 'SyncFlow Text Egress Actor',
@@ -82,14 +82,14 @@ export const DOCS_SIDEBAR: DocsSidebarSection[] = [
   {
     title: 'How to use SyncFlow',
     items: [
-      {
-        title: 'Researchers',
-        href: '/docs/how-to/researchers',
-      },
-      {
-        title: 'Developers',
-        href: '/docs/how-to/developers',
-      },
+      // {
+      //   title: 'Researchers',
+      //   href: '/docs/how-to/researchers',
+      // },
+      // {
+      //   title: 'Developers',
+      //   href: '/docs/how-to/developers',
+      // },
       {
         title: 'Client Development',
         href: '/docs/how-to/client-development',
@@ -99,10 +99,10 @@ export const DOCS_SIDEBAR: DocsSidebarSection[] = [
   {
     title: 'Deploying SyncFlow',
     items: [
-      {
-        title: 'Dockerized Deployment',
-        href: '/docs/deployment/dockerized',
-      },
+      // {
+      //   title: 'Dockerized Deployment',
+      //   href: '/docs/deployment/dockerized',
+      // },
       {
         title: 'Local Deployment',
         href: '/docs/deployment/local',

@@ -111,6 +111,7 @@ impl From<VideoGrantsWrapper> for VideoGrants {
             ingress_admin: value.ingress_admin,
             hidden: value.hidden,
             recorder: value.recorder,
+            ..Default::default() // Default values for other fields
         }
     }
 }

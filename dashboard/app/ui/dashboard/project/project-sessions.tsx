@@ -1,14 +1,12 @@
 'use client';
 import { deleteSession, stopSession } from '@/app/lib/project-actions';
-import { LivekitSessionInfo, ProjectSession } from '@/types/project';
+import { ProjectSession } from '@/types/project';
 import { Tooltip } from 'flowbite-react';
 import { MdDelete } from 'react-icons/md';
 import { FaStop } from 'react-icons/fa';
 import InfoModal from '../info-modal';
 import { useState } from 'react';
 import type { InfoModalContent } from '../info-modal';
-import { GiMirrorMirror } from 'react-icons/gi';
-import SessionJoinForm from '@/app/ui/dashboard/project/session-join-form';
 
 import { CustomDataTable } from './data-table';
 import Link from 'next/link';
@@ -23,8 +21,8 @@ const sortedSessionsToColumns = (projectId: string) => {
   return [
     {
       name: 'Session Id',
-      selector: (session) => session.id,
-      cell: (session) => (
+      selector: (session: ProjectSession) => session.id,
+      cell: (session: ProjectSession) => (
         <Link
           href={`/dashboard/projects/${projectId}/sessions/${session.id}`}
           className="text-xs hover:underline"
@@ -35,8 +33,8 @@ const sortedSessionsToColumns = (projectId: string) => {
     },
     {
       name: 'Session Name',
-      selector: (session) => session.name,
-      cell: (session) => (
+      selector: (session: ProjectSession) => session.name,
+      cell: (session: ProjectSession) => (
         <Link
           href={`/dashboard/projects/${projectId}/sessions/${session.id}`}
           className="text-xs hover:underline"
@@ -48,18 +46,19 @@ const sortedSessionsToColumns = (projectId: string) => {
     },
     {
       name: 'Start Time',
-      selector: (session) => session.startedAt,
+      selector: (session: ProjectSession) =>
+        getDateFromTimeStamp(session.startedAt),
       sortable: true,
     },
     {
       name: 'Participants',
-      selector: (session) => session.participants,
+      selector: (session: ProjectSession) => session.numParticipants,
       sortable: true,
     },
     {
       name: 'Status',
-      selector: (row) => row.status,
-      cell: (session) => {
+      selector: (session: ProjectSession) => session.status,
+      cell: (session: ProjectSession) => {
         return isActive(session) ? (
           <Tooltip content="Join Session">
             <Link
@@ -81,12 +80,12 @@ const sortedSessionsToColumns = (projectId: string) => {
     },
     {
       name: 'Recordings',
-      selector: (session) => session.recordings,
+      selector: (session: ProjectSession) => session.numRecordings,
     },
     {
       name: 'Actions',
-      selector: (session) => session.id,
-      cell: (session) => {
+      selector: (session: ProjectSession) => session.id,
+      cell: (session: ProjectSession) => {
         /* eslint-disable react-hooks/rules-of-hooks */
         let [infoModalContent, setInfoModalContent] =
           useState<InfoModalContent | null>(null);
@@ -165,33 +164,15 @@ const sortedSessionsToColumns = (projectId: string) => {
   ];
 };
 
-const sortedSessionsToTableData = (
-  sessions: ProjectSession[],
-  livekitSessionInfo: { [sessionId: string]: LivekitSessionInfo },
-) => {
-  return sessions.map((session) => {
-    return {
-      id: session.id,
-      name: session.name,
-      startedAt: getDateFromTimeStamp(session.startedAt),
-      status: session.status,
-      participants: livekitSessionInfo[session.id]?.participants.length || 0,
-      recordings: livekitSessionInfo[session.id]?.recordings.length || 0,
-    };
-  });
-};
-
 export default function ProjectSessions({
   projectId,
   projectName,
   sessions,
-  livekitSessionInfo,
   emptyMessage,
 }: {
   projectId: string;
   projectName: string;
   sessions: ProjectSession[];
-  livekitSessionInfo: { [sessionId: string]: LivekitSessionInfo };
   emptyMessage?: string;
 }) {
   const sortedSessions = sessions.sort((a, b) => {
@@ -199,15 +180,11 @@ export default function ProjectSessions({
   });
 
   let sessionHeaders = sortedSessionsToColumns(projectId);
-  let sessionData = sortedSessionsToTableData(
-    sortedSessions,
-    livekitSessionInfo,
-  );
 
   return (
     <CustomDataTable
       columns={sessionHeaders}
-      data={sessionData}
+      data={sortedSessions}
       noDataComponent={
         emptyMessage ||
         `No Sessions for project found for ${projectName}. Create one to get started.`

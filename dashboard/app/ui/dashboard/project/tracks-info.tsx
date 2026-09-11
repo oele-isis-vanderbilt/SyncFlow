@@ -4,17 +4,19 @@ import type { ParticipantInfo, TrackInfo } from 'livekit-server-sdk';
 import { CustomDataTable } from './data-table';
 import { Tooltip } from 'flowbite-react';
 import { FaRecordVinyl } from 'react-icons/fa';
+import { SessionParticipant, SessionTrack } from '@/types/project';
 
-const tracksToColumns = (
-  tracks: TrackInfo[],
-  tracksToParticipantSid: Record<string, string>,
-) => {
+type DisplayTrack = SessionTrack & {
+  publisher: string;
+};
+
+const tracksToColumns = () => {
   return [
     {
       name: 'Track SID/Name',
-      selector: (track) => track.sid,
+      selector: (track: SessionTrack) => track.sid,
       sortable: true,
-      cell: (track) => {
+      cell: (track: SessionTrack) => {
         return (
           <div className="flex items-center">
             <div className="mr-2">{track.sid}</div>
@@ -28,15 +30,19 @@ const tracksToColumns = (
     {
       name: 'Publisher',
       sortable: true,
-      selector: (track) => tracksToParticipantSid[track.sid] || 'Unknown',
+      selector: (track: DisplayTrack) => track.participantId || 'Unknown',
     },
     {
       name: 'Kind',
-      selector: (track) => track.type || 'Unknown',
+      selector: (track: DisplayTrack) => track.kind || 'Unknown',
+    },
+    {
+      name: 'Source',
+      selector: (track: DisplayTrack) => track.source || 'Unknown',
     },
     {
       name: 'Actions',
-      cell: (track) => {
+      cell: (track: DisplayTrack) => {
         return (
           <div className="flex items-center">
             <button>
@@ -51,44 +57,26 @@ const tracksToColumns = (
   ];
 };
 
-const tracksToTableData = (
-  tracks: TrackInfo[],
-  tracksToParticipantSid: Record<string, string>,
-) => {
-  return tracks.map((track) => {
-    return {
-      ...track,
-      id: track.sid,
-      publisher: tracksToParticipantSid[track.sid] || 'Unknown',
-    };
-  });
-};
-
 export function TracksInfo({
   participants,
   emptyTracksMessage,
 }: {
-  participants: ParticipantInfo[];
+  participants: SessionParticipant[];
   emptyTracksMessage?: string;
 }) {
-  const tracks = participants.reduce<TrackInfo[]>((acc, participant) => {
-    return acc.concat(participant.tracks || []);
-  }, [] as TrackInfo[]);
-
-  const tracksToParticipantSid = participants.reduce(
-    (acc, participant) => {
-      participant.tracks?.forEach((track) => {
-        acc[track.sid] = participant.identity;
-      });
-      return acc;
-    },
-    {} as Record<string, string>,
-  );
+  const tracksData: DisplayTrack[] = participants.flatMap((participant) => {
+    return participant.tracks.map((track) => {
+      return {
+        ...track,
+        publisher: participant.identity,
+      };
+    });
+  });
 
   return (
     <CustomDataTable
-      columns={tracksToColumns(tracks, tracksToParticipantSid)}
-      data={tracksToTableData(tracks, tracksToParticipantSid)}
+      columns={tracksToColumns()}
+      data={tracksData}
       noDataComponent={emptyTracksMessage || 'No tracks available'}
     />
   );

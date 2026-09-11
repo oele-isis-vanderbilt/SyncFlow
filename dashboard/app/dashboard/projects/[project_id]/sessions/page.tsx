@@ -47,22 +47,13 @@ export default async function Project({
           </div>
           <div className="min-h-20">
             {(
-              await sessionResult.mapAsync(async (sessions) => {
+              await sessionResult.map((sessions) => {
                 const activeSessions = sessions.filter(isActive);
-                let participantsCount = {};
-                for (const session of activeSessions) {
-                  let sessionInfo = await projectClient.getLivekitSessionInfo(
-                    project.id,
-                    session.id,
-                  );
-                  participantsCount[session.id] = sessionInfo.unwrapOr(null);
-                }
                 return (
                   <ProjectSessions
                     key={project.id}
                     sessions={activeSessions}
                     projectId={project.id}
-                    livekitSessionInfo={participantsCount}
                     projectName={project.name}
                     emptyMessage={`No active sessions for ${project.name}. Create a new session to get started.`}
                   />
@@ -98,7 +89,6 @@ export default async function Project({
                     key={project.id}
                     sessions={stoppedSessions}
                     projectId={project.id}
-                    livekitSessionInfo={{}}
                     projectName={project.name}
                   />
                 );

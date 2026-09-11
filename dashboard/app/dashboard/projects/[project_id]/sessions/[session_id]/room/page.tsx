@@ -2,6 +2,7 @@ import { projectClient } from '@/app/lib/project-client';
 import ErrorComponent from '@/app/ui/dashboard/project/error-component';
 import Room from '@/app/ui/dashboard/rooms/room';
 import { auth } from '@/auth';
+import { ProjectSession, SessionTokenResponse } from '@/types/project';
 import { VideoGrant } from 'livekit-server-sdk';
 
 export default async function Page({
@@ -34,7 +35,7 @@ export default async function Page({
   return (
     await (
       await projectClient.getSession(projectId, sessionId)
-    ).mapAsync(async (sessionInfo) => {
+    ).mapAsync(async (sessionInfo: ProjectSession) => {
       const tokenRequest: VideoGrant = {
         room: sessionInfo.livekitRoomName,
         canPublish: true,
@@ -60,7 +61,7 @@ export default async function Page({
           tokenRequest,
         )
       )
-        .map((sessionToken) => {
+        .map((sessionToken: SessionTokenResponse) => {
           return (
             <Room
               key={`${projectId}-${sessionId}`}

@@ -3,7 +3,21 @@ export function getDateFromTimeStamp(timestamp: number) {
 }
 
 export function getDateFromTimeStampNs(timestamp: number) {
-  return new Date(timestamp / 1000000).toISOString();
+  return new Date(Math.floor(timestamp / 1000000)).toISOString();
+}
+
+export function friendlyDateTimeFromNs(timestamp: number) {
+  const date = new Date(timestamp / 1000000);
+  return date.toLocaleString('en-US', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
 }
 
 export function getTimeDifferenceInMinutes(timestamp: number) {
