@@ -1,0 +1,15 @@
+---
+title: SyncFlow App
+description: Desktop application for SyncFlow
+---
+
+# SyncFlow App
+This is an attempt to acompany syncflow with a desktop application that can do the following cross platform(Still in intial stages):
+
+- List Devices (Cameras, Mics and Screens) from rust (Uses gstreamer bindings).
+- Publish a plethora of devices to syncflow sessions (On session start)
+- Record devices locally (No streaming) and upon session completion, upload the recordings to the same s3 bucket as the syncflow session.
+
+The desktop application is built using [Tauri](https://tauri.app/) and [Rust](https://www.rust-lang.org/). The application is still in its early stages and is not yet ready for production use. However, it can be used to test the functionality of the SyncFlow backend server and the SyncFlow client SDKs.
+
+The Github Repository for the SyncFlow desktop application can be found [here](https://github.com/oele-isis-vanderbilt/syncflow-app).

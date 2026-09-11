@@ -1,0 +1,61 @@
+---
+title: Architecture
+description: Details of the SyncFlow architecture
+---
+## Conceptual View
+<div className="text-center p-2 dark:bg-white">
+    <img src="/docs/conceptual-diagram.png" alt="SyncFlow Architecture" className="w-3/4 mx-auto" />
+    <p className="italic mt-4 dark:text-white">Conceptual View of <code>SyncFlow</code></p>
+</div>
+
+In a classroom environment for MMLA Studies, conceptually, we have different modalities from various multi-modal sensors as well as learning environments. With the advent of modern tech stacks, we need a platform that can handle the live streaming and time aligned recording of these data streams. With the advent of real-time AI inferencing capabilities in the cloud, we have the ability to provide real-time feedback to the students and teachers. This is where `SyncFlow` comes in.
+
+`SyncFlow` can be leveraged by learning science researchers and software developers in a wide variety of ways. Our goal is for `SyncFlow` to be a platform that manages your cloud infrastructure for MMLA. It provides a set of APIs and SDKs to build reliable data streaming/collection channels from various systems and sensors. `SyncFlow` is designed to be a scalable and secure platform to collect, store and analyze multimodal data in real-time. Leveraging modern webrtc stack used in video conferencing applications with [LiveKit](https://livekit.io/), `SyncFlow` provides a robust platform for building live video and audio streaming integrations from various sources.
+
+## SyncFlow Architecture
+Our idea when we started to develop `SyncFlow` was to provide an orchestration dashboard that various learning environments could reuse to preview and record data for the classroom studies, provided they integrate with our ecosystem. The overall architecture of the platform is shown below:
+
+<div className="text-center p-2 dark:bg-white">
+    <img src="/docs/arch.png" alt="SyncFlow Architecture" className="w-3/4 mx-auto" />
+    <p className="italic mt-4 dark:text-white">SyncFlow Architecture</p>
+</div>
+
+The backend is a web application that allows users to register and create projects with different resources. Each project owned by the user is associated with a LiveKit server and an S3 bucket. The backend application is responsible for managing the LiveKit services, managing users and sessions, and providing APIs for the dashboard to interact with the LiveKit services. The frontend is a Next.js application that allows users to create and manage LiveKit sessions, manage users and preview/record data streams for various projects that are integrated with `SyncFlow`.
+
+SyncFlow uses [RabbitMQ](https://www.rabbitmq.com/) as a message broker to notify connected non-login clients of different events in the project.
+
+## Backend Tooling
+<div className="text-center p-2 dark:bg-white">
+    <img src="/docs/backend-tooling.png" alt="SyncFlow Backend Tooling" className="mx-auto" />
+    <p className="italic mt-4 dark:text-white">SyncFlow Backend Tooling</p>
+</div>
+
+The SyncFlow backend consists of the following components:
+
+1. **Domain**: The database and ORM interaction module for the system.
+
+2. **Shared**: Common reusable functions and utilities.
+
+3. **Application**: Main application logic for creating LiveKit rooms, sending recording requests, stopping recording managing users, and handling API keys and secrets.
+
+4. **REST API**: The server and routes for the SyncFlow application.
+
+5. **Client(s)**: REST clients, preferably packaged in various languages, for interacting with the REST API and the SyncFlow application.
+
+6. **CLI**: The command-line interface (CLI) for the SyncFlow application.
+
+
+## Organization
+`SyncFlow` at its core, is a server manager for Livekit. The backend application is an actix web application that is used to control/manage the LiveKit services. The frontend application is a Next.js application that is used to manage preview streams and data.
+
+`SyncFlow` is a bring your own resource platform, meaning, you can bring your own LiveKit server(and associated credentials) and S3 compatible bucket(and associated credentials) to use with `SyncFlow`. The platform is designed to be multi-tenant, where multiple LiveKit servers can be managed from a single dashboard, and different integrations can be managed from a single server, via [projects](/docs/tutorials/projects) in `SyncFlow`.
+
+**Projects** form the basic atomic unit of organization in `SyncFlow`. A project is created by a user and is associated with a LiveKit server and an S3 bucket. Apart from this, a project can handle multiple non-login users/devices, via api key/secret pairs. This allows for a wide range of integrations, to be handled by streaming data to a LiveKit room, and saving the streams to an S3 bucket.
+
+## SyncFlow Vision
+<div className="text-center p-2 dark:bg-white">
+    <img src="/docs/syncflow-vision.png" alt="SyncFlow Architecture" className="mx-auto" />
+    <p className="italic mt-4 dark:text-white">SyncFlow Vision</p>
+</div>
+
+The eventual vision for `SyncFlow` is to become an open-source analytics platform for multi modal data, that can be easily be integrated with learning/training environments. `SyncFlow` will be used as a platform to manage the cloud infrastructure for MMLA studies, for integrating various AI inferencing and multi-modal streaming/storage services. The platform, as it continues to evolve, will provide a one-stop solution for anytime anywhere MMLA, with real-time feedback and analytics capabilities.

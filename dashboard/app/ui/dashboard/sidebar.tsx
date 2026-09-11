@@ -2,6 +2,7 @@
 import { Sidebar } from 'flowbite-react';
 import Link from 'next/link';
 import { HiChartPie, HiViewBoards } from 'react-icons/hi';
+import { SiDocsdotrs } from 'react-icons/si';
 import { MdOutlineSettings } from 'react-icons/md';
 import AppLogo from '../app-logo';
 import { usePathname } from 'next/navigation';
@@ -23,6 +24,11 @@ const links = [
     icon: MdOutlineSettings,
     pathRegex:
       '/dashboard/projects/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  },
+  {
+    name: 'Help',
+    href: '/docs/introduction/introduction',
+    icon: SiDocsdotrs,
   },
 ];
 

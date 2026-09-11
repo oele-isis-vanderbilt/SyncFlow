@@ -1,0 +1,110 @@
+---
+title: Client Development
+description: Development of SyncFlow Clients
+---
+
+
+# Client Development for SyncFlow
+`SyncFlow` clients are available for [`NodeJS`](https://github.com/oele-isis-vanderbilt/syncflow-node-client), [Rust](https://github.com/oele-isis-vanderbilt/SyncFlow/crates/client) and [Python](https://github.com/oele-isis-vanderbilt/syncflow-python-client). These client provide a simple and easy way to interact with the SyncFlow API and manage as `SyncFlow` project and sessions and can be used by the learning/training environment to create and manage sessions programmatically. If there's a custom client that you would like to develop in a language of your choice, you can follow the steps below to get started. We will use the Rust client as a reference implementation. Basically, there are three steps to developing a client for SyncFlow:
+
+1. Creating `JWT` signing functionality
+2. Creating Request and Response Models
+3. Implementing the API client
+
+## Creating JWT Signing Functionality
+As shown in the Rust client implementation, the first step is to create a function that signs a `JWT` token using the Project's API key and Secret. The following dictionary structure is used as the claims for the `JWT` token:
+
+```json
+{
+    "iat": "<current time in milli seconds>",
+    "exp": "<expiry time in milli seconds>",
+    "iss": "<Project API Key>",
+    "projectId": "<Project ID>"
+}
+```
+
+Then, once you have the claims, you can use the Project's API Secret to sign the token and use it as the `Authorization` header in your requests to the `SyncFlow` backend server.
+
+
+## Creating Request and Response Models
+The next step is to create request and response models for the API endpoints that you want to interact with. For example, if you want to create a new session, you would need a request model that contains the session name and description. Similarly, you would need a response model that contains the session ID, name, and other details. These models are available as a separate crate in the [SyncFlow repository](https://github.com/oele-isis-vanderbilt/SyncFlow/tree/main/crates/shared/src), keep in mind these models are camel cased during serialization and deserialization and can be used in your client implementation.
+
+
+## Implementing the API Client
+Finally, you can implement the API client using the request and response models and the `JWT` signing functionality. The API client should have functions to interact with the SyncFlow API endpoints, such as creating a new session, joining a session, and managing resources. The client should also handle the serialization and deserialization of the request and response models and the signing of the `JWT` token for authentication. You can refer to the Rust client [implementation](https://github.com/oele-isis-vanderbilt/SyncFlow/blob/main/crates/client/src/project_client.rs) for the API routes and the request methods that are available in the SyncFlow API. For example, see this snippet for creating a new session:
+
+```rust
+...
+    pub async fn create_session(
+        &self,
+        new_session_request: &NewSessionRequest,
+    ) -> Result<ProjectSessionResponse, ProjectClientError> {
+        let path = format!("projects/{}/create-session", self.project_id);
+
+        self.authenticated_post(&path, new_session_request).await
+    }
+
+    pub async fn authenticated_post<T: serde::de::DeserializeOwned, E: serde::Serialize>(
+        &self,
+        path: &str,
+        body: &E,
+    ) -> Result<T, ProjectClientError> {
+        let token = self.get_api_token().await?;
+        let url = format!("{}/{}", self.base_url, path);
+        let response = self
+            .client
+            .post(&url)
+            .header("Authorization", format!("Bearer {}", token))
+            .header("Content-Type", "application/json")
+            .header("User-Agent", "SyncFlow Project Client/ V0.1.0")
+            .json(body)
+            .send()
+            .await?;
+
+
+        let response_json = response.json::<T>().await?;
+        Ok(response_json)
+    }
+
+    pub async fn get_api_token(&self) -> Result<String, ProjectClientError> {
+        let mut token_lock: tokio::sync::MutexGuard<'_, Option<String>> =
+            self.api_token.lock().await;
+        if token_lock.is_none() {
+            *token_lock = Some(self.generate_api_token()?);
+        }
+
+
+        let has_token_expired = self
+            .is_expired(token_lock.as_ref().unwrap())
+            .unwrap_or(true);
+
+
+        if has_token_expired {
+            *token_lock = Some(self.generate_api_token()?);
+        }
+
+        Ok(token_lock.as_ref().unwrap().clone())
+    }
+
+
+    pub fn generate_api_token(&self) -> Result<String, ProjectClientError> {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as usize;
+        let claims = ProjectToken {
+            iat: now,
+            exp: now + 3600, // 1 hour expiration
+            iss: self.api_key.clone(),
+            project_id: self.project_id.clone(),
+        };
+
+
+        let token = generate_and_sign_jwt::<ProjectToken>(&claims, &self.api_secret)?;
+
+        Ok(token)
+    }
+...
+```
+
+Other reference implementations are available in the [SyncFlow Python Client repository](https://github.com/oele-isis-vanderbilt/syncflow-python-client) and the [SyncFlow NodeJS Client repository](https://github.com/oele-isis-vanderbilt/syncflow-node-client). You can use these as a reference to develop a client in your preferred language.

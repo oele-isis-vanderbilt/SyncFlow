@@ -1,0 +1,12 @@
+---
+title: SyncFlow Text Egress Actor
+description: SyncFlow Text Egress Actor
+---
+
+# SyncFlow Text Egress Actor
+
+The livekit egress servers handle the complex multimedia recording. However, text/data channel egress is not supported. This library attempts to implement an actix actor that can be used to extract text from the data channel and send it to a specified endpoint (S3). In SyncFlow integrations with the learning environments, we would need to do this because of textual data recordings are needed for application logs and analytics.
+
+The SyncFlow Text Egress Actor uses an Actor Framework to manage the lifecycle of the text egress process. It listens for incoming text data from the data channel and processes it accordingly. The actor can be configured to send the extracted text to a specified endpoint, such as an S3 bucket, for storage and further analysis.
+
+The deployment and usage instructions can be accessed at our (Github Repository)[https://github.com/oele-isis-vanderbilt/syncflow-text-egress-actor].

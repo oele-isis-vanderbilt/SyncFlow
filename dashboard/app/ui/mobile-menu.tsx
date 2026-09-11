@@ -44,7 +44,7 @@ const MobileMenu = () => {
                 </div>
                 <hr />
               </Link>
-              <Link href="#" className="bg-slate-100 dark:bg-slate-700">
+              <Link href="/docs" className="bg-slate-100 dark:bg-slate-700">
                 <div className="flex items-center gap-2 px-2">
                   <SiDocsdotrs className="h-6 w-6" />
                   <span className="py-2 font-bold text-gray-700 text-xl transition-colors duration-300 hover:bg-gray-200 dark:text-white">
@@ -64,7 +64,7 @@ const MobileMenu = () => {
               </Link>
             </div>
             <div className="mt-10">
-              <Link href="#">
+              <Link href="/docs">
                 <button className="w-full items-center gap-1.5 rounded-lg bg-blue-700 p-2.5 font-medium text-lg text-white">
                   Get Started
                 </button>
