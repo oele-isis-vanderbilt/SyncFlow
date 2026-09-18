@@ -202,6 +202,8 @@ fn get_egress_type(egress: &EgressInfo) -> Option<domain::models::SessionEgressT
             Request::Track(_) => SessionEgressType::Track,
             Request::TrackComposite(_) => SessionEgressType::TrackComposite,
             Request::Web(_) => SessionEgressType::Web,
+            Request::Replay(_) => SessionEgressType::RoomComposite, // Assuming Replay maps to RoomComposite; adjust as needed
+            Request::Egress(_) => SessionEgressType::RoomComposite, // Assuming Egress maps to RoomComposite; adjust as needed
         };
         Some(egress_type)
     } else {

@@ -180,6 +180,8 @@ impl From<LivekitSessionInfo> for (Vec<SessionParticipantResponse>, Vec<EgressRe
                             Request::Track(_) => "Track".to_string(),
                             Request::TrackComposite(_) => "TrackComposite".to_string(),
                             Request::Web(_) => "Web".to_string(),
+                            Request::Replay(_) => "Replay".to_string(),
+                            Request::Egress(_) => "Egress".to_string(),
                         };
                         Some(etype)
                     }

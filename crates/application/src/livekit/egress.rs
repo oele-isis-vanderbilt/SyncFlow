@@ -38,6 +38,7 @@ impl EgressService {
         let options = EgressListOptions {
             active: false,
             filter: EgressListFilter::Room(room_name.into()),
+            page_token: None,
         };
 
         self.client.list_egress(options).await
@@ -93,6 +94,7 @@ impl EgressService {
                         metadata: HashMap::new(),
                         proxy: None,
                         session_token: "".to_string(),
+                        ..Default::default()
                     })),
                     disable_manifest: false,
                 }));

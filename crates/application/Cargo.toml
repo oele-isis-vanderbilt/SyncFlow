@@ -26,11 +26,12 @@ serde_json = "1.0.118"
 thiserror = "1.0.63"
 futures = "0.3.30"
 tokio = { version = "1", features = ["full"] }
-livekit-client = { package="livekit", version = "0.6.0", features = ["rustls-tls-native-roots"] }
-livekit-api = "0.4.0"
-livekit-protocol = "0.3.5"
-livekit-runtime = { version = "0.3.0", features = ["tokio"] }
 amqprs = { version = "2.1.0", features = ["tls"] }
 rusoto_core = "0.48.0"
 rusoto_credential = "0.48.0"
 rusoto_s3 = "0.48.0"
+livekit-client = { package="livekit", version = "0.9.1", features = ["rustls-tls-native-roots"] }
+livekit-api = "0.7.1"
+livekit-protocol = "0.7.13"
+livekit-runtime = { version = "0.4.0", features = ["tokio"] }
+

@@ -72,6 +72,8 @@ pub fn get_track_id_from_egress(egress: &EgressInfo) -> String {
                 )
             }
             Request::Web(_) => "Web".to_string(),
+            Request::Replay(_) => "Replay".to_string(),
+            Request::Egress(_) => "Egress".to_string(),
         }
     } else {
         "Unknown".to_string()
